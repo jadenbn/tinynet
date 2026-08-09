@@ -8,7 +8,7 @@ To build and run the game:
 ```bash
 cd game
 make
-./Debug/tinynet
+./bin/Debug/tinynet
 ```
 
 Jaden
