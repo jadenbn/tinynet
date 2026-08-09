@@ -6,8 +6,6 @@
 
 class Player
 {
-private:
-	float scaleFactor = 2.0f;
 
 public:
 	Vector2 position;
@@ -65,7 +63,7 @@ int main()
 
 void MovePlayer(Player *p, int speed)
 {
-	Vector2 direction;
+	Vector2 direction = {0.0f, 0.0f};
 
 	if (IsKeyDown(KEY_W))
 		direction.y -= 1.0f;

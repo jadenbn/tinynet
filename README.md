@@ -4,11 +4,12 @@ I was writing the netcode for a Unity game I was making with my friends, when I 
 
 So, I decided to build tinynet! This project is just for my enjoyment of recreational programming and to broaden my understanding of the topic, so I've avoided using LLMs. While an extraordinarily useful tool, I find that I learn best when I write the code myself.
 
-To build and run the client:
+To build and run the client (make sure your working directory is the project's root):
+
 ```bash
-cd client
-make
-./bin/Debug/tinynet
+make client && make run-client
 ```
+
+Server is wip!
 
 Jaden
