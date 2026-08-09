@@ -1,5 +1,33 @@
 #include "raylib.h"
+#include "raymath.h"
 #include "resource_dir.h"
+#include <iostream>
+#include "string"
+
+class Player
+{
+private:
+	float scaleFactor = 2.0f;
+
+public:
+	Vector2 position;
+	Texture sprite;
+
+	Player(Vector2 initialPosition, Texture playerSprite)
+	{
+		position = initialPosition;
+		sprite = playerSprite;
+	}
+
+	void DrawPlayer()
+	{
+		// todo: make this cleaner
+		// DrawTextureEx(sprite, {this->position.x, this->position.y}, 0.0f, scaleFactor, BLUE);
+		DrawTexture(sprite, this->position.x, this->position.y, BLUE);
+	}
+};
+
+void MovePlayer(Player *p, int speed);
 
 int main()
 {
@@ -7,35 +35,58 @@ int main()
 	constexpr int HEIGHT = 1080;
 
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
-	InitWindow(WIDTH, HEIGHT, "tinynet");
+	InitWindow(WIDTH, HEIGHT, "tinynet client");
 
 	SearchAndSetResourceDir("resources");
-	Texture testSprite = LoadTexture("github.png");
+
+	// main player starts in center of screen
+	Texture mainPlayerSprite = LoadTexture("github.png");
+	Player mainPlayer({(float)(WIDTH / 2), (float)(HEIGHT / 2)}, mainPlayerSprite);
 
 	// game loop
-	while (!WindowShouldClose()) // run the loop until the user presses ESCAPE or presses the Close button on the window
+	while (!WindowShouldClose())
 	{
-		// drawing
 		BeginDrawing();
+		ClearBackground(WHITE);
 
-		// Setup the back buffer for drawing (clear color and depth buffers)
-		ClearBackground(BLACK);
+		MovePlayer(&mainPlayer, 200);
 
-		// draw some text using the default font
-		DrawText("test", 200, 200, 20, WHITE);
+		// draw main player
+		mainPlayer.DrawPlayer();
 
-		// draw our texture to the screen
-		DrawTexture(testSprite, WIDTH / 2, HEIGHT / 2, WHITE);
-
-		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();
 	}
 
 	// cleanup
-	// unload our texture so it can be cleaned up
-	UnloadTexture(testSprite);
-
-	// destroy the window and cleanup the OpenGL context
+	UnloadTexture(mainPlayerSprite);
 	CloseWindow();
 	return 0;
+}
+
+void MovePlayer(Player *p, int speed)
+{
+	Vector2 direction;
+
+	if (IsKeyDown(KEY_W))
+		direction.y -= 1.0f;
+	if (IsKeyDown(KEY_A))
+		direction.x -= 1.0f;
+	if (IsKeyDown(KEY_S))
+		direction.y += 1.0f;
+	if (IsKeyDown(KEY_D))
+		direction.x += 1.0f;
+
+	if (direction.x != 0.0f || direction.y != 0.0f)
+	{
+		direction = Vector2Normalize(direction);
+	}
+
+	// account for offset of sprite
+	DrawText(std::string(std::to_string(direction.x) + std::to_string(direction.y)).c_str(), p->position.x - (p->sprite.width / 2), p->position.y - 25 - (p->sprite.height / 2), 12, BLACK);
+
+	float deltaTime = GetFrameTime();
+	p->position.x += direction.x * speed * deltaTime;
+	p->position.y += direction.y * speed * deltaTime;
+
+	direction = {0, 0};
 }
