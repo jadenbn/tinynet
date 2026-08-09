@@ -1,27 +1,60 @@
-#include "../src/Socket.h"
+#include "../src/Socket.h" // change later, i don't know if i like this relative path schtick
+#include <cassert>
 #include <iostream>
 
-int main() {
-  unsigned short port = 3000;
-  Socket socket;
+void test_address() {
+  Address addr(127, 0, 0, 1, 3000);
+  assert(addr.GetA() == 127);
+  assert(addr.GetB() == 0);
+  assert(addr.GetC() == 0);
+  assert(addr.GetD() == 1);
+  assert(addr.GetPort() == 3000);
+}
 
+void test_socket_lifecycle() {
+  Socket socket;
+  assert(!socket.isOpen());
+
+  int handle = socket.Open(3000);
+  assert(handle == 3000);
+  assert(socket.isOpen());
+
+  socket.Close();
+  assert(!socket.isOpen());
+}
+
+void test_one_socket();
+
+int main() {
+  constexpr short port = 30000;
+
+  Socket socket;
   if (!socket.Open(port)) {
-    std::cout << "Failed to open socket" << std::endl;
     return 1;
   }
 
-  const char data[] = "Hello world!";
-  socket.Send(Address(127, 0, 0, 1, port), data, sizeof(data));
+  Address sender;
+  Address receiver(127, 0, 0, 1, port);
 
-  while (true) {
-    Address sender;
-    unsigned char buff[256];
-    int bytes_read = socket.Receive(sender, buff, sizeof(buff));
+  char dataSent[] = "Hello, world!";
+  const auto sizeSent = sizeof(dataSent);
 
-    if (!bytes_read) {
-      break;
+  char dataReceived[256];
+  const auto sizeReceived = sizeof(dataSent);
+
+  for (int i = 0; i < 10; i++) {
+    socket.Send(receiver, dataSent, sizeSent);
+    int bytesReceived = socket.Receive(sender, dataReceived, sizeReceived);
+    if (bytesReceived == 0) {
+      std::cout << "No bytes found!\n";
+      continue;
     }
-
-    // packet reaceived
+    std::cout << "Receiving: ";
+    for (int j = 0; j < bytesReceived; j++) {
+      std::cout << dataReceived[j];
+    }
+    std::cout << std::endl;
   }
+
+  return 0;
 }
