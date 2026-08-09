@@ -46,7 +46,7 @@ void test_one_socket() {
     bytesReceived =
         socket.Receive(sender, receiveBuffer, sizeof(receiveBuffer));
     attempts++;
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   assert(bytesReceived > 0);
@@ -73,7 +73,7 @@ void test_two_socket() {
     bytesReceived =
         receiver.Receive(senderAddress, receiveBuff, sizeof(receiveBuff));
     attempts++;
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   assert(bytesReceived > 0);
