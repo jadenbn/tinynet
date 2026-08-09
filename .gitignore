@@ -3,7 +3,7 @@ obj/
 bin/
 .DS_Store
 .vscode/
-game/Debug/
+client/Debug/
 *.o
 *.obj
 *.dylib
