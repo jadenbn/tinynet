@@ -22,6 +22,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <fcntl.h>
+#include <unistd.h>
 #endif
 
 #if PLATFORM == PLATFORM_WINDOWS
@@ -59,7 +60,6 @@ int main()
     unsigned int d = 98;
     unsigned short port = 30000;
 
-    int port = 30000;
     int handle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
     if (handle <= 0)
@@ -129,7 +129,35 @@ int main()
 #pragma endregion
 
     // receive packets
-    while (true) {
+    while (true)
+    {
         unsigned char packet_data[256];
+        unsigned int max_packet_size = sizeof(packet_data);
+
+#if PLATFORM == PLATFORM_WINDOWS
+        typedef int socklen_t;
+#endif
+
+        sockaddr_in from;
+        socklen_t fromLength = sizeof(from);
+
+        int bytes = recvfrom(handle,
+                             (char *)packet_data,
+                             max_packet_size,
+                             0,
+                             (sockaddr *)&from,
+                             &fromLength);
+
+        if (bytes <= 0)
+            break;
+
+        unsigned int from_address = ntohl(from.sin_addr.s_addr);
+        unsigned int from_port = ntohs(from.sin_port);
+
+#if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
+        close(handle);
+#elif PLATFORM == PLATFORM_WINDOWS
+        closesocket(socket);
+#endif
     }
 }
