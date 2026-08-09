@@ -2,6 +2,8 @@ build/
 obj/
 bin/
 .DS_Store
+.clangd/
+compile_commands.json
 .vscode/
 client/Debug/
 *.o
