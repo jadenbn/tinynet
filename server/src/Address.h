@@ -9,11 +9,11 @@ public:
 
   unsigned int GetAddress() const;
 
-  unsigned char GetA();
-  unsigned char GetB();
-  unsigned char GetC();
-  unsigned char GetD();
-  unsigned short GetPort();
+  unsigned char GetA() const;
+  unsigned char GetB() const;
+  unsigned char GetC() const;
+  unsigned char GetD() const;
+  unsigned short GetPort() const;
 
 private:
   unsigned short port;
