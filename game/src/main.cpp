@@ -22,7 +22,7 @@ int main()
 		ClearBackground(BLACK);
 
 		// draw some text using the default font
-		DrawText("Hello world!!", 200, 200, 20, WHITE);
+		DrawText("test", 200, 200, 20, WHITE);
 
 		// draw our texture to the screen
 		DrawTexture(testSprite, WIDTH / 2, HEIGHT / 2, WHITE);
