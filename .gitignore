@@ -1,0 +1,10 @@
+build/
+obj/
+bin/
+.DS_Store
+.vscode/
+game/Debug/
+*.o
+*.obj
+*.dylib
+*.a
