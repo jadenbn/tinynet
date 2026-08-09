@@ -1,6 +1,8 @@
 #include "../src/Socket.h" // change later, i don't know if i like this relative path schtick
 #include <cassert>
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 void test_address() {
   Address addr(127, 0, 0, 1, 3000);
@@ -15,46 +17,74 @@ void test_socket_lifecycle() {
   Socket socket;
   assert(!socket.isOpen());
 
-  int handle = socket.Open(3000);
-  assert(handle == 3000);
+  assert(socket.Open(3000));
   assert(socket.isOpen());
 
   socket.Close();
   assert(!socket.isOpen());
 }
 
-void test_one_socket();
-
-int main() {
-  constexpr short port = 30000;
-
+void test_one_socket() {
   Socket socket;
-  if (!socket.Open(port)) {
-    return 1;
-  }
+  const unsigned short port = 3000;
+  assert(socket.Open(port));
 
   Address sender;
   Address receiver(127, 0, 0, 1, port);
 
-  char dataSent[] = "Hello, world!";
-  const auto sizeSent = sizeof(dataSent);
+  char dataSent[] = "Testing socket!";
+  auto dataSentSize = sizeof(dataSent);
 
-  char dataReceived[256];
-  const auto sizeReceived = sizeof(dataSent);
+  char receiveBuffer[256];
 
-  for (int i = 0; i < 10; i++) {
-    socket.Send(receiver, dataSent, sizeSent);
-    int bytesReceived = socket.Receive(sender, dataReceived, sizeReceived);
-    if (bytesReceived == 0) {
-      std::cout << "No bytes found!\n";
-      continue;
-    }
-    std::cout << "Receiving: ";
-    for (int j = 0; j < bytesReceived; j++) {
-      std::cout << dataReceived[j];
-    }
-    std::cout << std::endl;
+  assert(socket.Send(receiver, dataSent, dataSentSize));
+
+  int bytesReceived = 0;
+  int attempts = 0;
+
+  while (bytesReceived == 0 && attempts < 100) {
+    bytesReceived =
+        socket.Receive(sender, receiveBuffer, sizeof(receiveBuffer));
+    attempts++;
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
+  assert(bytesReceived > 0);
+}
+
+void test_two_socket() {
+  Socket sender;
+  Socket receiver;
+  assert(sender.Open(3000));
+  assert(receiver.Open(3001));
+
+  Address senderAddress;
+  Address receiverAddress(127, 0, 0, 1, 3001);
+
+  constexpr char data[] = "Ping";
+  sender.Send(receiverAddress, data, sizeof(data));
+
+  char receiveBuff[256];
+
+  int bytesReceived = 0;
+  int attempts = 0;
+
+  while (bytesReceived == 0 && attempts < 100) {
+    bytesReceived =
+        receiver.Receive(senderAddress, receiveBuff, sizeof(receiveBuff));
+    attempts++;
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+
+  assert(bytesReceived > 0);
+  assert(senderAddress.GetPort() == 3000);
+}
+
+int main() {
+  test_address();
+  test_socket_lifecycle();
+  test_one_socket();
+  test_two_socket();
+  std::cout << "All tests passed!" << std::endl;
   return 0;
 }
