@@ -50,6 +50,15 @@ void ShutdownSockets()
 
 int main()
 {
+
+    // 207.45.186.98:30000 example destination address
+    // note that 0 <= a, b, c, d <= 255
+    unsigned int a = 207;
+    unsigned int b = 45;
+    unsigned int c = 186;
+    unsigned int d = 98;
+    unsigned short port = 30000;
+
     int port = 30000;
     int handle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
@@ -69,7 +78,7 @@ int main()
         std::cout << "Failed to bind socket!" << '\n';
         return 1;
     }
-
+#pragma region Set_Packets_Non_Blocking
     // set packets to be non blocking, otherwise a function like recvfrom will not return until a packet is available to read
 #if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
     int nonBlocking = 1;
@@ -90,4 +99,37 @@ int main()
     }
 
 #endif
+#pragma endregion
+
+#pragma region Sending_Packets
+    // turns our address from 207, 45, 186, ... to one unsigned integer with each byte corresponding to input vals
+    // uint32_t address = ((a << 24) ||
+    //                     (b << 16) ||
+    //                     (c << 8) ||
+    //                     d);
+
+    // sockaddr_in addr;
+    // addr.sin_family = AF_INET;
+    // addr.sin_addr.s_addr = htonl(address);
+    // addr.sin_port = htons(port);
+
+    // int sent_bytes = sendto(
+    //     handle,
+    //     (const char *)packet_data,
+    //     packet_size,
+    //     0,
+    //     (sockaddr *)&address,
+    //     sizeof(sockaddr_in));
+
+    // if (sent_bytes != packet_size)
+    // {
+    //     std::cout << "Failed to send packet" << std::endl;
+    //     return 1;
+    // }
+#pragma endregion
+
+    // receive packets
+    while (true) {
+        unsigned char packet_data[256];
+    }
 }
