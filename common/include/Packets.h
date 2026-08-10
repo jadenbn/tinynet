@@ -4,6 +4,7 @@
 
 #include <cstdint>
 struct Buffer {
+  // first byte specifies packet type!
   uint8_t *data;
   int index; // write ind
   int size;  // size of buff

@@ -1,10 +1,8 @@
 #include "Client.h"
-#include "Packet.h"
 #include "Server.h" // for timeoutms constant
 #include "Socket.h"
 #include <arpa/inet.h>
 #include <cstring>
-#include <iostream>
 
 Client::Client(Address clientAddress) {
   this->clientAddress = clientAddress;
