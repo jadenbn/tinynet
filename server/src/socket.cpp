@@ -2,6 +2,7 @@
 #include "fcntl.h"
 #include <iostream>
 #include <netinet/in.h>
+#include <string>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -12,7 +13,8 @@ bool Socket::Open(unsigned short port) {
   handle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
   if (handle <= 0) {
-    std::cout << "Failed to create socket" << std::endl;
+    std::cout << "Failed to create socket on port " << std::to_string(port)
+              << std::endl;
     return false;
   }
 

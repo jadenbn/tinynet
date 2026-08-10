@@ -1,3 +1,5 @@
+#include "Server.h"
+#include "Address.h"
 #include "Packet.h"
 #include "Socket.h"
 #include <chrono>
@@ -5,41 +7,38 @@
 #include <string>
 #include <thread>
 
-int main() {
-  constexpr unsigned short serverPort = 3000;
+Server::Server(Address serverAddress) {
+  this->serverAddress = serverAddress;
+  serverSocket = Socket();
+}
 
-  Address server(127, 0, 0, 1, serverPort);
-  Socket serverSocket;
+Address Server::getServerAddress() { return serverAddress; }
+Address Server::getClientAddress() { return clientAddress; }
 
-  const uint32_t gameProtocolHash = 0x12345678;
-  std::cout << std::to_string(gameProtocolHash) << '\n';
+void Server::listenForClient(uint32_t protocolHash) {
+  serverSocket.Open(serverAddress.GetPort());
 
-  if (!serverSocket.Open(serverPort)) {
-    return 1;
-  }
-
-  bool connectionEstablished = false;
-  char buffer[256];
+  char buffer[256]; // todo: turn into packet
   int bytesRead;
-  Address client;
-  // server listens every 10ms
-  std::cout << "Listening for connection; hash is "
-            << std::to_string(gameProtocolHash) << std::endl;
 
+  std::cout << "Listening for connection; hash is "
+            << std::to_string(protocolHash) << std::endl;
   while (!connectionEstablished) {
+    bytesRead = serverSocket.Receive(clientAddress, buffer, sizeof(buffer));
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    bytesRead = serverSocket.Receive(client, buffer, sizeof(buffer));
     if (bytesRead > 0) {
       uint32_t receivedHeader = 0;
       std::memcpy(&receivedHeader, buffer, 4);
       receivedHeader = ntohl(receivedHeader);
       std::cout << std::to_string(receivedHeader) << '\n';
-      if (receivedHeader == gameProtocolHash) {
+      if (receivedHeader == protocolHash) {
         std::cout << "Connection established with address "
-                  << std::to_string(client.GetAddress()) << " and port "
-                  << std::to_string(client.GetPort());
-        break;
+                  << std::to_string(clientAddress.GetAddress()) << " and port "
+                  << std::to_string(clientAddress.GetPort());
+        connectionEstablished = true;
       }
     }
   }
 }
+
+bool Server::isConnected() { return connectionEstablished; }
