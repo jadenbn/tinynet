@@ -34,7 +34,6 @@ int Server::receive() {
     std::memcpy(&receivedHeader, buffer, 4);
     receivedHeader = ntohl(receivedHeader);
     if (receivedHeader == protocolHash) {
-      std::cout << "Got a valid packet from client! " << '\n';
       initialPacketReceived = true;
       auto now = std::chrono::steady_clock::now();
       lastReceivedTime = now;
@@ -59,7 +58,6 @@ void Server::Update() {
   receive();
   isConnected = !timedOut();
   if (!isConnected) {
-    std::cout << "server timed out!" << std::endl;
     clientAddress = Address();
   }
   return;
@@ -71,7 +69,6 @@ bool Server::timedOut() {
 
   auto now = std::chrono::steady_clock::now();
   auto elapsed = now - lastReceivedTime;
-
   return elapsed > TIMEOUT_MS;
 }
 
