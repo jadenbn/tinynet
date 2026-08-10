@@ -7,17 +7,20 @@ class Address;
 class Server {
 public:
   Server(Address serverAddress);
-  void listenForClient(uint32_t protocolHash);
+  void initialize(uint32_t protocolHash);
+  void Update();
   int receive();
   bool send(char *packet);
-  bool isConnected();
+  bool getIsConnected();
   Address getServerAddress();
   Address getClientAddress();
 
 private:
+  bool timedOut();
   Address clientAddress;
   Address serverAddress;
   Socket serverSocket;
-  bool connectionEstablished = false;
+  bool isConnected = false;
+  float timeout;
   uint32_t protocolHash;
 };
