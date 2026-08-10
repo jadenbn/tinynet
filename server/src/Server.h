@@ -2,7 +2,6 @@
 #include "Packets.h"
 #include "Socket.h"
 #include <chrono>
-#include <cstdint>
 #include <ctime>
 
 class Address;
@@ -12,7 +11,7 @@ static constexpr auto TIMEOUT_MS = std::chrono::milliseconds(10000);
 class Server {
 public:
   Server(Address serverAddress);
-  void initialize(uint32_t protocolHash);
+  void initialize();
   void Update();
   int receive(Buffer &out);
   bool send(const Buffer &buffer);
@@ -30,5 +29,4 @@ private:
   Socket serverSocket;
   bool isConnected;
   float timeout;
-  uint32_t protocolHash;
 };

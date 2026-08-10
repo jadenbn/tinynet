@@ -1,16 +1,16 @@
 #pragma once
 #include "Address.h"
+#include "Packets.h"
 #include "Socket.h"
 #include <chrono>
-#include <cstdint>
 
 class Client {
 public:
   Client(Address clientAddress);
-  void initialize(Address serverAddress, uint32_t protocolHash);
+  void initialize(Address serverAddress);
   void Update();
-  int receive();
-  bool send(char *packet);
+  int receive(Buffer &out);
+  bool send(const Buffer &buffer);
   bool getIsConnected();
   Address getClientAddress();
   Address getServerAddress();
@@ -25,5 +25,4 @@ private:
   Socket clientSocket;
   float timeout;
   bool isConnected;
-  uint32_t protocolHash;
 };

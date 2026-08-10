@@ -1,6 +1,7 @@
 #include "Server.h"
 #include "Address.h"
 #include "Packets.h"
+#include "Protocol.h"
 #include "Socket.h"
 #include <chrono>
 #include <cstring>
@@ -19,7 +20,7 @@ bool Server::send(const Buffer &buffer) {
 
   uint8_t scratch[MAX_PACKET_SIZE + 4];
   Buffer send = {scratch, 0, sizeof(scratch)};
-  WriteInteger(send, protocolHash);
+  WriteInteger(send, PROTOCOL_HASH);
 
   std::memcpy(send.data + 4, buffer.data, buffer.index);
 
@@ -40,7 +41,7 @@ int Server::receive(Buffer &outBuffer) {
   outBuffer.index = 0;
 
   uint32_t receivedHeader = ReadInteger(outBuffer);
-  if (receivedHeader != protocolHash) {
+  if (receivedHeader != PROTOCOL_HASH) {
     return 0;
   }
 
@@ -54,11 +55,10 @@ int Server::receive(Buffer &outBuffer) {
 Address Server::getServerAddress() { return serverAddress; }
 Address Server::getClientAddress() { return clientAddress; }
 
-void Server::initialize(uint32_t protocolHash) {
+void Server::initialize() {
   serverSocket.Open(serverAddress.GetPort());
-  this->protocolHash = protocolHash;
   std::cout << "Initialized to listen for connection; hash is "
-            << std::to_string(protocolHash) << std::endl;
+            << std::to_string(PROTOCOL_HASH) << std::endl;
 }
 
 void Server::Update() {

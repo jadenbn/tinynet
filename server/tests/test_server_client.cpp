@@ -16,10 +16,10 @@ void test_server_socket() {
 void test_server_listens_and_receives_packets_from_client() {
   Address serverAddress = Address(127, 0, 0, 1, 3000);
   Server server = Server(serverAddress);
-  server.initialize(0x12345678);
+  server.initialize();
 
   Client client = Client(Address(127, 0, 0, 1, 3001));
-  client.initialize(serverAddress, 0x12345678);
+  client.initialize(serverAddress);
 
   // run for 2 * timeout duration
   for (int i = 0; i < ((TIMEOUT_MS.count() * 2) / 10); i++) {

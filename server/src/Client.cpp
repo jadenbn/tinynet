@@ -14,10 +14,9 @@ Address Client::getClientAddress() { return clientAddress; }
 
 bool Client::getIsConnected() { return isConnected; }
 
-void Client::initialize(Address serverAddress, uint32_t protocolHash) {
+void Client::initialize(Address serverAddress) {
   clientSocket.Open(clientAddress.GetPort());
   this->serverAddress = serverAddress;
-  this->protocolHash = protocolHash;
   isConnected = true;
 }
 
