@@ -1,6 +1,8 @@
 #include "Packet.h"
 #include "Socket.h"
+#include <cstring>
 #include <iostream>
+#include <string>
 #include <thread>
 
 int main() {
@@ -12,21 +14,21 @@ int main() {
   Socket clientSocket;
 
   const uint32_t gameProtocolHash = 0x12345678; // temporary
+  auto gameProtocolHash_networked = htonl(gameProtocolHash);
 
   if (!clientSocket.Open(client.GetPort())) {
     return 1;
   }
 
   char firstPacket[16];
-  firstPacket[0] = (char)(htonl(gameProtocolHash));
-  firstPacket[1] = (char)(htonl(gameProtocolHash));
-  firstPacket[2] = (char)(htonl(gameProtocolHash));
-  firstPacket[3] = (char)(htonl(gameProtocolHash));
+  std::memcpy(firstPacket, &gameProtocolHash_networked,
+              sizeof(gameProtocolHash_networked));
 
-  std::cout << "Initiating connection" << std::endl;
+  std::cout << "Initiating connection; hash is "
+            << std::to_string(gameProtocolHash) << std::endl;
 
   for (int i = 0; i < 10; i++) {
-    clientSocket.Send(server, &firstPacket, sizeof(firstPacket));
+    clientSocket.Send(server, firstPacket, sizeof(firstPacket));
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
 }

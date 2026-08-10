@@ -23,17 +23,16 @@ int main() {
   int bytesRead;
   Address client;
   // server listens every 10ms
-  std::cout << "Listening for connection" << std::endl;
+  std::cout << "Listening for connection; hash is "
+            << std::to_string(gameProtocolHash) << std::endl;
 
   while (!connectionEstablished) {
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     bytesRead = serverSocket.Receive(client, buffer, sizeof(buffer));
     if (bytesRead > 0) {
-      char first = buffer[0];
-      char second = buffer[1];
-      char third = buffer[2];
-      char fourth = buffer[3];
-      uint32_t receivedHeader = ntohl((first | second | third | fourth));
+      uint32_t receivedHeader = 0;
+      std::memcpy(&receivedHeader, buffer, 4);
+      receivedHeader = ntohl(receivedHeader);
       std::cout << std::to_string(receivedHeader) << '\n';
       if (receivedHeader == gameProtocolHash) {
         std::cout << "Connection established with address "
