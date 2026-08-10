@@ -1,20 +1,17 @@
 #include "Packet.h"
 #include "Socket.h"
 #include <chrono>
-#include <functional>
 #include <iostream>
 #include <string>
-#include <string_view>
 #include <thread>
 
 int main() {
-  std::hash<std::string_view> hasher;
   constexpr unsigned short serverPort = 3000;
 
   Address server(127, 0, 0, 1, serverPort);
   Socket serverSocket;
 
-  const uint32_t gameProtocolHash = hasher("tinynet");
+  const uint32_t gameProtocolHash = 0x12345678;
   std::cout << std::to_string(gameProtocolHash) << '\n';
 
   if (!serverSocket.Open(serverPort)) {
@@ -36,8 +33,7 @@ int main() {
       char second = buffer[1];
       char third = buffer[2];
       char fourth = buffer[3];
-      uint32_t receivedHeader =
-          first << 24 | second << 16 | third << 8 | fourth;
+      uint32_t receivedHeader = ntohl((first | second | third | fourth));
       std::cout << std::to_string(receivedHeader) << '\n';
       if (receivedHeader == gameProtocolHash) {
         std::cout << "Connection established with address "
