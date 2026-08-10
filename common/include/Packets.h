@@ -1,8 +1,10 @@
 #pragma once
+#include <cstdint>
+
+constexpr static uint8_t MAX_PACKET_SIZE = 1400;
 
 // utility header for writing and reading packet data
 
-#include <cstdint>
 struct Buffer {
   // first byte specifies packet type!
   uint8_t *data;

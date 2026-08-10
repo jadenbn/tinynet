@@ -1,4 +1,5 @@
 #pragma once
+#include "Packets.h"
 #include "Socket.h"
 #include <chrono>
 #include <cstdint>
@@ -13,8 +14,8 @@ public:
   Server(Address serverAddress);
   void initialize(uint32_t protocolHash);
   void Update();
-  int receive();
-  bool send(char *packet);
+  int receive(Buffer &out);
+  bool send(const Buffer &buffer);
   bool getIsConnected();
   Address getServerAddress();
   Address getClientAddress();
