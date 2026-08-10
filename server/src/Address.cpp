@@ -23,3 +23,8 @@ unsigned char Address::GetB() const { return (unsigned char)(address >> 16); }
 unsigned char Address::GetC() const { return (unsigned char)(address >> 8); }
 unsigned char Address::GetD() const { return (unsigned char)(address); }
 unsigned short Address::GetPort() const { return port; }
+
+bool Address::operator==(const Address &other) const {
+  return this->GetAddress() == other.GetAddress() &&
+         this->GetPort() == other.GetPort();
+}

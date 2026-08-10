@@ -6,7 +6,7 @@
 
 class Address;
 
-static constexpr auto TIMEOUT_MS = std::chrono::milliseconds(2000);
+static constexpr auto TIMEOUT_MS = std::chrono::milliseconds(10000);
 
 class Server {
 public:
@@ -27,7 +27,7 @@ private:
   Address clientAddress;
   Address serverAddress;
   Socket serverSocket;
-  bool isConnected = false;
+  bool isConnected;
   float timeout;
   uint32_t protocolHash;
 };

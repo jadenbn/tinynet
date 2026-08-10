@@ -1,6 +1,7 @@
 #include "../src/Client.h"
 #include "../src/Server.h"
 #include <cassert>
+#include <chrono>
 #include <iostream>
 #include <thread>
 
@@ -20,13 +21,22 @@ void test_server_listens_and_receives_packets_from_client() {
   Client client = Client(Address(127, 0, 0, 1, 3001));
   client.initialize(serverAddress, 0x12345678);
 
-  int i = 0;
-
-  while (true) {
+  // run for 20s
+  for (int i = 0; i < 2000; i++) {
+    client.Update();
     server.Update();
-    if (i < 20 || (i > 300 && i < 500))
-      client.Update();
-    i++;
+
+    // client sends packet for 2s
+    if (i < 200) {
+      client.send(0);
+    }
+
+    // confirm connection between 100ms and 1s
+    if (i > 10 && i < 100) {
+      assert(client.getIsConnected());
+      assert(server.getIsConnected());
+      assert(client.getServerAddress() == server.getServerAddress());
+    }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }

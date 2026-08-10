@@ -15,9 +15,13 @@ bool Server::send(char *packet) {
     return false;
   }
 
-  // WE NEED TO PREPEND THIS PACKET WITH THE PROTOCOL HASH
+  uint32_t protocolHashNetworked = htonl(protocolHash);
 
-  return serverSocket.Send(clientAddress, packet, sizeof(packet));
+  char firstPacket[16];
+  std::memcpy(firstPacket, &protocolHashNetworked,
+              sizeof(protocolHashNetworked));
+
+  return serverSocket.Send(clientAddress, firstPacket, sizeof(firstPacket));
 }
 
 int Server::receive() {
@@ -55,12 +59,11 @@ void Server::Update() {
   receive();
   isConnected = !timedOut();
   if (!isConnected) {
-    std::cout << "timed out!" << std::endl;
+    std::cout << "server timed out!" << std::endl;
     clientAddress = Address();
-
   }
   return;
-} 
+}
 
 bool Server::timedOut() {
   if (!initialPacketReceived)

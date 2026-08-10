@@ -16,6 +16,7 @@ public:
   unsigned char GetC() const;
   unsigned char GetD() const;
   unsigned short GetPort() const;
+  bool operator==(Address const &other) const;
 
 private:
   unsigned short port;
