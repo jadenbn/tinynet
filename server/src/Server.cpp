@@ -12,6 +12,21 @@ Server::Server(Address serverAddress) {
   serverSocket = Socket();
 }
 
+bool Server::send(char *packet) {
+  if (!connectionEstablished) {
+    return false;
+  }
+
+  // WE NEED TO PREPEND THIS PACKET WITH THE PROTOCOL HASH
+
+  return serverSocket.Send(clientAddress, packet, sizeof(packet));
+}
+
+int receive() {
+  // WE NEED TO ENSURE THIS PACKET HAS THE PROTOCOL HASH
+  return 0; // TODO
+}
+
 Address Server::getServerAddress() { return serverAddress; }
 Address Server::getClientAddress() { return clientAddress; }
 
@@ -36,9 +51,15 @@ void Server::listenForClient(uint32_t protocolHash) {
                   << std::to_string(clientAddress.GetAddress()) << " and port "
                   << std::to_string(clientAddress.GetPort());
         connectionEstablished = true;
+        this->protocolHash = protocolHash;
       }
     }
   }
 }
 
 bool Server::isConnected() { return connectionEstablished; }
+
+int main() {
+  Server server = Server(Address(127, 0, 0, 1, 3000));
+  server.listenForClient(0x12345678);
+}

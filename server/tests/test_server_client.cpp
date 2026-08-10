@@ -1,3 +1,4 @@
+#include "../src/Client.h"
 #include "../src/Server.h"
 #include <cassert>
 
@@ -9,4 +10,11 @@ void test_server_socket() {
 
 void test_server_listenForClient() { Server s(Address(127, 0, 0, 1, 3000)); }
 
-int main() {}
+int main() {
+  uint32_t protocolHash = 0x12345678;
+  Client client = Client(Address(127, 0, 0, 1, 3000));
+  Server server = Server(Address(127, 0, 0, 1, 3001));
+
+  client.connect(server.getServerAddress(), protocolHash);
+  server.listenForClient(protocolHash);
+}

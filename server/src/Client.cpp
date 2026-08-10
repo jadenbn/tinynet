@@ -1,3 +1,4 @@
+#include "Client.h"
 #include "Packet.h"
 #include "Socket.h"
 #include <cstring>
@@ -5,30 +6,32 @@
 #include <string>
 #include <thread>
 
-int main() {
-  constexpr unsigned short clientPort = 3001;
-  constexpr unsigned short serverPort = 3000;
+Client::Client(Address clientAddress) {
+  this->clientAddress = clientAddress;
+  clientSocket = Socket();
+}
 
-  Address client(127, 0, 0, 1, clientPort);
-  Address server(127, 0, 0, 1, serverPort);
-  Socket clientSocket;
-
-  const uint32_t gameProtocolHash = 0x12345678; // temporary
-  auto gameProtocolHash_networked = htonl(gameProtocolHash);
-
-  if (!clientSocket.Open(client.GetPort())) {
-    return 1;
-  }
+void Client::connect(Address serverAddress, uint32_t protocolHash) {
+  this->serverAddress = serverAddress;
+  clientSocket.Open(clientAddress.GetPort());
+  uint32_t protocolHashNetworked = htonl(protocolHash);
 
   char firstPacket[16];
-  std::memcpy(firstPacket, &gameProtocolHash_networked,
-              sizeof(gameProtocolHash_networked));
+  std::memcpy(firstPacket, &protocolHashNetworked,
+              sizeof(protocolHashNetworked));
 
-  std::cout << "Initiating connection; hash is "
-            << std::to_string(gameProtocolHash) << std::endl;
+  std::cout << "Initiating connection; hash is " << std::to_string(protocolHash)
+            << std::endl;
 
   for (int i = 0; i < 10; i++) {
-    clientSocket.Send(server, firstPacket, sizeof(firstPacket));
+    clientSocket.Send(serverAddress, firstPacket, sizeof(firstPacket));
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
+}
+
+void Client::Update() {}
+
+int main() {
+  Client client = Client(Address(127, 0, 0, 1, 3001));
+  client.connect(Address(127, 0, 0, 1, 3000), 0x12345678);
 }
