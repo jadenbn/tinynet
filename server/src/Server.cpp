@@ -67,7 +67,8 @@ void Server::Update() {
 
   while (receive(buff) > 0) {
     // process
-    std::cout << "First char in packet: " << ReadChar(buff);
+    std::cout << "Server recevied! First char in packet: "
+              << std::to_string(ReadChar(buff)) << '\n';
   }
 
   isConnected = !timedOut();

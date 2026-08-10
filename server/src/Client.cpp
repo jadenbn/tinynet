@@ -1,8 +1,11 @@
 #include "Client.h"
+#include "Packets.h"
+#include "Protocol.h"
 #include "Server.h" // for timeoutms constant
 #include "Socket.h"
 #include <arpa/inet.h>
 #include <cstring>
+#include <iostream>
 
 Client::Client(Address clientAddress) {
   this->clientAddress = clientAddress;
@@ -20,37 +23,42 @@ void Client::initialize(Address serverAddress) {
   isConnected = true;
 }
 
-int Client::receive() {
-  char buffer[256]; // todo: turn into packet
+int Client::receive(Buffer &outBuffer) {
   int bytesRead;
 
-  bytesRead = clientSocket.Receive(serverAddress, buffer, sizeof(buffer));
-  if (bytesRead > 0) {
-    uint32_t receivedHeader = 0;
-    std::memcpy(&receivedHeader, buffer, 4);
-    receivedHeader = ntohl(receivedHeader);
-    if (receivedHeader == protocolHash) {
-      initialPacketReceived = true;
-      auto now = std::chrono::steady_clock::now();
-      lastReceivedTime = now;
-    } else {
-      bytesRead = 0; // not from the right header
-    }
+  bytesRead =
+      clientSocket.Receive(serverAddress, outBuffer.data, MAX_PACKET_SIZE);
+
+  if (bytesRead < 4) {
+    return 0;
   }
-  return bytesRead;
+
+  outBuffer.size = bytesRead;
+  outBuffer.index = 0;
+
+  uint32_t receivedHeader = ReadInteger(outBuffer);
+  if (receivedHeader != PROTOCOL_HASH) {
+    return 0;
+  }
+
+  initialPacketReceived = true;
+  auto now = std::chrono::steady_clock::now();
+  lastReceivedTime = now;
+
+  return bytesRead - 4;
 }
 
-bool Client::send(char *packet) {
+bool Client::send(const Buffer &buffer) {
   if (!isConnected)
     return false;
 
-  uint32_t protocolHashNetworked = htonl(protocolHash);
+  uint8_t scratch[MAX_PACKET_SIZE + 4];
+  Buffer send = {scratch, 0, sizeof(scratch)};
+  WriteInteger(send, PROTOCOL_HASH);
 
-  char firstPacket[16];
-  std::memcpy(firstPacket, &protocolHashNetworked,
-              sizeof(protocolHashNetworked));
+  std::memcpy(send.data + 4, buffer.data, buffer.index);
 
-  return clientSocket.Send(serverAddress, firstPacket, sizeof(firstPacket));
+  return clientSocket.Send(serverAddress, send.data, buffer.index + 4);
 }
 
 bool Client::timedOut() {
@@ -64,7 +72,14 @@ bool Client::timedOut() {
 }
 
 void Client::Update() {
-  receive();
+  uint8_t rawData[MAX_PACKET_SIZE];
+  Buffer buff = {rawData, 0, sizeof(rawData)};
+
+  while (receive(buff) > 0) {
+    std::cout << "Client received data! First char: "
+              << std::to_string(ReadChar(buff)) << '\n';
+  }
+
   isConnected = !timedOut();
   if (!isConnected) {
     return;

@@ -28,8 +28,10 @@ void test_server_listens_and_receives_packets_from_client() {
 
     // establish connection
     if (i < 200) {
-      client.send(0);
-      server.send(0);
+      uint8_t character = 1;
+      Buffer data = {&character, 1, 32};
+      client.send(data);
+      server.send(data);
     }
 
     // confirm connection between 100ms and 1s
