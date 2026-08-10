@@ -1,8 +1,12 @@
 #pragma once
 #include "Socket.h"
+#include <chrono>
 #include <cstdint>
+#include <ctime>
 
 class Address;
+
+static constexpr auto TIMEOUT_MS = std::chrono::milliseconds(2000);
 
 class Server {
 public:
@@ -17,6 +21,9 @@ public:
 
 private:
   bool timedOut();
+  bool initialPacketReceived; // this is ugly i don't like it maybe change when
+                              // posible future me
+  std::chrono::steady_clock::time_point lastReceivedTime;
   Address clientAddress;
   Address serverAddress;
   Socket serverSocket;
