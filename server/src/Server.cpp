@@ -3,6 +3,7 @@
 #include "Packets.h"
 #include "Socket.h"
 #include <chrono>
+#include <cstring>
 #include <iostream>
 #include <string>
 
@@ -16,36 +17,38 @@ bool Server::send(const Buffer &buffer) {
     return false;
   }
 
-  return serverSocket.Send(clientAddress, buffer.data, buffer.index);
+  uint8_t scratch[MAX_PACKET_SIZE + 4];
+  Buffer send = {scratch, 0, sizeof(scratch)};
+  WriteInteger(send, protocolHash);
+
+  std::memcpy(send.data + 4, buffer.data, buffer.index);
+
+  return serverSocket.Send(clientAddress, send.data, buffer.index + 4);
 }
 
 int Server::receive(Buffer &outBuffer) {
-  uint8_t data[MAX_PACKET_SIZE];
   int bytesRead;
 
-  bytesRead = serverSocket.Receive(clientAddress, data, sizeof(data));
+  bytesRead =
+      serverSocket.Receive(clientAddress, outBuffer.data, MAX_PACKET_SIZE);
 
   if (bytesRead < 4) {
     return 0; // we need some space for our protocl hash
   }
-  
-  if (bytesRead > 0) {
-    uint32_t receivedHeader = 0;
-    std::memcpy(&receivedHeader, data, 4); // 4 is 4 bytes for protocol hash
-    receivedHeader = ntohl(receivedHeader);
-    if (receivedHeader == protocolHash) {
-      initialPacketReceived = true;
-      auto now = std::chrono::steady_clock::now();
-      lastReceivedTime = now;
-      outBuffer.data = data + 4; // ptr arithmetic cpsc213!! offset by 4 because
-                                 // of the protocol hash
-      outBuffer.index = 0;       // reading now
-      outBuffer.size = bytesRead;
-    } else {
-      bytesRead = 0; // not from the right header
-    }
+
+  outBuffer.size = bytesRead;
+  outBuffer.index = 0;
+
+  uint32_t receivedHeader = ReadInteger(outBuffer);
+  if (receivedHeader != protocolHash) {
+    return 0;
   }
-  return bytesRead;
+
+  initialPacketReceived = true;
+  auto now = std::chrono::steady_clock::now();
+  lastReceivedTime = now;
+
+  return bytesRead - 4;
 }
 
 Address Server::getServerAddress() { return serverAddress; }
@@ -59,12 +62,18 @@ void Server::initialize(uint32_t protocolHash) {
 }
 
 void Server::Update() {
-  receive();
+  uint8_t raw[MAX_PACKET_SIZE];
+  Buffer buff = {raw, 0, sizeof(raw)};
+
+  while (receive(buff) > 0) {
+    // process
+    std::cout << "First char in packet: " << ReadChar(buff);
+  }
+
   isConnected = !timedOut();
   if (!isConnected) {
     clientAddress = Address();
   }
-  return;
 }
 
 bool Server::timedOut() {
