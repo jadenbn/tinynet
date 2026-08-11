@@ -2,7 +2,6 @@
 #include <cassert>
 #include <chrono>
 #include <cstdint>
-#include <iostream>
 #include <ratio>
 #include <sys/types.h>
 #include <vector>
@@ -79,7 +78,9 @@ std::vector<uint32_t> SentQueue::getLostPackets(uint32_t highestAckReceived) {
     if (!queue[i].acked && queue[i].sequenceNumber > 0) {
 
       bool outOfWindow = highestAckReceived - 32 > queue[i].sequenceNumber;
-      bool timedOut = now - queue[i].timeSent > PACKET_TIMEOUT;
+      bool timedOut =
+          std::chrono::duration<float, std::milli>(now - queue[i].timeSent)
+              .count() > PACKET_TIMEOUT;
 
       if (outOfWindow || timedOut) {
         lost.push_back(queue[i].sequenceNumber);
