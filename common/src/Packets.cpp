@@ -57,7 +57,6 @@ void SentQueue::insert(uint32_t sequenceNumber,
   queue[index] = {sequenceNumber, false, timeSent};
 }
 
-// returns whether or not was acked
 void SentQueue::ackPacket(uint32_t sequenceNumber, uint32_t bitfield) {
   ack(sequenceNumber);
   for (int i = 0; i < 32; i++) {
