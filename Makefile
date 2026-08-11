@@ -39,5 +39,5 @@ run-client:
 	./client/bin/client
 
 clean:
-	rm -rf server/bin client/bin tests/bin
+	@rm -rf server/bin client/bin tests/bin
 

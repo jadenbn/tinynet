@@ -95,6 +95,12 @@ void Server::Update() {
 
   while (receive(buff) > 0) {
     // server received data
+    PacketType packetType = static_cast<PacketType>(ReadChar(buff));
+    if (packetType == PacketType::PlayerInput) {
+      PlayerInputPacket packet = PlayerInputPacket::deserialize(buff);
+      std::cout << "Received player move packet! x: " << packet.x
+                << "y: " << packet.y << '\n';
+    }
   }
 
   isConnected = !timedOut();

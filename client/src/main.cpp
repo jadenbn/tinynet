@@ -1,3 +1,7 @@
+#include "Address.h"
+#include "Client.h"
+#include "Packets.h"
+#include "Protocol.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "resource_dir.h"
@@ -34,6 +38,10 @@ int main() {
 
   SearchAndSetResourceDir("resources");
 
+  Address clientAddress(127, 0, 0, 1, 3001);
+  Client client(clientAddress);
+  client.initialize(Address(127, 0, 0, 1, 3000));
+
   // main player starts in center of screen
   Texture mainPlayerSprite = LoadTexture("github.png");
   Player mainPlayer({(float)(WIDTH / 2), (float)(HEIGHT / 2)},
@@ -41,10 +49,19 @@ int main() {
 
   // game loop
   while (!WindowShouldClose()) {
+    client.Update();
     BeginDrawing();
     ClearBackground(WHITE);
 
     MovePlayer(&mainPlayer, 200);
+
+    if (IsKeyDown(KEY_C)) {
+      uint8_t scratch[MAX_PACKET_SIZE];
+      Buffer buff = {scratch, 0, sizeof(scratch)};
+      PlayerInputPacket packet = {4, 8};
+      packet.Serialize(buff);
+      client.send(buff);
+    }
 
     // draw main player
     mainPlayer.DrawPlayer();

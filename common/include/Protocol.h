@@ -10,7 +10,6 @@ enum class PacketType : uint8_t {
   PlayerInput,
 };
 
-
 inline void WriteChar(Buffer &buff, PacketType type) {
   WriteChar(buff, static_cast<uint8_t>(type));
 };
@@ -20,5 +19,5 @@ struct PlayerInputPacket {
   float y;
 
   void Serialize(Buffer &buff);
-  const PlayerInputPacket deserialize(Buffer buff);
+  static PlayerInputPacket deserialize(Buffer &buff);
 };

@@ -1,5 +1,4 @@
 #include "Packets.h"
-#include "Protocol.h"
 #include <cassert>
 #include <chrono>
 #include <cstdint>
