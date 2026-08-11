@@ -2,6 +2,17 @@
 #include <cassert>
 #include <cstdint>
 
+bool ReceivedQueue::exists(uint32_t sequenceNumber) {
+  auto index = sequenceNumber % SIZE;
+  return isAcked[index] && numbers[index] == sequenceNumber;
+}
+
+void ReceivedQueue::insert(uint32_t sequenceNumber) {
+  auto index = sequenceNumber % SIZE;
+  numbers[index] = sequenceNumber;
+  isAcked[sequenceNumber] = true;
+}
+
 void WriteInteger(Buffer &buff, uint32_t data) {
   assert(buff.index + 4 <= buff.size);
 

@@ -18,9 +18,12 @@ bool Server::send(const Buffer &buffer) {
     return false;
   }
 
-  uint8_t scratch[MAX_PACKET_SIZE + 4];
+  uint8_t scratch[MAX_PACKET_SIZE + 16];
   Buffer send = {scratch, 0, sizeof(scratch)};
-  WriteInteger(send, PROTOCOL_HASH);
+  WriteInteger(send, PROTOCOL_HASH);  // write protocol hash
+  WriteInteger(send, sequenceNumber); // write sequence num
+  sequenceNumber++;
+  
 
   std::memcpy(send.data + 4, buffer.data, buffer.index);
 
@@ -33,8 +36,9 @@ int Server::receive(Buffer &outBuffer) {
   bytesRead =
       serverSocket.Receive(clientAddress, outBuffer.data, MAX_PACKET_SIZE);
 
-  if (bytesRead < 4) {
-    return 0; // we need some space for our protocl hash
+  if (bytesRead < 16) {
+    return 0; // we need some space for our protocl hash, sequence num, ack,
+              // etc.
   }
 
   outBuffer.size = bytesRead;
