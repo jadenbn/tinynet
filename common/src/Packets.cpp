@@ -26,7 +26,12 @@ bool SentQueue::ack(uint32_t sequenceNumber) {
     float packetRtt =
         std::chrono::duration<float, std::milli>(
             std::chrono::steady_clock::now() - queue[index].timeSent)
-            .count(); // todo: use
+            .count();
+
+    if (packetRtt > PACKET_TIMEOUT) {
+      return false;
+    }
+
     if (globalRtt == 0.0f) {
       globalRtt = packetRtt;
     } else {
@@ -40,7 +45,11 @@ bool SentQueue::ack(uint32_t sequenceNumber) {
 
 bool SentQueue::exists(uint32_t sequenceNumber) {
   auto index = sequenceNumber % SENT_QUEUE_SIZE;
-  return (!queue[index].acked && queue[index].sequenceNumber == sequenceNumber);
+  return (!queue[index].acked &&
+          queue[index].sequenceNumber == sequenceNumber &&
+          (std::chrono::duration<float, std::milli>(
+               std::chrono::steady_clock::now() - queue[index].timeSent)
+               .count() <= PACKET_TIMEOUT));
 }
 
 void SentQueue::insert(uint32_t sequenceNumber,
