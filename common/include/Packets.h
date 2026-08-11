@@ -14,8 +14,8 @@ static constexpr auto CONNECTION_TIMEOUT_MS = std::chrono::milliseconds(10000);
 // ring buffer for quickly handling our acks and such
 struct ReceivedQueue {
   static constexpr auto SIZE = 1024;
-  uint32_t numbers[SIZE];
-  bool isAcked[SIZE];
+  uint32_t numbers[SIZE] = {};
+  bool isAcked[SIZE] = {};
   bool exists(uint32_t sequenceNumber);
   void insert(uint32_t sequenceNumber);
 };

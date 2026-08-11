@@ -14,7 +14,7 @@ bool ReceivedQueue::exists(uint32_t sequenceNumber) {
 void ReceivedQueue::insert(uint32_t sequenceNumber) {
   auto index = sequenceNumber % SIZE;
   numbers[index] = sequenceNumber;
-  isAcked[sequenceNumber] = true;
+  isAcked[index] = true;
 }
 
 // returns whether or not was acked
