@@ -2,6 +2,8 @@
 #include <cassert>
 #include <chrono>
 #include <cstdint>
+#include <iostream>
+#include <ratio>
 #include <sys/types.h>
 #include <vector>
 
@@ -21,8 +23,15 @@ bool SentQueue::ack(uint32_t sequenceNumber) {
   auto index = sequenceNumber % SENT_QUEUE_SIZE;
   if (exists(sequenceNumber)) {
     queue[index].acked = true;
-    auto rtt =
-        std::chrono::steady_clock::now() - queue[index].timeSent; // todo: use
+    float packetRtt =
+        std::chrono::duration<float, std::milli>(
+            std::chrono::steady_clock::now() - queue[index].timeSent)
+            .count(); // todo: use
+    if (globalRtt == 0.0f) {
+      globalRtt = packetRtt;
+    } else {
+      globalRtt = (0.9 * (globalRtt)) + (0.1 * packetRtt);
+    }
     return true;
   }
 
@@ -50,6 +59,9 @@ void SentQueue::ackPacket(uint32_t sequenceNumber, uint32_t bitfield) {
   }
 }
 
+// when we actually make game packets we should also store the packet type
+// in the SentPacketData struct, and resend it. for now we can get the packet
+// sequence # that we lost, but not the data.
 std::vector<uint32_t> SentQueue::getLostPackets(uint32_t highestAckReceived) {
   std::vector<uint32_t> lost;
   auto now = std::chrono::steady_clock::now();
@@ -58,7 +70,7 @@ std::vector<uint32_t> SentQueue::getLostPackets(uint32_t highestAckReceived) {
     if (!queue[i].acked && queue[i].sequenceNumber > 0) {
 
       bool outOfWindow = highestAckReceived - 32 > queue[i].sequenceNumber;
-      bool timedOut = queue[i].timeSent - now > PACKET_TIMEOUT;
+      bool timedOut = now - queue[i].timeSent > PACKET_TIMEOUT;
 
       if (outOfWindow || timedOut) {
         lost.push_back(queue[i].sequenceNumber);

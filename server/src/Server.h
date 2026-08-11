@@ -21,13 +21,13 @@ public:
 
 private:
   bool timedOut();
-  bool initialPacketReceived; // this is ugly i don't like it maybe change when
+  bool initialPacketReceived = false; // this is ugly i don't like it maybe change when
                               // posible future me
   std::chrono::steady_clock::time_point lastReceivedTime;
   Address clientAddress;
   Address serverAddress;
   Socket serverSocket;
-  bool isConnected;
+  bool isConnected = false;
   float timeout;
   uint32_t sequenceNumber = 0;
   uint32_t remoteSequenceNumber = 0;

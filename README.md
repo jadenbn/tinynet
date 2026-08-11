@@ -24,7 +24,7 @@ I wanted to add a little section here (mostly for myself) to document some of th
 
 _UDP vs TCP_ is likely something that you may have been wondering about. I opted for UDP here for a couple of reasons.
 
-First of all, UDP is _fast_. We aren't really getting any blocking loops and are able to transmit data at speeds much quicker than TCP. We don't have to concern ourselves with handshakes, we send entire packets at once rather than in segments, and we don't have to wait to acknowledge that the client and server have both fully sent/received packets. As will all things, of course, this comes with a few large tradeoffs; data can be unreliable and out of order; UDP's checksum is unreliable - and so on. However, this project is meant to be as high performance as possible, and TCP simply loses to UDP on that front.
+First of all, UDP is _fast_. We aren't really getting any blocking loops and are able to transmit data at speeds much quicker than TCP. We don't have to concern ourselves with handshakes, we send entire packets at once rather than in segments, and we don't have to wait to acknowledge that the client and server have both fully sent/received packets. As with all things, of course, this comes with a few large tradeoffs. Data can be unreliable, out of order, UDP's checksum can also be unreliable - and so on. However, this project is meant to be as high performance as possible, and TCP simply loses to UDP on that front.
 
 Also, UDP gives me a bit more intimate control over the way that I handle my data. Because of the unstructured nature of the protocol, I can choose how to break up my packets, serialize, deseralize, and so on. I like knowing that I have the low level control over the happenings in my code.
 

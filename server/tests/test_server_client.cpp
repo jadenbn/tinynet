@@ -11,8 +11,6 @@ void test_server_socket() {
   assert(s.getServerAddress().GetA() == 127);
 }
 
-// brutal test name </3
-// fix assertions later when we have a packet queue
 void test_server_listens_and_receives_packets_from_client() {
   Address serverAddress = Address(127, 0, 0, 1, 3000);
   Server server = Server(serverAddress);
@@ -31,7 +29,8 @@ void test_server_listens_and_receives_packets_from_client() {
       uint8_t character = 1;
       Buffer data = {&character, 1, 32};
       client.send(data);
-      server.send(data);
+      if (server.getIsConnected())
+        server.send(data);
     }
 
     // confirm connection between 100ms and 1s

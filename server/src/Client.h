@@ -17,13 +17,13 @@ public:
 
 private:
   bool timedOut();
-  bool initialPacketReceived;
+  bool initialPacketReceived = false;
 
   std::chrono::steady_clock::time_point lastReceivedTime;
   Address clientAddress;
   Address serverAddress;
   Socket clientSocket;
-  bool isConnected;
+  bool isConnected = false;
   float timeout;
   uint32_t sequenceNumber = 0;
   uint32_t remoteSequenceNumber = 0;

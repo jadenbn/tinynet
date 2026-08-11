@@ -7,7 +7,7 @@ constexpr static uint32_t SENT_QUEUE_SIZE = 256;
 
 // tolerance for timeout when running getlostpackets on the sent q
 constexpr static std::chrono::milliseconds PACKET_TIMEOUT =
-    std::chrono::milliseconds(150);
+    std::chrono::milliseconds(1000);
 
 // utility header for writing and reading packet data
 
@@ -27,8 +27,11 @@ struct SentPacketMetadata {
 
 struct SentQueue {
   SentPacketMetadata queue[SENT_QUEUE_SIZE];
+  float globalRtt = 0.0f; // ms
 
-  bool exists(uint32_t sequenceNumber);
+  bool
+  exists(uint32_t sequenceNumber); // in the future we can optimize for bandwith
+                                   // and turn these fields from 8bit to 4bit
   void insert(uint32_t sequenceNumber,
               std::chrono::steady_clock::time_point timeSent);
   void ackPacket(uint32_t sequenceNumber, uint32_t bitfield);
