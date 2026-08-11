@@ -54,10 +54,11 @@ struct Buffer {
 void WriteInteger(Buffer &buff, uint32_t data);
 void WriteShort(Buffer &buff, uint16_t data);
 void WriteChar(Buffer &buff, uint8_t data);
-void WritePacketHeader(Buffer &buff, uint32_t protocolHash,
-                       uint32_t sequenceNumber, uint32_t ack,
-                       uint32_t ackBitfield);
+void WriteFloat(Buffer &buff, float data);
 
+float ReadFloat(Buffer &buff);
 uint32_t ReadInteger(Buffer &buff);
 uint16_t ReadShort(Buffer &buff);
 uint8_t ReadChar(Buffer &buff);
+
+// packet types!

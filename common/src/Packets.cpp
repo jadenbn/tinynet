@@ -1,4 +1,5 @@
 #include "Packets.h"
+#include "Protocol.h"
 #include <cassert>
 #include <chrono>
 #include <cstdint>
@@ -103,6 +104,11 @@ void WriteInteger(Buffer &buff, uint32_t data) {
   buff.index += 4;
 };
 
+void WriteFloat(Buffer &buff, float data) {
+  uint32_t int_bits = std::bit_cast<uint32_t>(data);
+  WriteInteger(buff, int_bits);
+}
+
 void WriteShort(Buffer &buff, uint16_t data) {
   assert(buff.index + 2 <= buff.size);
 
@@ -132,6 +138,11 @@ uint32_t ReadInteger(Buffer &buff) {
   buff.index += 4;
   return (static_cast<uint32_t>(b4) << 24 | static_cast<uint32_t>(b3) << 16) |
          static_cast<uint32_t>(b2) << 8 | static_cast<uint32_t>(b1);
+}
+
+float ReadFloat(Buffer &buff) {
+  uint32_t int_bits = ReadInteger(buff);
+  return std::bit_cast<float>(int_bits);
 }
 
 uint16_t ReadShort(Buffer &buff) {
