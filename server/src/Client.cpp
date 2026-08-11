@@ -103,8 +103,7 @@ void Client::Update() {
   Buffer buff = {rawData, 0, sizeof(rawData)};
 
   while (receive(buff) > 0) {
-    std::cout << "Client received data! First char: "
-              << std::to_string(ReadChar(buff)) << '\n';
+    // received data
   }
 
   isConnected = !timedOut();

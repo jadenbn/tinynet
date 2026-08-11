@@ -94,9 +94,7 @@ void Server::Update() {
   Buffer buff = {raw, 0, sizeof(raw)};
 
   while (receive(buff) > 0) {
-    // process
-    std::cout << "Server recevied! First char in packet: "
-              << std::to_string(ReadChar(buff)) << '\n';
+    // server received data
   }
 
   isConnected = !timedOut();

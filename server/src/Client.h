@@ -25,8 +25,8 @@ private:
   Socket clientSocket;
   bool isConnected;
   float timeout;
-  uint32_t sequenceNumber;
-  uint32_t remoteSequenceNumber;
+  uint32_t sequenceNumber = 0;
+  uint32_t remoteSequenceNumber = 0;
   ReceivedQueue receivedQueue;
   SentQueue sentQueue;
 };

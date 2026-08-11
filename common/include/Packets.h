@@ -3,7 +3,7 @@
 #include <cstdint>
 
 constexpr static uint8_t MAX_PACKET_SIZE = 1400;
-constexpr static uint8_t SENT_QUEUE_SIZE = 256;
+constexpr static uint32_t SENT_QUEUE_SIZE = 256;
 
 // tolerance for timeout when running getlostpackets on the sent q
 constexpr static std::chrono::milliseconds PACKET_TIMEOUT =
