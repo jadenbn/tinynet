@@ -41,12 +41,18 @@ int Client::receive(Buffer &outBuffer) {
     return 0;
   }
 
-  uint32_t sequenceNumber = ReadInteger(outBuffer);
-  uint32_t remoteSequenceNumber = ReadInteger(outBuffer);
-  uint32_t ackBitfield = ReadInteger(outBuffer);
+  uint32_t incomingSequenceNumber = ReadInteger(outBuffer);
 
-  sentQueue.ackPacket(remoteSequenceNumber, ackBitfield);
-  receivedQueue.insert(sequenceNumber);
+  if (incomingSequenceNumber > remoteSequenceNumber) {
+    remoteSequenceNumber = incomingSequenceNumber;
+  }
+
+  receivedQueue.insert(incomingSequenceNumber);
+
+  uint32_t incomingAck = ReadInteger(outBuffer);
+  uint32_t incomingAckBitfield = ReadInteger(outBuffer);
+
+  sentQueue.ackPacket(incomingAck, incomingAckBitfield);
 
   initialPacketReceived = true;
   auto now = std::chrono::steady_clock::now();
