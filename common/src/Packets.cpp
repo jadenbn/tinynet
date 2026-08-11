@@ -19,13 +19,25 @@ void ReceivedQueue::insert(uint32_t sequenceNumber) {
 // returns whether or not was acked
 bool SentQueue::ack(uint32_t sequenceNumber) {
   auto index = sequenceNumber % SENT_QUEUE_SIZE;
-  if (queue[index].sequenceNumber == sequenceNumber && !queue[index].acked) {
+  if (exists(sequenceNumber)) {
     queue[index].acked = true;
-    auto rtt = std::chrono::steady_clock::now() - queue[index].timeSent;
+    auto rtt =
+        std::chrono::steady_clock::now() - queue[index].timeSent; // todo: use
     return true;
   }
 
   return false;
+}
+
+bool SentQueue::exists(uint32_t sequenceNumber) {
+  auto index = sequenceNumber % SENT_QUEUE_SIZE;
+  return (!queue[index].acked && queue[index].sequenceNumber == sequenceNumber);
+}
+
+void SentQueue::insert(uint32_t sequenceNumber,
+                       std::chrono::steady_clock::time_point timeSent) {
+  auto index = sequenceNumber % SENT_QUEUE_SIZE;
+  queue[index] = {sequenceNumber, false, timeSent};
 }
 
 // returns whether or not was acked

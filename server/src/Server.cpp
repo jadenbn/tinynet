@@ -22,12 +22,24 @@ bool Server::send(const Buffer &buffer) {
   Buffer send = {scratch, 0, sizeof(scratch)};
   WriteInteger(send, PROTOCOL_HASH);  // write protocol hash
   WriteInteger(send, sequenceNumber); // write sequence num
+  WriteInteger(send, remoteSequenceNumber);
+
+  // todo: turn this into helper later
+  uint32_t ackBitfield = 0;
+  for (int i = 1; i < 33; i++) {
+    auto prevSequenceNumber = remoteSequenceNumber - i;
+    if (receivedQueue.exists(prevSequenceNumber)) {
+      ackBitfield |= (1U << (i - 1));
+    }
+  }
+  WriteInteger(send, ackBitfield);
+  sentQueue.insert(sequenceNumber, std::chrono::steady_clock::now());
   sequenceNumber++;
-  
 
-  std::memcpy(send.data + 4, buffer.data, buffer.index);
+  // copy payload of buffer
+  std::memcpy(send.data + send.index, buffer.data, buffer.index);
 
-  return serverSocket.Send(clientAddress, send.data, buffer.index + 4);
+  return serverSocket.Send(clientAddress, send.data, buffer.index + send.index);
 }
 
 int Server::receive(Buffer &outBuffer) {

@@ -32,5 +32,5 @@ private:
   uint32_t sequenceNumber;
   uint32_t remoteSequenceNumber;
   ReceivedQueue receivedQueue;
-  SentPacketMetadata sentQueue[256];
+  SentQueue sentQueue;
 };

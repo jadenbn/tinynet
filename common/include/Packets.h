@@ -29,7 +29,8 @@ struct SentQueue {
   SentPacketMetadata queue[SENT_QUEUE_SIZE];
 
   bool exists(uint32_t sequenceNumber);
-  void insert(uint32_t sequenceNumber);
+  void insert(uint32_t sequenceNumber,
+              std::chrono::steady_clock::time_point timeSent);
   void ackPacket(uint32_t sequenceNumber, uint32_t bitfield);
   std::vector<uint32_t> getLostPackets(uint32_t highestAckReceived);
 
