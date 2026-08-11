@@ -1,6 +1,9 @@
 #include "Packets.h"
 #include <cassert>
+#include <chrono>
 #include <cstdint>
+#include <sys/types.h>
+#include <vector>
 
 bool ReceivedQueue::exists(uint32_t sequenceNumber) {
   auto index = sequenceNumber % SIZE;
@@ -11,6 +14,47 @@ void ReceivedQueue::insert(uint32_t sequenceNumber) {
   auto index = sequenceNumber % SIZE;
   numbers[index] = sequenceNumber;
   isAcked[sequenceNumber] = true;
+}
+
+// returns whether or not was acked
+bool SentQueue::ack(uint32_t sequenceNumber) {
+  auto index = sequenceNumber % SENT_QUEUE_SIZE;
+  if (queue[index].sequenceNumber == sequenceNumber && !queue[index].acked) {
+    queue[index].acked = true;
+    auto rtt = std::chrono::steady_clock::now() - queue[index].timeSent;
+    return true;
+  }
+
+  return false;
+}
+
+// returns whether or not was acked
+void SentQueue::ackPacket(uint32_t sequenceNumber, uint32_t bitfield) {
+  ack(sequenceNumber);
+  for (int i = 0; i < 32; i++) {
+    if (((bitfield >> i) & 1) == 1) {
+      ack(sequenceNumber - i - 1);
+    }
+  }
+}
+
+std::vector<uint32_t> SentQueue::getLostPackets(uint32_t highestAckReceived) {
+  std::vector<uint32_t> lost;
+  auto now = std::chrono::steady_clock::now();
+
+  for (int i = 0; i < SENT_QUEUE_SIZE; i++) {
+    if (!queue[i].acked && queue[i].sequenceNumber > 0) {
+
+      bool outOfWindow = highestAckReceived - 32 > queue[i].sequenceNumber;
+      bool timedOut = queue[i].timeSent - now > PACKET_TIMEOUT;
+
+      if (outOfWindow || timedOut) {
+        lost.push_back(queue[i].sequenceNumber);
+      }
+    }
+  }
+
+  return lost;
 }
 
 void WriteInteger(Buffer &buff, uint32_t data) {

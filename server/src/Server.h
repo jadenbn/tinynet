@@ -32,5 +32,5 @@ private:
   uint32_t sequenceNumber;
   uint32_t remoteSequenceNumber;
   ReceivedQueue receivedQueue;
-  std::queue<uint32_t> sentQueue;
+  SentPacketMetadata sentQueue[256];
 };

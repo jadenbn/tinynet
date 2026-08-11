@@ -3,6 +3,11 @@
 #include <cstdint>
 
 constexpr static uint8_t MAX_PACKET_SIZE = 1400;
+constexpr static uint8_t SENT_QUEUE_SIZE = 256;
+
+// tolerance for timeout when running getlostpackets on the sent q
+constexpr static std::chrono::milliseconds PACKET_TIMEOUT =
+    std::chrono::milliseconds(150);
 
 // utility header for writing and reading packet data
 
@@ -11,19 +16,26 @@ struct ReceivedQueue {
   static constexpr auto SIZE = 1024;
   uint32_t numbers[SIZE];
   bool isAcked[SIZE];
-
   bool exists(uint32_t sequenceNumber);
-
   void insert(uint32_t sequenceNumber);
 };
-
-//
 struct SentPacketMetadata {
   uint32_t sequenceNumber;
   bool acked;
   std::chrono::steady_clock::time_point timeSent; // to calculate rtt
 };
 
+struct SentQueue {
+  SentPacketMetadata queue[SENT_QUEUE_SIZE];
+
+  bool exists(uint32_t sequenceNumber);
+  void insert(uint32_t sequenceNumber);
+  void ackPacket(uint32_t sequenceNumber, uint32_t bitfield);
+  std::vector<uint32_t> getLostPackets(uint32_t highestAckReceived);
+
+private:
+  bool ack(uint32_t sequenceNumber);
+};
 struct Buffer {
   // shape of data:
   // data[0] - data[3] - protocol hash
