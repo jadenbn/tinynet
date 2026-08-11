@@ -18,7 +18,7 @@ bool Server::send(const Buffer &buffer) {
     return false;
   }
 
-  uint8_t scratch[MAX_PACKET_SIZE + 16];
+  uint8_t scratch[MAX_PACKET_SIZE];
   Buffer send = {scratch, 0, sizeof(scratch)};
   WriteInteger(send, PROTOCOL_HASH);  // write protocol hash
   WriteInteger(send, sequenceNumber); // write sequence num
@@ -60,12 +60,18 @@ int Server::receive(Buffer &outBuffer) {
   if (receivedHeader != PROTOCOL_HASH) {
     return 0;
   }
+  uint32_t sequenceNumber = ReadInteger(outBuffer);
+  uint32_t remoteSequenceNumber = ReadInteger(outBuffer);
+  uint32_t ackBitfield = ReadInteger(outBuffer);
+
+  sentQueue.ackPacket(remoteSequenceNumber, ackBitfield);
+  receivedQueue.insert(sequenceNumber);
 
   initialPacketReceived = true;
   auto now = std::chrono::steady_clock::now();
   lastReceivedTime = now;
 
-  return bytesRead - 4;
+  return bytesRead - outBuffer.index;
 }
 
 Address Server::getServerAddress() { return serverAddress; }

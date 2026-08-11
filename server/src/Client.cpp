@@ -29,7 +29,7 @@ int Client::receive(Buffer &outBuffer) {
   bytesRead =
       clientSocket.Receive(serverAddress, outBuffer.data, MAX_PACKET_SIZE);
 
-  if (bytesRead < 4) {
+  if (bytesRead < 16) {
     return 0;
   }
 
@@ -41,24 +41,45 @@ int Client::receive(Buffer &outBuffer) {
     return 0;
   }
 
+  uint32_t sequenceNumber = ReadInteger(outBuffer);
+  uint32_t remoteSequenceNumber = ReadInteger(outBuffer);
+  uint32_t ackBitfield = ReadInteger(outBuffer);
+
+  sentQueue.ackPacket(remoteSequenceNumber, ackBitfield);
+  receivedQueue.insert(sequenceNumber);
+
   initialPacketReceived = true;
   auto now = std::chrono::steady_clock::now();
   lastReceivedTime = now;
 
-  return bytesRead - 4;
+  return bytesRead - outBuffer.index;
 }
 
 bool Client::send(const Buffer &buffer) {
   if (!isConnected)
     return false;
 
-  uint8_t scratch[MAX_PACKET_SIZE + 4];
+  uint8_t scratch[MAX_PACKET_SIZE];
   Buffer send = {scratch, 0, sizeof(scratch)};
   WriteInteger(send, PROTOCOL_HASH);
+  WriteInteger(send, sequenceNumber);
+  WriteInteger(send, remoteSequenceNumber);
 
-  std::memcpy(send.data + 4, buffer.data, buffer.index);
+  // todo: turn this into helper later
+  uint32_t ackBitfield = 0;
+  for (int i = 1; i < 33; i++) {
+    auto prevSequenceNumber = remoteSequenceNumber - i;
+    if (receivedQueue.exists(prevSequenceNumber)) {
+      ackBitfield |= (1U << (i - 1));
+    }
+  }
+  WriteInteger(send, ackBitfield);
+  sentQueue.insert(sequenceNumber, std::chrono::steady_clock::now());
+  sequenceNumber++;
 
-  return clientSocket.Send(serverAddress, send.data, buffer.index + 4);
+  std::memcpy(send.data + send.index, buffer.data, buffer.index);
+
+  return clientSocket.Send(serverAddress, send.data, buffer.index + send.index);
 }
 
 bool Client::timedOut() {

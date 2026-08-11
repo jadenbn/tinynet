@@ -23,6 +23,10 @@ private:
   Address clientAddress;
   Address serverAddress;
   Socket clientSocket;
-  float timeout;
   bool isConnected;
+  float timeout;
+  uint32_t sequenceNumber;
+  uint32_t remoteSequenceNumber;
+  ReceivedQueue receivedQueue;
+  SentQueue sentQueue;
 };
