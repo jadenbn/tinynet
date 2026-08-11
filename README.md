@@ -1,4 +1,4 @@
-# A Low-Latency C++ Multiplayer Server
+# A Low-Latency C++ Multiplayer Server & Protocol
 
 I was writing the netcode for a Unity game I was making with my friends, when I realized that I do not have a very good grasp of how networking actually works.
 
@@ -8,13 +8,13 @@ I attribute most of my work to a few different sources, with the most prominent 
 
 ---
 
-To build and run the client (make sure your working directory is the project's root):
+Features so far:
 
-```bash
-make client && make run-client
-```
-
-The server build is still a work in progress ;)
+- Custom UDP Socket & Address abstraction (non-blocking POSIX socket, cross platform)
+- Binary Serialization Engine (endian-safe)
+- 16-Byte Protocol Packet Header (protocol hash, sequence ID, remote ack, 32-bit ACK bitfield)
+- Reliability & ACK System (ring buffers for packet queues)
+- Connection Lifecycle (Heartbeat, timeout detection, event loops and such)
 
 ---
 
