@@ -1,11 +1,9 @@
 #include "Client.h"
 #include "Packets.h"
 #include "Protocol.h"
-#include "Server.h" // for timeoutms constant
 #include "Socket.h"
 #include <arpa/inet.h>
 #include <cstring>
-#include <iostream>
 
 Client::Client(Address clientAddress) {
   this->clientAddress = clientAddress;
@@ -95,7 +93,7 @@ bool Client::timedOut() {
   auto now = std::chrono::steady_clock::now();
   auto elapsed = now - lastReceivedTime;
 
-  return elapsed > TIMEOUT_MS;
+  return elapsed > CONNECTION_TIMEOUT_MS;
 }
 
 void Client::Update() {

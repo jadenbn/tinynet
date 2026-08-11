@@ -1,4 +1,4 @@
-#include "Server.h"
+#include "../include/Server.h"
 #include "Address.h"
 #include "Packets.h"
 #include "Protocol.h"
@@ -109,7 +109,7 @@ bool Server::timedOut() {
 
   auto now = std::chrono::steady_clock::now();
   auto elapsed = now - lastReceivedTime;
-  return elapsed > TIMEOUT_MS;
+  return elapsed > CONNECTION_TIMEOUT_MS;
 }
 
 bool Server::getIsConnected() { return isConnected; }

@@ -1,34 +1,29 @@
 #pragma once
+#include "Address.h"
 #include "Packets.h"
 #include "Socket.h"
 #include <chrono>
-#include <ctime>
 
-class Address;
-
-static constexpr auto TIMEOUT_MS = std::chrono::milliseconds(10000);
-
-class Server {
+class Client {
 public:
-  Server(Address serverAddress);
-  void initialize();
+  Client(Address clientAddress);
+  void initialize(Address serverAddress);
   void Update();
   int receive(Buffer &out);
   bool send(const Buffer &buffer);
   bool getIsConnected();
-  Address getServerAddress();
   Address getClientAddress();
+  Address getServerAddress();
 
 private:
   bool timedOut();
-  bool initialPacketReceived = false; // this is ugly i don't like it maybe change when
-                              // posible future me
+  bool initialPacketReceived = false;
+
   std::chrono::steady_clock::time_point lastReceivedTime;
   Address clientAddress;
   Address serverAddress;
-  Socket serverSocket;
+  Socket clientSocket;
   bool isConnected = false;
-  float timeout;
   uint32_t sequenceNumber = 0;
   uint32_t remoteSequenceNumber = 0;
   ReceivedQueue receivedQueue;

@@ -26,8 +26,8 @@ public:
 void MovePlayer(Player *p, int speed);
 
 int main() {
-  constexpr int WIDTH = 1920;
-  constexpr int HEIGHT = 1080;
+  constexpr int WIDTH = 640;
+  constexpr int HEIGHT = 480;
 
   SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
   InitWindow(WIDTH, HEIGHT, "tinynet client");

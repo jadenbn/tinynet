@@ -7,6 +7,7 @@ constexpr static uint32_t SENT_QUEUE_SIZE = 256;
 
 // tolerance for timeout when running getlostpackets on the sent q
 constexpr static float PACKET_TIMEOUT = 1.0f; // ms
+static constexpr auto CONNECTION_TIMEOUT_MS = std::chrono::milliseconds(10000);
 
 // utility header for writing and reading packet data
 

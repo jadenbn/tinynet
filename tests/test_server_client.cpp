@@ -1,5 +1,6 @@
-#include "../src/Client.h"
-#include "../src/Server.h"
+#include "../server/include/Server.h"
+#include "Client.h"
+#include "Packets.h"
 #include <cassert>
 #include <chrono>
 #include <iostream>
@@ -20,7 +21,7 @@ void test_server_listens_and_receives_packets_from_client() {
   client.initialize(serverAddress);
 
   // run for 2 * timeout duration
-  for (int i = 0; i < ((TIMEOUT_MS.count() * 2) / 10); i++) {
+  for (int i = 0; i < ((CONNECTION_TIMEOUT_MS.count() * 2) / 10); i++) {
     client.Update();
     server.Update();
 
@@ -41,7 +42,7 @@ void test_server_listens_and_receives_packets_from_client() {
     }
 
     // confirm both timeout
-    if (i > (TIMEOUT_MS.count() + 100)) {
+    if (i > (CONNECTION_TIMEOUT_MS.count() + 100)) {
       assert(!client.getIsConnected());
       assert(!server.getIsConnected());
       assert(server.getClientAddress() == Address());
