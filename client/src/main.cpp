@@ -50,11 +50,13 @@ void MovePlayer(Player *p, int speed, Client &client) {
       p->position.x - (p->sprite.width / 2),
       p->position.y - 25 - (p->sprite.height / 2), 12, BLACK);
 
-  uint8_t scratch[MAX_PACKET_SIZE];
-  Buffer buff = {scratch, 0, sizeof(scratch)};
-  PlayerInputPacket packet = {p->position.x, p->position.y};
-  packet.Serialize(buff);
-  client.send(buff);
+  if (Vector2Length(direction) != 0.0f) {
+    uint8_t scratch[MAX_PACKET_SIZE];
+    Buffer buff = {scratch, 0, sizeof(scratch)};
+    PlayerInputPacket packet = {p->position.x, p->position.y};
+    packet.Serialize(buff);
+    client.send(buff);
+  }
 
   float deltaTime = GetFrameTime();
   p->position.x += direction.x * speed * deltaTime;
