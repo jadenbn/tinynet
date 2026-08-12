@@ -18,6 +18,6 @@ struct PlayerInputPacket {
   float x;
   float y;
 
-  void Serialize(Buffer &buff);
+  void Serialize(Buffer &buff) const;
   static PlayerInputPacket deserialize(Buffer &buff);
 };

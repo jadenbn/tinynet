@@ -1,12 +1,10 @@
 #include "Address.h"
 #include "Client.h"
-#include "Packets.h"
 #include "Protocol.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "resource_dir.h"
 #include "string"
-#include <iostream>
 
 class Player {
 
@@ -51,11 +49,7 @@ void MovePlayer(Player *p, int speed, Client &client) {
       p->position.y - 25 - (p->sprite.height / 2), 12, BLACK);
 
   if (Vector2Length(direction) != 0.0f) {
-    uint8_t scratch[MAX_PACKET_SIZE];
-    Buffer buff = {scratch, 0, sizeof(scratch)};
-    PlayerInputPacket packet = {p->position.x, p->position.y};
-    packet.Serialize(buff);
-    client.connection.Send(buff);
+    client.SendPacket(PlayerInputPacket{p->position.x, p->position.y});
   }
 
   float deltaTime = GetFrameTime();

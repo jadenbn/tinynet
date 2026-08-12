@@ -1,7 +1,7 @@
 #include "Protocol.h"
 #include "Packets.h"
 
-void PlayerInputPacket::Serialize(Buffer &buff) {
+void PlayerInputPacket::Serialize(Buffer &buff) const {
   WriteChar(buff, PacketType::PlayerInput);
   WriteFloat(buff, this->x);
   WriteFloat(buff, this->y);

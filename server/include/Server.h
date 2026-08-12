@@ -10,5 +10,7 @@ public:
   void initialize();
   void Update();
 
+  template <typename Packet> bool SendPacket(Packet &packet);
+
 private:
 };
