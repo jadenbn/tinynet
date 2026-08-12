@@ -23,28 +23,35 @@ void test_server_listens_and_receives_packets_from_client() {
 
   // run for 2 * timeout duration
   for (int i = 0; i < ((CONNECTION_TIMEOUT_MS.count() * 2) / 10); i++) {
-    client.Update();
-    server.Update();
+    client.UpdateConnection();
+    server.UpdateConnection();
+
+    uint8_t tmp1[MAX_PACKET_SIZE];
+    Buffer buff1 = {tmp1, 0, sizeof(tmp1)};
+    client.Receive(buff1);
+
+    uint8_t tmp2[MAX_PACKET_SIZE];
+    Buffer buff2 = {tmp2, 0, sizeof(tmp1)};
+    server.Receive(buff2);
 
     // establish connection
     if (i < 200) {
-      uint8_t character = 1;
-      Buffer data = {&character, 1, 32};
-      client.connection.Send(data);
-      if (server.GetIsConnected())
-        server.SendPacket(PlayerInputPacket{1.0f, 1.0f});
+      assert(client.SendPacket(PlayerInputPacket{-1.0f, -1.0f}));
+      if (server.GetIsConnected()) {
+        assert(server.SendPacket(PlayerInputPacket{1.0f, 1.0f}));
+      }
     }
 
     // confirm connection between 100ms and 1s
     if (i > 10 && i < 100) {
-      assert(client.connection.GetIsConnected());
+      assert(client.GetIsConnected());
       assert(server.GetIsConnected());
       assert(client.GetAddress() == server.GetRemoteAddress());
     }
 
     // confirm both timeout
     if (i > (CONNECTION_TIMEOUT_MS.count() + 100)) {
-      assert(!client.connection.GetIsConnected());
+      assert(!client.GetIsConnected());
       assert(!server.GetIsConnected());
       assert(server.GetRemoteAddress() == Address());
     }

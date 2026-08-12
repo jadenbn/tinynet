@@ -18,18 +18,6 @@ Address Server::GetRemoteAddress() { return connection.GetRemoteAddress(); }
 bool Server::GetIsConnected() { return connection.GetIsConnected(); }
 float Server::GetRTT() { return connection.GetRTT(); }
 
-void Server::Update() {
-  connection.Update();
-  uint8_t rawData[MAX_PACKET_SIZE];
-  Buffer buff = {rawData, 0, sizeof(rawData)};
+int Server::Receive(Buffer &buff) { return connection.Receive(buff); }
 
-  while (connection.Receive(buff) > 0) {
-    // server received data
-    PacketType packetType = static_cast<PacketType>(ReadChar(buff));
-    if (packetType == PacketType::PlayerInput) {
-      PlayerInputPacket packet = PlayerInputPacket::deserialize(buff);
-      std::cout << "Received player move packet! x: " << packet.x
-                << "y: " << packet.y << '\n';
-    }
-  }
-}
+void Server::UpdateConnection() { connection.Update(); }

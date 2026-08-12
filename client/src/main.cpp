@@ -1,10 +1,12 @@
 #include "Address.h"
 #include "Client.h"
+#include "Packets.h"
 #include "Protocol.h"
 #include "TransportLayer.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "resource_dir.h"
+#include <iostream>
 
 class Player {
 
@@ -83,9 +85,10 @@ int main() {
 
   // game loop
   while (!WindowShouldClose()) {
-    client.Update();
+    client.UpdateConnection();
 
-    Buffer packet;
+    uint8_t scratch[MAX_PACKET_SIZE];
+    Buffer packet = {scratch, 0, sizeof(scratch)};
     while (client.Receive(packet) > 0) {
       transportLayer.HandlePacket(packet);
     }
@@ -94,6 +97,11 @@ int main() {
     ClearBackground(WHITE);
 
     MovePlayer(&mainPlayer, 200, client);
+
+    DrawText(std::string(std::to_string(game.playerPosition.x) + '\n' +
+                         std::to_string(game.playerPosition.y))
+                 .c_str(),
+             400, 400, 12, BLACK);
 
     // draw main player
     mainPlayer.DrawPlayer();

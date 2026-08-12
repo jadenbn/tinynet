@@ -21,7 +21,7 @@ bool TransportLayer::HandlePacket(Buffer &buff) {
     return false;
   }
 
-  return false;
+  return true;
 }
 
 bool TransportLayer::ApplyPlayerInputPacket(const PlayerInputPacket &p) {

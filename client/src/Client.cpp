@@ -21,9 +21,8 @@ Address Client::GetRemoteAddress() { return connection.GetRemoteAddress(); }
 bool Client::GetIsConnected() { return connection.GetIsConnected(); }
 float Client::GetRTT() { return connection.GetRTT(); }
 
-
 int Client::Receive(Buffer &buff) { return connection.Receive(buff); }
 
-void Client::Update() {
+void Client::UpdateConnection() {
   connection.Update(); // handle timeout
 }

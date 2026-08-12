@@ -45,6 +45,8 @@ int Connection::Receive(Buffer &outBuffer) {
     return 0;
   }
 
+  isConnected = true;
+
   uint32_t incomingSequenceNumber = ReadInteger(outBuffer);
 
   if (incomingSequenceNumber > remoteSequenceNumber) {
@@ -109,8 +111,8 @@ void Connection::Connect(Address remoteAddress) {
 
 void Connection::Update() {
   // handnle watchdog timeout
-  isConnected = !timedOut();
-  if (!isConnected) {
-    return;
+  if (isConnected && timedOut()) {
+    isConnected = false;
+    remoteAddress = Address();
   }
 }

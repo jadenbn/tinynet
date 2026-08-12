@@ -5,9 +5,8 @@
 class Client {
 public:
   Client(Address clientAddress);
-  Connection connection = Connection();
   void initialize(Address serverAddress);
-  void Update();
+  void UpdateConnection();
   Address GetAddress();
   Address GetRemoteAddress();
   bool GetIsConnected();
@@ -22,4 +21,5 @@ public:
   }
 
 private:
+  Connection connection;
 };
