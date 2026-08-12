@@ -26,7 +26,6 @@ bool ServerReplicationSystem::HandlePacket(Buffer &buff) {
 
 bool ServerReplicationSystem::ApplyPlayerInputPacket(
     const PlayerInputPacket &p) {
-  std::cout << "applying player input packet" << '\n';
   game.playerPosition = {p.x, p.y};
   return true;
 }
