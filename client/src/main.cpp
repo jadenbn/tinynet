@@ -42,11 +42,14 @@ void MovePlayer(Player *p, int speed, Client &client) {
     direction = Vector2Normalize(direction);
   }
 
+  float deltaTime = GetFrameTime();
+
   if (Vector2Length(direction) != 0.0f) {
-    client.SendPacket(PlayerInputPacket{p->position.x, p->position.y});
+    client.SendPacket(
+        PlayerInputPacket{p->position.x += direction.x * speed,
+                          p->position.y += direction.x * speed * deltaTime});
   }
 
-  // float deltaTime = GetFrameTime();
   // p->position.x += direction.x * speed * deltaTime;
   // p->position.y += direction.y * speed * deltaTime;
 }
@@ -87,7 +90,7 @@ int main() {
     BeginDrawing();
     ClearBackground(WHITE);
 
-    MovePlayer(&mainPlayer, 200, client);
+    MovePlayer(&mainPlayer, 2, client);
 
     DrawText(std::string(std::to_string(game.playerPosition.x) + '\n' +
                          std::to_string(game.playerPosition.y))

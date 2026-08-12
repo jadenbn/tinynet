@@ -25,8 +25,8 @@ int main() {
       replicationSystem.HandlePacket(buff);
     }
 
-    server.SendPacket(
-        PlayerInputPacket{game.playerPosition.x, game.playerPosition.y});
+    server.SendPacket(PlayerInputPacket{game.playerPosition.x,
+                                        game.playerPosition.y}); // worldstate
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
   }
 }
