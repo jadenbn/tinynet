@@ -1,10 +1,10 @@
 #include "Address.h"
 #include "Client.h"
 #include "Protocol.h"
+#include "TransportLayer.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "resource_dir.h"
-#include "string"
 
 class Player {
 
@@ -42,11 +42,11 @@ void MovePlayer(Player *p, int speed, Client &client) {
   }
 
   // account for offset of sprite
-  DrawText(
-      std::string(std::to_string(direction.x) + std::to_string(direction.y))
-          .c_str(),
-      p->position.x - (p->sprite.width / 2),
-      p->position.y - 25 - (p->sprite.height / 2), 12, BLACK);
+  // DrawText(
+  //     std::string(std::to_string(direction.x) + std::to_string(direction.y))
+  //         .c_str(),
+  //     p->position.x - (p->sprite.width / 2),
+  //     p->position.y - 25 - (p->sprite.height / 2), 12, BLACK);
 
   if (Vector2Length(direction) != 0.0f) {
     client.SendPacket(PlayerInputPacket{p->position.x, p->position.y});
@@ -59,7 +59,11 @@ void MovePlayer(Player *p, int speed, Client &client) {
   direction = {0, 0};
 }
 
+Game game;
+TransportLayer transportLayer(game);
+
 int main() {
+
   constexpr int WIDTH = 640;
   constexpr int HEIGHT = 480;
 
@@ -74,12 +78,18 @@ int main() {
 
   // main player starts in center of screen
   Texture mainPlayerSprite = LoadTexture("github.png");
-  Player mainPlayer({(float)(WIDTH / 2), (float)(HEIGHT / 2)},
+  Player mainPlayer({(float)(WIDTH - 20.0f), (float)(HEIGHT - 20.0f)},
                     mainPlayerSprite);
 
   // game loop
   while (!WindowShouldClose()) {
     client.Update();
+
+    Buffer packet;
+    while (client.Receive(packet) > 0) {
+      transportLayer.HandlePacket(packet);
+    }
+
     BeginDrawing();
     ClearBackground(WHITE);
 

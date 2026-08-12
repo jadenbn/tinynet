@@ -1,5 +1,8 @@
 #include "Client.h"
+#include "Address.h"
 #include "Connection.h"
+#include "Packets.h"
+#include "Protocol.h"
 #include <arpa/inet.h>
 #include <cstring>
 #include <iostream>
@@ -18,12 +21,9 @@ Address Client::GetRemoteAddress() { return connection.GetRemoteAddress(); }
 bool Client::GetIsConnected() { return connection.GetIsConnected(); }
 float Client::GetRTT() { return connection.GetRTT(); }
 
-void Client::Update() {
-  connection.Update();
-  uint8_t rawData[MAX_PACKET_SIZE];
-  Buffer buff = {rawData, 0, sizeof(rawData)};
 
-  while (connection.Receive(buff) > 0) {
-    // received data
-  }
+int Client::Receive(Buffer &buff) { return connection.Receive(buff); }
+
+void Client::Update() {
+  connection.Update(); // handle timeout
 }

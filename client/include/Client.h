@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Connection.h"
+#include "Protocol.h"
 class Client {
 public:
   Client(Address clientAddress);
@@ -11,6 +12,7 @@ public:
   Address GetRemoteAddress();
   bool GetIsConnected();
   float GetRTT();
+  int Receive(Buffer &buff);
 
   template <typename Packet> bool SendPacket(const Packet &packet) {
     uint8_t scratch[MAX_PACKET_SIZE];
