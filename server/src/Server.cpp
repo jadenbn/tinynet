@@ -4,19 +4,15 @@
 #include <cstring>
 #include <iostream>
 
-Server::Server(Address address) { connection.SetAddress(address); }
+Server::Server(Address address_c) { localAddress = address_c; }
 
 void Server::initialize() {
-  connection.Open();
-  std::cout << "Server listening on port " << connection.GetAddress().GetPort()
-            << '\n';
+  socket.Open(localAddress.GetPort());
+  std::cout << "Server listening on port " << localAddress.GetPort() << '\n';
 }
 
-Address Server::GetAddress() { return connection.GetAddress(); }
-Address Server::GetRemoteAddress() { return connection.GetRemoteAddress(); }
-bool Server::GetIsConnected() { return connection.GetIsConnected(); }
-float Server::GetRTT() { return connection.GetRTT(); }
-
-int Server::Receive(Buffer &buff) { return connection.Receive(buff); }
-
-void Server::UpdateConnection() { connection.Update(); }
+Address Server::GetAddress() { return localAddress; }
+std::unordered_map<ClientID, Connection> Server::GetClientMap() {
+  return clients;
+}
+bool Server::GetIsConnected() { return socket.isOpen(); }

@@ -1,6 +1,7 @@
 #pragma once
 #include "Connection.h"
 #include "Packets.h"
+#include <unordered_map>
 
 class Address;
 
@@ -10,18 +11,25 @@ public:
   void initialize();
   void UpdateConnection();
   Address GetAddress();
-  Address GetRemoteAddress();
+  std::unordered_map<ClientID, Connection> GetClientMap();
   bool GetIsConnected();
   float GetRTT();
   int Receive(Buffer &buff);
 
-  template <typename Packet> bool SendPacket(const Packet &packet) {
+  template <typename Packet>
+  bool SendPacket(const ClientID client, const Packet &packet) {
+    auto conn = clients.find(client);
+    if (conn == clients.end())
+      return false;
+
     uint8_t scratch[MAX_PACKET_SIZE];
     Buffer buff = Buffer(scratch, 0, sizeof(scratch));
     packet.Serialize(buff);
-    return connection.Send(buff);
+    return conn->second.Send(socket, buff);
   }
 
 private:
-  Connection connection;
+  Socket socket;
+  Address localAddress;
+  std::unordered_map<ClientID, Connection> clients;
 };

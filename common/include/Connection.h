@@ -7,30 +7,25 @@
 // TODO: congestion avoidance; perhaps at a higher level of abstraction, though,
 // like
 
+typedef uint32_t ClientID;
+
+// represents an endpoint; client has one, server has many
 class Connection {
 public:
   Connection(Address address);
-  Connection();
-  bool Open();
-  void Connect(Address remoteAddress); // should only be used by a client!
-  void Update();
-  int Receive(Buffer &out);
-  bool Send(const Buffer &buffer);
-  bool GetIsConnected();
+  int Receive(Socket &sock, Buffer &out);
+  bool Send(Socket &sock, const Buffer &buffer);
   Address GetAddress();
-  void SetAddress(Address address);
-  Address GetRemoteAddress();
   float GetRTT();
 
 private:
+  float rtt;
   bool timedOut();
   bool initialPacketReceived = false;
-
   std::chrono::steady_clock::time_point lastReceivedTime;
   Address address = Address();
   Address remoteAddress = Address();
-  Socket socket;
-  bool isConnected = false;
+  bool connected = false;
   uint32_t sequenceNumber = 0;
   uint32_t remoteSequenceNumber = 0;
   ReceivedQueue receivedQueue;
