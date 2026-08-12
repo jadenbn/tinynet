@@ -1,16 +1,16 @@
 #pragma once
 #include "../shared/include/Protocol.h"
-#include "ClientGame.h"
+#include "ServerGame.h"
 
 // for turning packets into actions
-class ClientReplicationSystem {
+class ServerReplicationSystem {
 public:
-  ClientReplicationSystem(ClientGame &c_game);
+  ServerReplicationSystem(ServerGame &c_game);
 
   bool HandlePacket(Buffer &buff);
 
 private:
-  ClientGame &game;
+  ServerGame &game;
 
   bool ApplyPlayerInputPacket(const PlayerInputPacket &p);
 };

@@ -42,29 +42,19 @@ void MovePlayer(Player *p, int speed, Client &client) {
     direction = Vector2Normalize(direction);
   }
 
-  // account for offset of sprite
-  // DrawText(
-  //     std::string(std::to_string(direction.x) + std::to_string(direction.y))
-  //         .c_str(),
-  //     p->position.x - (p->sprite.width / 2),
-  //     p->position.y - 25 - (p->sprite.height / 2), 12, BLACK);
-
   if (Vector2Length(direction) != 0.0f) {
     client.SendPacket(PlayerInputPacket{p->position.x, p->position.y});
   }
 
-  float deltaTime = GetFrameTime();
-  p->position.x += direction.x * speed * deltaTime;
-  p->position.y += direction.y * speed * deltaTime;
-
-  direction = {0, 0};
+  // float deltaTime = GetFrameTime();
+  // p->position.x += direction.x * speed * deltaTime;
+  // p->position.y += direction.y * speed * deltaTime;
 }
 
-Game game;
+ClientGame game;
 ClientReplicationSystem replicationSystem(game);
 
 int main() {
-
   constexpr int WIDTH = 640;
   constexpr int HEIGHT = 480;
 
@@ -91,6 +81,8 @@ int main() {
     while (client.Receive(packet) > 0) {
       replicationSystem.HandlePacket(packet);
     }
+
+    mainPlayer.position = game.playerPosition;
 
     BeginDrawing();
     ClearBackground(WHITE);

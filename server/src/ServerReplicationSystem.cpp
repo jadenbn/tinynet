@@ -1,12 +1,11 @@
-#include "ClientReplicationSystem.h"
-#include "../shared/include/Protocol.h"
+#include "../server/include/ServerReplicationSystem.h"
 #include "Packets.h"
 #include <iostream>
 
-ClientReplicationSystem::ClientReplicationSystem(ClientGame &c_game)
+ServerReplicationSystem::ServerReplicationSystem(ServerGame &c_game)
     : game(c_game) {};
 
-bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
+bool ServerReplicationSystem::HandlePacket(Buffer &buff) {
   if (buff.index >= buff.size)
     return false;
   PacketType packetType = static_cast<PacketType>(ReadChar(buff));
@@ -25,7 +24,7 @@ bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
   return true;
 }
 
-bool ClientReplicationSystem::ApplyPlayerInputPacket(
+bool ServerReplicationSystem::ApplyPlayerInputPacket(
     const PlayerInputPacket &p) {
   std::cout << "applying player input packet" << '\n';
   game.playerPosition = {p.x, p.y};
