@@ -1,4 +1,4 @@
-#include "Protocol.h"
+#include "../shared/include/Protocol.h"
 #include "Packets.h"
 
 void PlayerInputPacket::Serialize(Buffer &buff) const {

@@ -1,10 +1,10 @@
+#include "../shared/include/Protocol.h"
 #include "Game.h"
-#include "Protocol.h"
 
 // for turning packets into actions
-class TransportLayer {
+class ClientReplicationSystem {
 public:
-  TransportLayer(Game &c_game);
+  ClientReplicationSystem(Game &c_game);
 
   bool HandlePacket(Buffer &buff);
 

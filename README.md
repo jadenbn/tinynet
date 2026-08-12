@@ -6,6 +6,12 @@ So, I decided to build tinynet! This project is just for my enjoyment of recreat
 
 I attribute most of my work to a few different sources, with the most prominent (while this project is still in its infancy) being Glenn Fiedler's [Game Networking series](https://gafferongames.com/categories/game-networking/).
 
+Note that:
+client/ is demo game rendering, input, prediction, interpolation
+common/ is networking generics; knows nothing about the demo game
+server/ is demo game authoritative world and server rules
+shared/ is game-specific code needed by both client and program
+
 ---
 
 Features so far:

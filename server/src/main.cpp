@@ -1,7 +1,7 @@
 #include "../include/Server.h"
+#include "../shared/include/Protocol.h"
 #include "Address.h"
 #include "Packets.h"
-#include "Protocol.h"
 #include <chrono>
 #include <iostream>
 #include <thread>

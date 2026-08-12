@@ -1,7 +1,7 @@
 #include "Connection.h"
+#include "../shared/include/Protocol.h"
 #include "Address.h"
 #include "Packets.h"
-#include "Protocol.h"
 #include "Socket.h"
 #include <arpa/inet.h>
 #include <cassert>

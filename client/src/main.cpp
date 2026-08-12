@@ -1,12 +1,11 @@
+#include "../shared/include/Protocol.h"
 #include "Address.h"
 #include "Client.h"
+#include "ClientReplicationSystem.h"
 #include "Packets.h"
-#include "Protocol.h"
-#include "TransportLayer.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "resource_dir.h"
-#include <iostream>
 
 class Player {
 
@@ -62,7 +61,7 @@ void MovePlayer(Player *p, int speed, Client &client) {
 }
 
 Game game;
-TransportLayer transportLayer(game);
+ClientReplicationSystem replicationSystem(game);
 
 int main() {
 
@@ -90,7 +89,7 @@ int main() {
     uint8_t scratch[MAX_PACKET_SIZE];
     Buffer packet = {scratch, 0, sizeof(scratch)};
     while (client.Receive(packet) > 0) {
-      transportLayer.HandlePacket(packet);
+      replicationSystem.HandlePacket(packet);
     }
 
     BeginDrawing();

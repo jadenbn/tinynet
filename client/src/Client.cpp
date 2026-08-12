@@ -2,7 +2,6 @@
 #include "Address.h"
 #include "Connection.h"
 #include "Packets.h"
-#include "Protocol.h"
 #include <arpa/inet.h>
 #include <cstring>
 #include <iostream>

@@ -1,11 +1,12 @@
-#include "TransportLayer.h"
+#include "ClientReplicationSystem.h"
+#include "../shared/include/Protocol.h"
 #include "Packets.h"
-#include "Protocol.h"
 #include <iostream>
 
-TransportLayer::TransportLayer(Game &c_game) : game(c_game) {};
+ClientReplicationSystem::ClientReplicationSystem(Game &c_game)
+    : game(c_game) {};
 
-bool TransportLayer::HandlePacket(Buffer &buff) {
+bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
   if (buff.index >= buff.size)
     return false;
   PacketType packetType = static_cast<PacketType>(ReadChar(buff));
@@ -24,7 +25,8 @@ bool TransportLayer::HandlePacket(Buffer &buff) {
   return true;
 }
 
-bool TransportLayer::ApplyPlayerInputPacket(const PlayerInputPacket &p) {
+bool ClientReplicationSystem::ApplyPlayerInputPacket(
+    const PlayerInputPacket &p) {
   std::cout << "applying player input packet" << '\n';
   game.playerPosition = {p.x, p.y};
   return true;

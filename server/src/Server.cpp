@@ -1,7 +1,6 @@
 #include "../include/Server.h"
 #include "Address.h"
 #include "Connection.h"
-#include "Protocol.h"
 #include <cstring>
 #include <iostream>
 

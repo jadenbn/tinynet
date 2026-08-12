@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Connection.h"
-#include "Protocol.h"
 class Client {
 public:
   Client(Address clientAddress);
