@@ -1,6 +1,7 @@
 #include "../server/include/Server.h"
 #include "Client.h"
 #include "Packets.h"
+#include "Protocol.h"
 #include <cassert>
 #include <chrono>
 #include <iostream>
@@ -8,8 +9,8 @@
 
 void test_server_socket() {
   Server s(Address(127, 0, 0, 1, 3000));
-  assert(s.connection.GetAddress().GetPort() == 3000);
-  assert(s.connection.GetAddress().GetA() == 127);
+  assert(s.GetAddress().GetPort() == 3000);
+  assert(s.GetAddress().GetA() == 127);
 }
 
 void test_server_listens_and_receives_packets_from_client() {
@@ -30,23 +31,22 @@ void test_server_listens_and_receives_packets_from_client() {
       uint8_t character = 1;
       Buffer data = {&character, 1, 32};
       client.connection.Send(data);
-      if (server.connection.GetIsConnected())
-        server.connection.Send(data);
+      if (server.GetIsConnected())
+        server.SendPacket(PlayerInputPacket{1.0f, 1.0f});
     }
 
     // confirm connection between 100ms and 1s
     if (i > 10 && i < 100) {
       assert(client.connection.GetIsConnected());
-      assert(server.connection.GetIsConnected());
-      assert(client.connection.GetAddress() ==
-             server.connection.GetRemoteAddress());
+      assert(server.GetIsConnected());
+      assert(client.GetAddress() == server.GetRemoteAddress());
     }
 
     // confirm both timeout
     if (i > (CONNECTION_TIMEOUT_MS.count() + 100)) {
       assert(!client.connection.GetIsConnected());
-      assert(!server.connection.GetIsConnected());
-      assert(server.connection.GetRemoteAddress() == Address());
+      assert(!server.GetIsConnected());
+      assert(server.GetRemoteAddress() == Address());
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));

@@ -7,6 +7,9 @@ public:
   Connection connection = Connection();
   void initialize(Address serverAddress);
   void Update();
+  Address GetAddress();
+  Address GetRemoteAddress();
+  bool GetIsConnected();
 
   template <typename Packet> bool SendPacket(const Packet &packet) {
     uint8_t scratch[MAX_PACKET_SIZE];

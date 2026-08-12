@@ -13,6 +13,10 @@ void Server::initialize() {
             << '\n';
 }
 
+Address Server::GetAddress() { return connection.GetAddress(); }
+Address Server::GetRemoteAddress() { return connection.GetRemoteAddress(); }
+bool Server::GetIsConnected() { return connection.GetIsConnected(); }
+
 void Server::Update() {
   connection.Update();
   uint8_t rawData[MAX_PACKET_SIZE];
