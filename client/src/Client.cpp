@@ -16,6 +16,7 @@ void Client::initialize(Address serverAddress) {
 Address Client::GetAddress() { return connection.GetAddress(); }
 Address Client::GetRemoteAddress() { return connection.GetRemoteAddress(); }
 bool Client::GetIsConnected() { return connection.GetIsConnected(); }
+float Client::GetRTT() { return connection.GetRTT(); }
 
 void Client::Update() {
   connection.Update();

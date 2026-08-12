@@ -10,6 +10,7 @@ public:
   Address GetAddress();
   Address GetRemoteAddress();
   bool GetIsConnected();
+  float GetRTT();
 
   template <typename Packet> bool SendPacket(const Packet &packet) {
     uint8_t scratch[MAX_PACKET_SIZE];

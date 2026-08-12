@@ -4,6 +4,9 @@
 #include "Socket.h"
 #include <chrono>
 
+// TODO: congestion avoidance; perhaps at a higher level of abstraction, though,
+// like
+
 class Connection {
 public:
   Connection(Address address);
@@ -17,6 +20,7 @@ public:
   Address GetAddress();
   void SetAddress(Address address);
   Address GetRemoteAddress();
+  float GetRTT();
 
 private:
   bool timedOut();

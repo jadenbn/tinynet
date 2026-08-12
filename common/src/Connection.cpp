@@ -7,6 +7,8 @@
 #include <cassert>
 #include <cstring>
 
+// TODO: congestion avoidance
+
 Connection::Connection(Address address) {
   this->address = address;
   socket = Socket();
@@ -19,6 +21,7 @@ Address Connection::GetRemoteAddress() { return remoteAddress; }
 void Connection::SetAddress(Address address) { this->address = address; }
 
 bool Connection::GetIsConnected() { return isConnected; }
+float Connection::GetRTT() { return sentQueue.globalRtt; }
 
 bool Connection::Open() {
   assert(address != Address()); // ensure address isn't default
