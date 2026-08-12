@@ -8,8 +8,8 @@
 
 void test_server_socket() {
   Server s(Address(127, 0, 0, 1, 3000));
-  assert(s.getServerAddress().GetPort() == 3000);
-  assert(s.getServerAddress().GetA() == 127);
+  assert(s.connection.GetAddress().GetPort() == 3000);
+  assert(s.connection.GetAddress().GetA() == 127);
 }
 
 void test_server_listens_and_receives_packets_from_client() {
@@ -29,23 +29,24 @@ void test_server_listens_and_receives_packets_from_client() {
     if (i < 200) {
       uint8_t character = 1;
       Buffer data = {&character, 1, 32};
-      client.send(data);
-      if (server.getIsConnected())
-        server.send(data);
+      client.connection.Send(data);
+      if (server.connection.GetIsConnected())
+        server.connection.Send(data);
     }
 
     // confirm connection between 100ms and 1s
     if (i > 10 && i < 100) {
-      assert(client.getIsConnected());
-      assert(server.getIsConnected());
-      assert(client.getServerAddress() == server.getServerAddress());
+      assert(client.connection.GetIsConnected());
+      assert(server.connection.GetIsConnected());
+      assert(client.connection.GetAddress() ==
+             server.connection.GetRemoteAddress());
     }
 
     // confirm both timeout
     if (i > (CONNECTION_TIMEOUT_MS.count() + 100)) {
-      assert(!client.getIsConnected());
-      assert(!server.getIsConnected());
-      assert(server.getClientAddress() == Address());
+      assert(!client.connection.GetIsConnected());
+      assert(!server.connection.GetIsConnected());
+      assert(server.connection.GetRemoteAddress() == Address());
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));

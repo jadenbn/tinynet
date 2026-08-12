@@ -22,9 +22,7 @@ bool Connection::GetIsConnected() { return isConnected; }
 
 bool Connection::Open() {
   assert(address != Address()); // ensure address isn't default
-  socket.Open(address.GetPort());
-  isConnected = true;
-  return true;
+  return socket.Open(address.GetPort());
 };
 
 int Connection::Receive(Buffer &outBuffer) {
