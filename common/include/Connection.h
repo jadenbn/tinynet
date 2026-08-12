@@ -7,6 +7,7 @@
 class Connection {
 public:
   Connection(Address address);
+  Connection();
   bool Open();
   void Connect(Address remoteAddress); // should only be used by a client!
   void Update();
@@ -14,6 +15,7 @@ public:
   bool Send(const Buffer &buffer);
   bool GetIsConnected();
   Address GetAddress();
+  void SetAddress(Address address);
   Address GetRemoteAddress();
 
 private:

@@ -55,7 +55,7 @@ void MovePlayer(Player *p, int speed, Client &client) {
     Buffer buff = {scratch, 0, sizeof(scratch)};
     PlayerInputPacket packet = {p->position.x, p->position.y};
     packet.Serialize(buff);
-    client.send(buff);
+    client.connection.Send(buff);
   }
 
   float deltaTime = GetFrameTime();

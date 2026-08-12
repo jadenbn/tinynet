@@ -1,33 +1,14 @@
 #pragma once
-#include "Packets.h"
-#include "Socket.h"
-#include <chrono>
-#include <ctime>
+#include "Connection.h"
 
 class Address;
 
 class Server {
 public:
   Server(Address serverAddress);
+  Connection connection = Connection();
   void initialize();
   void Update();
-  int receive(Buffer &out);
-  bool send(const Buffer &buffer);
-  bool getIsConnected();
-  Address getServerAddress();
-  Address getClientAddress();
 
 private:
-  bool timedOut();
-  bool initialPacketReceived = false; // this is ugly i don't like it maybe
-                                      // change when posible future me
-  std::chrono::steady_clock::time_point lastReceivedTime;
-  Address clientAddress;
-  Address serverAddress;
-  Socket serverSocket;
-  bool isConnected = false;
-  uint32_t sequenceNumber = 0;
-  uint32_t remoteSequenceNumber = 0;
-  ReceivedQueue receivedQueue;
-  SentQueue sentQueue;
 };

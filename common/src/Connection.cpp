@@ -1,4 +1,5 @@
 #include "Connection.h"
+#include "Address.h"
 #include "Packets.h"
 #include "Protocol.h"
 #include "Socket.h"
@@ -11,8 +12,11 @@ Connection::Connection(Address address) {
   socket = Socket();
 }
 
+Connection::Connection() { socket = Socket(); }
+
 Address Connection::GetAddress() { return address; }
 Address Connection::GetRemoteAddress() { return remoteAddress; }
+void Connection::SetAddress(Address address) { this->address = address; }
 
 bool Connection::GetIsConnected() { return isConnected; }
 
@@ -97,14 +101,13 @@ bool Connection::timedOut() {
   return elapsed > CONNECTION_TIMEOUT_MS;
 }
 
+void Connection::Connect(Address remoteAddress) {
+  this->remoteAddress = remoteAddress; // for now just a SetRemoteAddress
+  isConnected = true;
+}
+
 void Connection::Update() {
-  uint8_t rawData[MAX_PACKET_SIZE];
-  Buffer buff = {rawData, 0, sizeof(rawData)};
-
-  while (Receive(buff) > 0) {
-    // received data
-  }
-
+  // handnle watchdog timeout
   isConnected = !timedOut();
   if (!isConnected) {
     return;
