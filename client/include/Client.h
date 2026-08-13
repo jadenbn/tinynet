@@ -6,8 +6,6 @@ public:
   Client(Address clientAddress, Address serverAddress);
   void Initialize(Address serverAddress);
   void UpdateConnection();
-  Address GetAddress();
-  Address GetRemoteAddress();
   bool GetIsConnected();
   float GetRTT();
   int ReceiveFromServer(Buffer &buff);

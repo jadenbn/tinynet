@@ -3,6 +3,7 @@
 #include "Connection.h"
 #include "Packets.h"
 #include <arpa/inet.h>
+#include <cstdint>
 #include <cstring>
 #include <iostream>
 
@@ -14,13 +15,20 @@ void Client::Initialize(Address serverAddress) {
   std::cout << "Client listening on port " << localAddress.GetPort() << '\n';
 }
 
-Address Client::GetAddress() { return connection.GetAddress(); }
-Address Client::GetRemoteAddress() { return connection.GetRemoteAddress(); }
-bool Client::GetIsConnected() { return connection.GetIsConnected(); }
-float Client::GetRTT() { return connection.GetRTT(); }
+bool Client::GetIsConnected() { return serverConnection.connected; }
+float Client::GetRTT() { return serverConnection.GetRTT(); }
 
-int Client::Receive(Buffer &buff) { return connection.Receive(buff); }
+int Client::ReceiveFromServer(Buffer &buff) {
+  Address inc;
+  int bytesRead = socket.Receive(inc, buff.data, buff.size);
+  if (bytesRead <= 0) {
+    return 0;
+  }
+  buff.index = 0;
+  buff.size = bytesRead;
+  return serverConnection.ProcessReceived(buff);
+};
 
 void Client::UpdateConnection() {
-  connection.Update(); // handle timeout
+  serverConnection.connected = !serverConnection.timedOut();
 }

@@ -39,12 +39,12 @@ Connection *Server::FindOrCreateConnection(ClientID &id, Address address) {
     }
   }
 
-  Connection newConnection = Connection(address);
   id = nextClientNumber;
   nextClientNumber++;
-  clients[id] = newConnection;
-
-  return &clients.find(id)->second;
+  // clients[id] = newConnection;  old; invoked connection default constructor
+  // which doesn't exist
+  auto [it, inserted] = clients.try_emplace(id, address);
+  return &it->second;
 }
 
 Address Server::GetAddress() { return localAddress; }
