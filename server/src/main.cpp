@@ -28,8 +28,8 @@ int main() {
       replicationSystem.HandlePacket(buff);
     }
 
-    if (server.GetClientMap().size() > 0) {
-      server.SendPacket(server.GetClientMap().begin()->first,
+    for (auto &[clientId, connection] : server.GetClientMap()) {
+      server.SendPacket(clientId,
                         WorldSnapshot{game.playerPosition.x,
                                       game.playerPosition.y}); // worldstate
     }

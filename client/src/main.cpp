@@ -79,6 +79,8 @@ int main(int argc, char *argv[]) {
   Address clientAddress(127, 0, 0, 1, std::stoi(argv[1]));
   Client client(clientAddress, serverAddress);
   client.Initialize();
+  client.SendPacket(
+      PlayerInputPacket{0.0f, 0.0f}); // our 'handshake' for now lol
 
   // main player starts in center of screen
   Texture mainPlayerSprite = LoadTexture("github.png");

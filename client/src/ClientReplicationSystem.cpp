@@ -14,7 +14,6 @@ bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
   switch (packetType) {
   case PacketType::WorldSnapshot:
 
-    std::cout << "client received worldsnap packet from server" << '\n';
     ApplyWorldSnapshot(WorldSnapshot::deserialize(buff));
     break;
   case PacketType::ConnectionRequest:
@@ -29,6 +28,8 @@ bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
 }
 
 bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &p) {
+  std::cout << "client received worldsnap packet from server" << p.player1X
+            << '\n';
   game.playerPosition = {p.player1X, p.player1Y};
   return true;
 }
