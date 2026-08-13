@@ -4,6 +4,7 @@
 #include <cstring>
 #include <iostream>
 
+ClientID nextClientNumber = 0;
 Server::Server(Address address_c) { localAddress = address_c; }
 
 void Server::initialize() {
@@ -19,12 +20,32 @@ int Server::ReceiveFromClients(ClientID &clientID, Buffer &buff) {
     return 0;
   }
 
-  Connection *conn = FindOrCreateConnection(client, incoming);
+  Connection *conn = FindOrCreateConnection(clientID, incoming);
 
   buff.index = 0;
   buff.size = bytesRead;
 
   return conn->ProcessReceived(buff);
+}
+
+Connection *Server::FindOrCreateConnection(ClientID &id, Address address) {
+  // TODO: IMPORTANT TODO
+  // i want to turn this into a lookup of address -> clientid. for now this is
+  // fine; o(n) lookup for a small # of clients is okay. but whe i get to stress
+  // testing 50k+ clients or 100k+ clients then this will be problematic.
+  for (auto &[connId, connection] : clients) {
+    if (connection.GetAddress() == address) {
+      id = connId;
+      return &connection;
+    }
+  }
+
+  Connection newConnection = Connection(address);
+  id = nextClientNumber;
+  nextClientNumber++;
+  clients[id] = newConnection;
+
+  return &clients.find(id)->second;
 }
 
 Address Server::GetAddress() { return localAddress; }

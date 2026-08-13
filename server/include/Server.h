@@ -14,6 +14,7 @@ public:
   std::unordered_map<ClientID, Connection> GetClientMap();
   bool GetIsConnected();
   int ReceiveFromClients(ClientID &client, Buffer &buff);
+  Connection *FindOrCreateConnection(ClientID &id, Address address);
 
   template <typename Packet>
   bool SendPacket(const ClientID client, const Packet &packet) {

@@ -24,11 +24,15 @@ int main() {
     Buffer buff = {tmp, 0, sizeof(MAX_PACKET_SIZE)};
     ClientID clientId;
     while (server.ReceiveFromClients(clientId, buff) > 0) {
+      std::cout << "Received packet from clientID: " << clientId << '\n';
       replicationSystem.HandlePacket(buff);
     }
 
-    server.SendPacket(PlayerInputPacket{game.playerPosition.x,
-                                        game.playerPosition.y}); // worldstate
+    if (server.GetClientMap().size() > 0) {
+      server.SendPacket(server.GetClientMap().begin()->first,
+                        PlayerInputPacket{game.playerPosition.x,
+                                          game.playerPosition.y}); // worldstate
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
   }
 }
