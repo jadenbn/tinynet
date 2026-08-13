@@ -24,7 +24,6 @@ int main() {
     Buffer buff = {tmp, 0, sizeof(tmp)};
     ClientID clientId;
     while (server.ReceiveFromClients(clientId, buff) > 0) {
-      std::cout << "Received packet from clientID: " << clientId << '\n';
       replicationSystem.HandlePacket(buff);
     }
 
