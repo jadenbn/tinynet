@@ -11,7 +11,7 @@
 
 int main() {
   Server server(Address(127, 0, 0, 1, 3000));
-  server.initialize();
+  server.Initialize();
 
   ServerGame game;
   ServerReplicationSystem replicationSystem(game);

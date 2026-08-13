@@ -8,7 +8,7 @@ class Address;
 class Server {
 public:
   Server(Address serverAddress);
-  void initialize();
+  void Initialize();
   void UpdateConnections();
   Address GetAddress();
   std::unordered_map<ClientID, Connection> &GetClientMap();

@@ -6,7 +6,7 @@
 
 Server::Server(Address address_c) { localAddress = address_c; }
 
-void Server::initialize() {
+void Server::Initialize() {
   socket.Open(localAddress.GetPort());
   std::cout << "Server listening on port " << localAddress.GetPort() << '\n';
 }

@@ -6,6 +6,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "resource_dir.h"
+#include <iostream>
 
 class Player {
 
@@ -66,9 +67,11 @@ int main() {
 
   SearchAndSetResourceDir("resources");
 
+  // initialize client and conect to server
+  Address serverAddress(127, 0, 0, 1, 3000);
   Address clientAddress(127, 0, 0, 1, 3001);
-  Client client(clientAddress);
-  client.initialize(Address(127, 0, 0, 1, 3000));
+  Client client(clientAddress, serverAddress);
+  client.Initialize();
 
   // main player starts in center of screen
   Texture mainPlayerSprite = LoadTexture("github.png");
@@ -82,7 +85,7 @@ int main() {
 
     uint8_t scratch[MAX_PACKET_SIZE];
     Buffer packet = {scratch, 0, sizeof(scratch)};
-    while (client.Receive(packet) > 0) {
+    while (client.ReceiveFromServer(packet) > 0) {
       replicationSystem.HandlePacket(packet);
     }
 

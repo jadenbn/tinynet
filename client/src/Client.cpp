@@ -10,7 +10,7 @@
 Client::Client(Address clientAddress, Address serverAddress)
     : localAddress(clientAddress), serverConnection(serverAddress) {};
 
-void Client::Initialize(Address serverAddress) {
+void Client::Initialize() {
   socket.Open(localAddress.GetPort());
   std::cout << "Client listening on port " << localAddress.GetPort() << '\n';
 }

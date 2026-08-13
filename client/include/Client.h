@@ -4,7 +4,7 @@
 class Client {
 public:
   Client(Address clientAddress, Address serverAddress);
-  void Initialize(Address serverAddress);
+  void Initialize();
   void UpdateConnection();
   bool GetIsConnected();
   float GetRTT();

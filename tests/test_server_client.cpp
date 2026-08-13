@@ -15,45 +15,46 @@ void test_server_socket() {
 
 void test_server_listens_and_receives_packets_from_client() {
   Address serverAddress = Address(127, 0, 0, 1, 3000);
-  Server server = Server(serverAddress);
-  server.initialize();
+  Address clientOneAddress = Address(127, 0, 0, 1, 3001);
 
-  Client client = Client(Address(127, 0, 0, 1, 3001));
-  client.initialize(serverAddress);
+  Server server = Server(serverAddress);
+  server.Initialize();
+
+  Client client = Client(clientOneAddress, serverAddress);
+  client.Initialize();
 
   // run for 2 * timeout duration
   for (int i = 0; i < ((CONNECTION_TIMEOUT_MS.count() * 2) / 10); i++) {
     client.UpdateConnection();
-    server.UpdateConnection();
+    server.UpdateConnections();
 
     uint8_t tmp1[MAX_PACKET_SIZE];
     Buffer buff1 = {tmp1, 0, sizeof(tmp1)};
-    client.Receive(buff1);
+    client.ReceiveFromServer(buff1);
 
     uint8_t tmp2[MAX_PACKET_SIZE];
+    ClientID clientID;
     Buffer buff2 = {tmp2, 0, sizeof(tmp1)};
-    server.Receive(buff2);
+    server.ReceiveFromClients(clientID, buff2);
 
     // establish connection
     if (i < 200) {
       assert(client.SendPacket(PlayerInputPacket{-1.0f, -1.0f}));
-      if (server.GetIsConnected()) {
-        assert(server.SendPacket(PlayerInputPacket{1.0f, 1.0f}));
+      if (server.GetClientMap().size() > 0) {
+        assert(server.SendPacket(clientID, PlayerInputPacket{1.0f, 1.0f}));
       }
     }
 
     // confirm connection between 100ms and 1s
     if (i > 10 && i < 100) {
       assert(client.GetIsConnected());
-      assert(server.GetIsConnected());
-      assert(client.GetAddress() == server.GetRemoteAddress());
+      assert(server.GetClientMap().size() > 0);
     }
 
     // confirm both timeout
     if (i > (CONNECTION_TIMEOUT_MS.count() + 100)) {
       assert(!client.GetIsConnected());
       assert(!server.GetIsConnected());
-      assert(server.GetRemoteAddress() == Address());
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
