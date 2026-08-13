@@ -9,12 +9,11 @@ class Server {
 public:
   Server(Address serverAddress);
   void initialize();
-  void UpdateConnection();
+  void UpdateConnections();
   Address GetAddress();
   std::unordered_map<ClientID, Connection> GetClientMap();
   bool GetIsConnected();
-  float GetRTT();
-  int Receive(Buffer &buff);
+  int ReceiveFromClients(ClientID &client, Buffer &buff);
 
   template <typename Packet>
   bool SendPacket(const ClientID client, const Packet &packet) {

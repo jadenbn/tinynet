@@ -9,43 +9,22 @@
 
 // TODO: congestion avoidance
 
-Connection::Connection(Address address) {
-  this->address = address;
-  socket = Socket();
+Connection::Connection(Address remoteAddress) {
+  this->remoteAddress = remoteAddress;
 }
 
-Connection::Connection() { socket = Socket(); }
-
-Address Connection::GetAddress() { return address; }
-Address Connection::GetRemoteAddress() { return remoteAddress; }
-void Connection::SetAddress(Address address) { this->address = address; }
-
-bool Connection::GetIsConnected() { return isConnected; }
+Address Connection::GetAddress() { return remoteAddress; }
 float Connection::GetRTT() { return sentQueue.globalRtt; }
 
-bool Connection::Open() {
-  assert(address != Address()); // ensure address isn't default
-  return socket.Open(address.GetPort());
-};
-
-int Connection::Receive(Buffer &outBuffer) {
-  int bytesRead;
-
-  bytesRead = socket.Receive(remoteAddress, outBuffer.data, MAX_PACKET_SIZE);
-
-  if (bytesRead < 16) {
+int Connection::ProcessReceived(Buffer &outBuffer) {
+  if (outBuffer.size < 16) {
     return 0;
   }
-
-  outBuffer.size = bytesRead;
-  outBuffer.index = 0;
 
   uint32_t receivedHeader = ReadInteger(outBuffer);
   if (receivedHeader != PROTOCOL_HASH) {
     return 0;
   }
-
-  isConnected = true;
 
   uint32_t incomingSequenceNumber = ReadInteger(outBuffer);
 
@@ -64,13 +43,47 @@ int Connection::Receive(Buffer &outBuffer) {
   auto now = std::chrono::steady_clock::now();
   lastReceivedTime = now;
 
-  return bytesRead - outBuffer.index;
+  return outBuffer.size - outBuffer.index;
 }
 
-bool Connection::Send(const Buffer &buffer) {
-  if (!isConnected)
-    return false;
+// int Connection::Receive(Socket &sock, Buffer &outBuffer) {
+//   int bytesRead;
 
+//   bytesRead = sock.Receive(remoteAddress, outBuffer.data, MAX_PACKET_SIZE);
+
+//   if (bytesRead < 16) {
+//     return 0;
+//   }
+
+//   outBuffer.size = bytesRead;
+//   outBuffer.index = 0;
+
+//   uint32_t receivedHeader = ReadInteger(outBuffer);
+//   if (receivedHeader != PROTOCOL_HASH) {
+//     return 0;
+//   }
+
+//   uint32_t incomingSequenceNumber = ReadInteger(outBuffer);
+
+//   if (incomingSequenceNumber > remoteSequenceNumber) {
+//     remoteSequenceNumber = incomingSequenceNumber;
+//   }
+
+//   receivedQueue.insert(incomingSequenceNumber);
+
+//   uint32_t incomingAck = ReadInteger(outBuffer);
+//   uint32_t incomingAckBitfield = ReadInteger(outBuffer);
+
+//   sentQueue.ackPacket(incomingAck, incomingAckBitfield);
+
+//   initialPacketReceived = true;
+//   auto now = std::chrono::steady_clock::now();
+//   lastReceivedTime = now;
+
+//   return bytesRead - outBuffer.index;
+// }
+
+bool Connection::Send(Socket &sock, const Buffer &buffer) {
   uint8_t scratch[MAX_PACKET_SIZE];
   Buffer send = {scratch, 0, sizeof(scratch)};
   WriteInteger(send, PROTOCOL_HASH);
@@ -91,7 +104,7 @@ bool Connection::Send(const Buffer &buffer) {
 
   std::memcpy(send.data + send.index, buffer.data, buffer.index);
 
-  return socket.Send(remoteAddress, send.data, buffer.index + send.index);
+  return sock.Send(remoteAddress, send.data, buffer.index + send.index);
 }
 
 bool Connection::timedOut() {
@@ -102,17 +115,4 @@ bool Connection::timedOut() {
   auto elapsed = now - lastReceivedTime;
 
   return elapsed > CONNECTION_TIMEOUT_MS;
-}
-
-void Connection::Connect(Address remoteAddress) {
-  this->remoteAddress = remoteAddress; // for now just a SetRemoteAddress
-  isConnected = true;
-}
-
-void Connection::Update() {
-  // handnle watchdog timeout
-  if (isConnected && timedOut()) {
-    isConnected = false;
-    remoteAddress = Address();
-  }
 }

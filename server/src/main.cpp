@@ -3,6 +3,7 @@
 #include "../include/ServerReplicationSystem.h"
 #include "../shared/include/Protocol.h"
 #include "Address.h"
+#include "Connection.h"
 #include "Packets.h"
 #include <chrono>
 #include <iostream>
@@ -17,11 +18,12 @@ int main() {
 
   std::cout << "Starting server on 127.0.0.1:3000" << '\n';
   while (true) {
-    server.UpdateConnection();
+    server.UpdateConnections();
 
     uint8_t tmp[MAX_PACKET_SIZE];
     Buffer buff = {tmp, 0, sizeof(MAX_PACKET_SIZE)};
-    while (server.Receive(buff) > 0) {
+    ClientID clientId;
+    while (server.ReceiveFromClients(clientId, buff) > 0) {
       replicationSystem.HandlePacket(buff);
     }
 
