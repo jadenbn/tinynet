@@ -12,24 +12,23 @@ bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
   PacketType packetType = static_cast<PacketType>(ReadChar(buff));
 
   switch (packetType) {
-  case PacketType::PlayerInput:
+  case PacketType::WorldSnapshot:
 
-    std::cout << "client received packet from server" << '\n';
-    ApplyPlayerInputPacket(PlayerInputPacket::deserialize(buff));
+    std::cout << "client received worldsnap packet from server" << '\n';
+    ApplyWorldSnapshot(WorldSnapshot::deserialize(buff));
     break;
   case PacketType::ConnectionRequest:
   case PacketType::Heartbeat:
     break;
   default:
+    std::cout << "ClientReplicationSystem received an unknown packet!" << '\n';
     return false;
   }
 
   return true;
 }
 
-bool ClientReplicationSystem::ApplyPlayerInputPacket(
-    const PlayerInputPacket &p) {
-  std::cout << "asdflk" << '\n';
-  game.playerPosition = {p.x, p.y};
+bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &p) {
+  game.playerPosition = {p.player1X, p.player1Y};
   return true;
 }

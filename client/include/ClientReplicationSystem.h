@@ -13,4 +13,5 @@ private:
   ClientGame &game;
 
   bool ApplyPlayerInputPacket(const PlayerInputPacket &p);
+  bool ApplyWorldSnapshot(const WorldSnapshot &p);
 };

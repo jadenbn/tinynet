@@ -21,7 +21,7 @@ int main() {
     server.UpdateConnections();
 
     uint8_t tmp[MAX_PACKET_SIZE];
-    Buffer buff = {tmp, 0, sizeof(MAX_PACKET_SIZE)};
+    Buffer buff = {tmp, 0, sizeof(tmp)};
     ClientID clientId;
     while (server.ReceiveFromClients(clientId, buff) > 0) {
       std::cout << "Received packet from clientID: " << clientId << '\n';
@@ -30,8 +30,8 @@ int main() {
 
     if (server.GetClientMap().size() > 0) {
       server.SendPacket(server.GetClientMap().begin()->first,
-                        PlayerInputPacket{game.playerPosition.x,
-                                          game.playerPosition.y}); // worldstate
+                        WorldSnapshot{game.playerPosition.x,
+                                      game.playerPosition.y}); // worldstate
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
   }

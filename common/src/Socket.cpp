@@ -76,7 +76,7 @@ bool Socket::Send(const Address &destination, const void *data, int size) {
                           (sockaddr *)&addr, sizeof(sockaddr_in));
 
   if (sent_bytes != size) {
-    std::cout << "Failed to send packet" << std::endl;
+    std::cout << "Failed to send packet; is this port busy?" << std::endl;
     return false;
   }
 

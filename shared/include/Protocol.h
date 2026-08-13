@@ -8,10 +8,19 @@ enum class PacketType : uint8_t {
   ConnectionRequest = 1,
   Heartbeat,
   PlayerInput,
+  WorldSnapshot,
 };
 
 inline void WriteChar(Buffer &buff, PacketType type) {
   WriteChar(buff, static_cast<uint8_t>(type));
+};
+
+struct WorldSnapshot {
+  float player1X;
+  float player1Y;
+
+  void Serialize(Buffer &buff) const;
+  static WorldSnapshot deserialize(Buffer &buff);
 };
 
 struct PlayerInputPacket {

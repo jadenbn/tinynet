@@ -58,7 +58,13 @@ void MovePlayer(Player *p, int speed, Client &client) {
 ClientGame game;
 ClientReplicationSystem replicationSystem(game);
 
-int main() {
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    std::cerr << "Error: Please provide a port for this client.\n";
+    std::cerr << "Usage: " << argv[0] << " <number>\n";
+    return 1;
+  }
+
   constexpr int WIDTH = 640;
   constexpr int HEIGHT = 480;
 
@@ -68,8 +74,9 @@ int main() {
   SearchAndSetResourceDir("resources");
 
   // initialize client and conect to server
-  Address serverAddress(127, 0, 0, 1, 3000);
-  Address clientAddress(127, 0, 0, 1, 3001);
+  Address serverAddress(127, 0, 0, 1,
+                        3000); // def unsecure but fine for now i thiknks
+  Address clientAddress(127, 0, 0, 1, std::stoi(argv[1]));
   Client client(clientAddress, serverAddress);
   client.Initialize();
 

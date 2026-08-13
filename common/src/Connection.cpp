@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <cstring>
+#include <iostream>
 
 // TODO: congestion avoidance
 
@@ -18,11 +19,13 @@ float Connection::GetRTT() { return sentQueue.globalRtt; }
 
 int Connection::ProcessReceived(Buffer &outBuffer) {
   if (outBuffer.size < 16) {
+    std::cout << "fail1" << '\n';
     return 0;
   }
 
   uint32_t receivedHeader = ReadInteger(outBuffer);
   if (receivedHeader != PROTOCOL_HASH) {
+    std::cout << "fail2" << '\n';
     return 0;
   }
 

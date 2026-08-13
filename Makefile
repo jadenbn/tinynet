@@ -10,6 +10,8 @@ SHARED_SRC = shared/src/*.cpp
 SERVER_SRC = server/src/Server.cpp
 CLIENT_SRC = client/src/Client.cpp
 
+PORT = 3001
+
 TEST_DEPS = $(COMMON_SRC) $(SERVER_SRC) $(CLIENT_SRC) $(SHARED_SRC)
 
 all: server client
@@ -37,7 +39,7 @@ run-server:
 	./server/bin/server
 
 run-client:
-	./client/bin/client
+	./client/bin/client $(PORT)
 
 clean:
 	@rm -rf server/bin client/bin tests/bin
