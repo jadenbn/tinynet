@@ -11,7 +11,7 @@ public:
   void initialize();
   void UpdateConnections();
   Address GetAddress();
-  std::unordered_map<ClientID, Connection> GetClientMap();
+  std::unordered_map<ClientID, Connection> &GetClientMap();
   bool GetIsConnected();
   int ReceiveFromClients(ClientID &client, Buffer &buff);
   Connection *FindOrCreateConnection(ClientID &id, Address address);
@@ -32,4 +32,5 @@ private:
   Socket socket;
   Address localAddress;
   std::unordered_map<ClientID, Connection> clients;
+  ClientID nextClientNumber = 0;
 };

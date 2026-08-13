@@ -6,13 +6,12 @@
 #include <cstring>
 #include <iostream>
 
-Client::Client(Address clientAddress) { connection.SetAddress(clientAddress); }
+Client::Client(Address clientAddress, Address serverAddress)
+    : localAddress(clientAddress), serverConnection(serverAddress) {};
 
-void Client::initialize(Address serverAddress) {
-  connection.Connect(serverAddress);
-  connection.Open();
-  std::cout << "Client listening on port " << connection.GetAddress().GetPort()
-            << '\n';
+void Client::Initialize(Address serverAddress) {
+  socket.Open(localAddress.GetPort());
+  std::cout << "Client listening on port " << localAddress.GetPort() << '\n';
 }
 
 Address Client::GetAddress() { return connection.GetAddress(); }

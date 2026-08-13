@@ -4,7 +4,6 @@
 #include <cstring>
 #include <iostream>
 
-ClientID nextClientNumber = 0;
 Server::Server(Address address_c) { localAddress = address_c; }
 
 void Server::initialize() {
@@ -15,7 +14,7 @@ void Server::initialize() {
 int Server::ReceiveFromClients(ClientID &clientID, Buffer &buff) {
   Address incoming;
 
-  int bytesRead = socket.Receive(incoming, buff.data, buff.index);
+  int bytesRead = socket.Receive(incoming, buff.data, buff.size);
   if (bytesRead <= 0) {
     return 0;
   }
@@ -49,7 +48,7 @@ Connection *Server::FindOrCreateConnection(ClientID &id, Address address) {
 }
 
 Address Server::GetAddress() { return localAddress; }
-std::unordered_map<ClientID, Connection> Server::GetClientMap() {
+std::unordered_map<ClientID, Connection> &Server::GetClientMap() {
   return clients;
 }
 bool Server::GetIsConnected() { return socket.isOpen(); }

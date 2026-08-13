@@ -40,48 +40,12 @@ int Connection::ProcessReceived(Buffer &outBuffer) {
   sentQueue.ackPacket(incomingAck, incomingAckBitfield);
 
   initialPacketReceived = true;
+  connected = true;
   auto now = std::chrono::steady_clock::now();
   lastReceivedTime = now;
 
   return outBuffer.size - outBuffer.index;
 }
-
-// int Connection::Receive(Socket &sock, Buffer &outBuffer) {
-//   int bytesRead;
-
-//   bytesRead = sock.Receive(remoteAddress, outBuffer.data, MAX_PACKET_SIZE);
-
-//   if (bytesRead < 16) {
-//     return 0;
-//   }
-
-//   outBuffer.size = bytesRead;
-//   outBuffer.index = 0;
-
-//   uint32_t receivedHeader = ReadInteger(outBuffer);
-//   if (receivedHeader != PROTOCOL_HASH) {
-//     return 0;
-//   }
-
-//   uint32_t incomingSequenceNumber = ReadInteger(outBuffer);
-
-//   if (incomingSequenceNumber > remoteSequenceNumber) {
-//     remoteSequenceNumber = incomingSequenceNumber;
-//   }
-
-//   receivedQueue.insert(incomingSequenceNumber);
-
-//   uint32_t incomingAck = ReadInteger(outBuffer);
-//   uint32_t incomingAckBitfield = ReadInteger(outBuffer);
-
-//   sentQueue.ackPacket(incomingAck, incomingAckBitfield);
-
-//   initialPacketReceived = true;
-//   auto now = std::chrono::steady_clock::now();
-//   lastReceivedTime = now;
-
-//   return bytesRead - outBuffer.index;
-// }
 
 bool Connection::Send(Socket &sock, const Buffer &buffer) {
   uint8_t scratch[MAX_PACKET_SIZE];
