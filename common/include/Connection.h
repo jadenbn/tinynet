@@ -7,8 +7,6 @@
 // TODO: congestion avoidance; perhaps at a higher level of abstraction, though,
 // like
 
-typedef uint32_t ClientID;
-
 // represents an endpoint; client has one, server has many
 class Connection {
 public:

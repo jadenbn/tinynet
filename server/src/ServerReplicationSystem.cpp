@@ -1,11 +1,12 @@
 #include "../server/include/ServerReplicationSystem.h"
+#include "../server/include/Server.h"
 #include "Packets.h"
 #include <iostream>
 
 ServerReplicationSystem::ServerReplicationSystem(ServerGame &c_game)
     : game(c_game) {};
 
-bool ServerReplicationSystem::HandlePacket(Buffer &buff) {
+bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
   if (buff.index >= buff.size)
     return false;
   PacketType packetType = static_cast<PacketType>(ReadChar(buff));

@@ -3,7 +3,7 @@
 #include "Packets.h"
 #include <unordered_map>
 
-class Address;
+typedef uint32_t ClientID;
 
 class Server {
 public:

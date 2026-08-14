@@ -3,7 +3,6 @@
 #include "../include/ServerReplicationSystem.h"
 #include "../shared/include/Protocol.h"
 #include "Address.h"
-#include "Connection.h"
 #include "Packets.h"
 #include <chrono>
 #include <iostream>
@@ -24,7 +23,7 @@ int main() {
     Buffer buff = {tmp, 0, sizeof(tmp)};
     ClientID clientId;
     while (server.ReceiveFromClients(clientId, buff) > 0) {
-      replicationSystem.HandlePacket(buff);
+      replicationSystem.HandlePacket(clientId, buff);
     }
 
     for (auto &[clientId, connection] : server.GetClientMap()) {
