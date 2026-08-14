@@ -29,19 +29,19 @@ void test_server_listens_and_receives_packets_from_client() {
     server.UpdateConnections();
 
     uint8_t tmp1[MAX_PACKET_SIZE];
-    Buffer buff1 = {tmp1, 0, sizeof(tmp1)};
+    Buffer buff1 = {tmp1, 0, 0, sizeof(tmp1)};
     client.ReceiveFromServer(buff1);
 
     uint8_t tmp2[MAX_PACKET_SIZE];
     ClientID clientID;
-    Buffer buff2 = {tmp2, 0, sizeof(tmp1)};
+    Buffer buff2 = {tmp2, 0, 0, sizeof(tmp1)};
     server.ReceiveFromClients(clientID, buff2);
 
     // establish connection
     if (i < 200) {
-      assert(client.SendPacket(PlayerInputPacket{-1.0f, -1.0f}));
+      assert(client.SendPacket(ConnectionRequest{}));
       if (server.GetClientMap().size() > 0) {
-        assert(server.SendPacket(clientID, PlayerInputPacket{1.0f, 1.0f}));
+        assert(server.SendPacket(clientID, ConnectionAccepted{clientID}));
       }
     }
 

@@ -8,7 +8,6 @@
 #include "raylib.h"
 #include "resource_dir.h"
 #include <chrono>
-#include <iostream>
 #include <pthread.h>
 #include <stdexcept>
 #include <thread>
@@ -27,7 +26,7 @@ void ClientGame::NetworkInit() {
   int attempts = 0;
 
   uint8_t scratch[MAX_PACKET_SIZE];
-  Buffer buff{scratch, 0, sizeof(scratch)};
+  Buffer buff{scratch, 0, 0, sizeof(scratch)};
   while (!connectionConfirmed && attempts < MAX_ATTEMPTS) {
     client.SendPacket(ConnectionRequest{});
     std::this_thread::sleep_for(std::chrono::milliseconds(16));

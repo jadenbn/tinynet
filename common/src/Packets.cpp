@@ -2,6 +2,7 @@
 #include <cassert>
 #include <chrono>
 #include <cstdint>
+#include <iostream>
 #include <ratio>
 #include <sys/types.h>
 #include <vector>
@@ -91,7 +92,7 @@ std::vector<uint32_t> SentQueue::getLostPackets(uint32_t highestAckReceived) {
 }
 
 void WriteInteger(Buffer &buff, uint32_t data) {
-  assert(buff.index + 4 <= buff.length);
+  assert(buff.index + 4 <= buff.capacity);
 
   // write as big endian
   buff.data[buff.index + 0] = static_cast<uint8_t>(data >> 24);
@@ -100,6 +101,7 @@ void WriteInteger(Buffer &buff, uint32_t data) {
   buff.data[buff.index + 3] = static_cast<uint8_t>(data);
 
   buff.index += 4;
+  buff.length += 4;
 };
 
 void WriteFloat(Buffer &buff, float data) {
@@ -108,26 +110,28 @@ void WriteFloat(Buffer &buff, float data) {
 }
 
 void WriteShort(Buffer &buff, uint16_t data) {
-  assert(buff.index + 2 <= buff.length);
+  assert(buff.index + 2 <= buff.capacity);
 
   // write as big endian
   buff.data[buff.index + 0] = static_cast<uint8_t>(data >> 8);
   buff.data[buff.index + 1] = static_cast<uint8_t>(data);
 
   buff.index += 2;
+  buff.length += 2;
 };
 
 void WriteChar(Buffer &buff, uint8_t data) {
-  assert(buff.index + 1 <= buff.length);
+  assert(buff.index + 1 <= buff.capacity);
 
   // write as big endian
   buff.data[buff.index + 0] = static_cast<uint8_t>(data);
 
   buff.index += 1;
+  buff.length += 1;
 };
 
 uint32_t ReadInteger(Buffer &buff) {
-  assert(buff.index + 4 <= buff.length);
+  assert(buff.index + 4 <= buff.capacity);
 
   uint8_t b1 = buff.data[buff.index + 3];
   uint8_t b2 = buff.data[buff.index + 2];
@@ -144,7 +148,7 @@ float ReadFloat(Buffer &buff) {
 }
 
 uint16_t ReadShort(Buffer &buff) {
-  assert(buff.index + 2 <= buff.length);
+  assert(buff.index + 2 <= buff.capacity);
 
   uint8_t b1 = buff.data[buff.index + 1];
   uint8_t b2 = buff.data[buff.index + 0]; // msb
@@ -153,7 +157,7 @@ uint16_t ReadShort(Buffer &buff) {
 }
 
 uint8_t ReadChar(Buffer &buff) {
-  assert(buff.index + 1 <= buff.length);
+  assert(buff.index + 1 <= buff.capacity);
 
   uint8_t b1 = buff.data[buff.index + 0];
   buff.index += 1;

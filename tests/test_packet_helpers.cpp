@@ -6,7 +6,8 @@
 void test_all() {
   Buffer buff;
   uint8_t data[128];
-  buff.size = 128;
+  buff.capacity = 128;
+  buff.length = 0;
   buff.index = 0;
   buff.data = data;
 

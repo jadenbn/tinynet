@@ -20,7 +20,7 @@ int main() {
     server.UpdateConnections();
 
     uint8_t tmp[MAX_PACKET_SIZE];
-    Buffer buff = {tmp, 0, sizeof(tmp)};
+    Buffer buff = {tmp, 0, 0, sizeof(tmp)};
     ClientID clientId;
     while (server.ReceiveFromClients(clientId, buff) > 0) {
       replicationSystem.HandlePacket(clientId, buff);

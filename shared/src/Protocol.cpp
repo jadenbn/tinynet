@@ -1,5 +1,6 @@
 #include "../shared/include/Protocol.h"
 #include "Packets.h"
+#include <iostream>
 
 void WorldSnapshot::Serialize(Buffer &buff) const {
   WriteChar(buff, PacketType::WorldSnapshot);

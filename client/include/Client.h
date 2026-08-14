@@ -12,7 +12,7 @@ public:
 
   template <typename Packet> bool SendPacket(const Packet &packet) {
     uint8_t scratch[MAX_PACKET_SIZE];
-    Buffer buffer{scratch, 0, sizeof(scratch)};
+    Buffer buffer{scratch, 0, 0, sizeof(scratch)};
     packet.Serialize(buffer);
     return serverConnection.Send(socket, buffer);
   }

@@ -24,7 +24,7 @@ public:
       return false;
 
     uint8_t scratch[MAX_PACKET_SIZE];
-    Buffer buff = Buffer(scratch, 0, sizeof(scratch));
+    Buffer buff = Buffer(scratch, 0, 0, sizeof(scratch));
     packet.Serialize(buff);
     return conn->second.Send(socket, buff);
   }

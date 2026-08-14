@@ -47,10 +47,10 @@ struct Buffer {
   // data[4] - data[7] - sequence number
   // data[8] - data[11] - ack
   // data[12] - data[15] - ack bitfield
-  uint8_t *data = nullptr;
-  int index = 0;  // write ind
-  int length = 0; // size of buff
-  int capacity = MAX_PACKET_SIZE;
+  uint8_t *data;
+  int index;  // write ind
+  int length; // size of buff
+  int capacity;
 };
 
 void WriteInteger(Buffer &buff, uint32_t data);

@@ -50,10 +50,10 @@ int Connection::ProcessReceived(Buffer &outBuffer) {
 
 bool Connection::Send(Socket &sock, const Buffer &buffer) {
   uint8_t scratch[MAX_PACKET_SIZE];
-  Buffer send = {scratch, 0, sizeof(scratch)};
-  WriteInteger(send, PROTOCOL_HASH);
-  WriteInteger(send, sequenceNumber);
-  WriteInteger(send, remoteSequenceNumber);
+  Buffer buff = {scratch, 0, 0, sizeof(scratch)};
+  WriteInteger(buff, PROTOCOL_HASH);
+  WriteInteger(buff, sequenceNumber);
+  WriteInteger(buff, remoteSequenceNumber);
 
   // todo: turn this into helper later
   uint32_t ackBitfield = 0;
@@ -63,13 +63,13 @@ bool Connection::Send(Socket &sock, const Buffer &buffer) {
       ackBitfield |= (1U << (i - 1));
     }
   }
-  WriteInteger(send, ackBitfield);
+  WriteInteger(buff, ackBitfield);
   sentQueue.insert(sequenceNumber, std::chrono::steady_clock::now());
   sequenceNumber++;
 
-  std::memcpy(send.data + send.index, buffer.data, buffer.index);
+  std::memcpy(buff.data + buff.length, buffer.data, buffer.index);
 
-  return sock.Send(remoteAddress, send.data, buffer.index + send.index);
+  return sock.Send(remoteAddress, buff.data, buffer.index + buff.index);
 }
 
 bool Connection::timedOut() {
