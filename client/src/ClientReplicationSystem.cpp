@@ -1,10 +1,12 @@
 #include "ClientReplicationSystem.h"
 #include "Packets.h"
 #include "Protocol.h"
+#include "game/ClientWorld.h"
 #include <iostream>
 
-ClientReplicationSystem::ClientReplicationSystem(ClientWorld &c_game)
-    : game(c_game) {};
+ClientReplicationSystem::ClientReplicationSystem(ClientWorld &c_game,
+                                                 Client &client_c)
+    : game(c_game), client(client_c) {};
 
 bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
   if (buff.index >= buff.size)

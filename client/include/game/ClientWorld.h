@@ -1,19 +1,13 @@
 // for handling gamestate
 #pragma once
-#include "Client.h"
-#include "ClientReplicationSystem.h"
 #include "Player.h"
 #include <vector>
 
 class ClientWorld {
 public:
-  ClientWorld(Address &clientAddress, Address &serverAddress);
-  void GameLoop();
-  void Init(int argc, char *argv[]);
+  ClientWorld();
+  void Draw();
+  void Update(float dt);
 
   std::vector<Player> players;
-
-private:
-  Client client;
-  ClientReplicationSystem replicationSystem;
 };

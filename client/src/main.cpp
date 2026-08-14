@@ -1,3 +1,4 @@
+#include "ClientGame.h"
 #include "ClientReplicationSystem.h"
 #include "game/ClientWorld.h"
 #include <iostream>
@@ -40,10 +41,11 @@ int main(int argc, char *argv[]) {
   Address serverAddress(127, 0, 0, 1,
                         3000); // def unsecure but fine for now i thiknks
   Address clientAddress(127, 0, 0, 1, std::stoi(argv[1]));
-  ClientWorld game(clientAddress, serverAddress);
+  ClientGame game(clientAddress, serverAddress);
 
   // game loop
-  game.Init(argc, argv);
+  game.NetworkInit();
+  game.GameInit();
   game.GameLoop();
   return 0;
 }
