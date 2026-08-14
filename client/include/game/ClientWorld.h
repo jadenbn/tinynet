@@ -7,7 +7,7 @@
 
 class ClientWorld {
 public:
-  ClientWorld();
+  ClientWorld(Address &clientAddress, Address &serverAddress);
   void GameLoop();
   void Init(int argc, char *argv[]);
 

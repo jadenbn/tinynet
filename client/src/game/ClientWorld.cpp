@@ -1,6 +1,15 @@
 #include "game/ClientWorld.h"
+#include "Client.h"
+#include "ClientReplicationSystem.h"
 #include "raylib.h"
 #include "resource_dir.h"
+
+ClientWorld::ClientWorld(Address &clientAddress, Address &serverAddress)
+    : client(clientAddress, serverAddress), replicationSystem(*this) {
+  client.Initialize();
+  client.SendPacket(
+      PlayerInputPacket{0.0f, 0.0f}); // our 'handshake' for now lol
+}
 
 void ClientWorld::GameLoop() {
   while (!WindowShouldClose()) {
@@ -47,14 +56,6 @@ void ClientWorld::Init(int argc, char *argv[]) {
   SearchAndSetResourceDir("resources");
 
   // initialize client and conect to server
-  Address serverAddress(127, 0, 0, 1,
-                        3000); // def unsecure but fine for now i thiknks
-  Address clientAddress(127, 0, 0, 1, std::stoi(argv[1]));
-  Client client(clientAddress, serverAddress);
-  client.Initialize();
-  client.SendPacket(
-      PlayerInputPacket{0.0f, 0.0f}); // our 'handshake' for now lol
-
   // Texture playerSprite = LoadTexture("github.png");
 
   SetTargetFPS(144);

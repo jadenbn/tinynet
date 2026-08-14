@@ -5,7 +5,7 @@ class Player {
 
 public:
   const PlayerID playerID;
-  Player(PlayerID id, Texture sprite) : playerID(id) {};
+  Player(PlayerID id_c, Texture sprite_c) : playerID(id_c), sprite(sprite_c) {};
   void DrawPlayer();
   ~Player(); // make sure to UnloadTexture(mainPlayerSprite);
 private:
