@@ -19,12 +19,12 @@ float Client::GetRTT() { return serverConnection.GetRTT(); }
 
 int Client::ReceiveFromServer(Buffer &buff) {
   Address inc;
-  int bytesRead = socket.Receive(inc, buff.data, buff.size);
+  int bytesRead = socket.Receive(inc, buff.data, buff.capacity);
   if (bytesRead <= 0) {
     return 0;
   }
   buff.index = 0;
-  buff.size = bytesRead;
+  buff.length = bytesRead;
   return serverConnection.ProcessReceived(buff);
 };
 

@@ -91,7 +91,7 @@ std::vector<uint32_t> SentQueue::getLostPackets(uint32_t highestAckReceived) {
 }
 
 void WriteInteger(Buffer &buff, uint32_t data) {
-  assert(buff.index + 4 <= buff.size);
+  assert(buff.index + 4 <= buff.length);
 
   // write as big endian
   buff.data[buff.index + 0] = static_cast<uint8_t>(data >> 24);
@@ -108,7 +108,7 @@ void WriteFloat(Buffer &buff, float data) {
 }
 
 void WriteShort(Buffer &buff, uint16_t data) {
-  assert(buff.index + 2 <= buff.size);
+  assert(buff.index + 2 <= buff.length);
 
   // write as big endian
   buff.data[buff.index + 0] = static_cast<uint8_t>(data >> 8);
@@ -118,7 +118,7 @@ void WriteShort(Buffer &buff, uint16_t data) {
 };
 
 void WriteChar(Buffer &buff, uint8_t data) {
-  assert(buff.index + 1 <= buff.size);
+  assert(buff.index + 1 <= buff.length);
 
   // write as big endian
   buff.data[buff.index + 0] = static_cast<uint8_t>(data);
@@ -127,7 +127,7 @@ void WriteChar(Buffer &buff, uint8_t data) {
 };
 
 uint32_t ReadInteger(Buffer &buff) {
-  assert(buff.index + 4 <= buff.size);
+  assert(buff.index + 4 <= buff.length);
 
   uint8_t b1 = buff.data[buff.index + 3];
   uint8_t b2 = buff.data[buff.index + 2];
@@ -144,7 +144,7 @@ float ReadFloat(Buffer &buff) {
 }
 
 uint16_t ReadShort(Buffer &buff) {
-  assert(buff.index + 2 <= buff.size);
+  assert(buff.index + 2 <= buff.length);
 
   uint8_t b1 = buff.data[buff.index + 1];
   uint8_t b2 = buff.data[buff.index + 0]; // msb
@@ -153,7 +153,7 @@ uint16_t ReadShort(Buffer &buff) {
 }
 
 uint8_t ReadChar(Buffer &buff) {
-  assert(buff.index + 1 <= buff.size);
+  assert(buff.index + 1 <= buff.length);
 
   uint8_t b1 = buff.data[buff.index + 0];
   buff.index += 1;

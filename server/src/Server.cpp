@@ -15,7 +15,7 @@ void Server::Initialize() {
 int Server::ReceiveFromClients(ClientID &clientID, Buffer &buff) {
   Address incoming;
 
-  int bytesRead = socket.Receive(incoming, buff.data, buff.size);
+  int bytesRead = socket.Receive(incoming, buff.data, buff.capacity);
   if (bytesRead <= 0) {
     return 0;
   }
@@ -24,7 +24,7 @@ int Server::ReceiveFromClients(ClientID &clientID, Buffer &buff) {
   Connection &conn = FindOrCreateConnection(clientID, incoming, createdClient);
 
   buff.index = 0;
-  buff.size = bytesRead;
+  buff.length = bytesRead;
 
   int processedBytes = conn.ProcessReceived(buff);
 

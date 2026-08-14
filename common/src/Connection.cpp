@@ -18,7 +18,7 @@ Address Connection::GetAddress() { return remoteAddress; }
 float Connection::GetRTT() { return sentQueue.globalRtt; }
 
 int Connection::ProcessReceived(Buffer &outBuffer) {
-  if (outBuffer.size < 16) {
+  if (outBuffer.length < 16) {
     return 0;
   }
 
@@ -45,7 +45,7 @@ int Connection::ProcessReceived(Buffer &outBuffer) {
   auto now = std::chrono::steady_clock::now();
   lastReceivedTime = now;
 
-  return outBuffer.size - outBuffer.index;
+  return outBuffer.length - outBuffer.index;
 }
 
 bool Connection::Send(Socket &sock, const Buffer &buffer) {

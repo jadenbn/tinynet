@@ -9,7 +9,7 @@ ClientReplicationSystem::ClientReplicationSystem(ClientWorld &c_game,
     : game(c_game), client(client_c) {};
 
 bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
-  if (buff.index >= buff.size)
+  if (buff.index >= buff.length)
     return false;
   PacketType packetType = static_cast<PacketType>(ReadChar(buff));
 
