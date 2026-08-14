@@ -25,12 +25,15 @@ void ClientGame::NetworkInit() {
   // handshake
   bool connectionConfirmed = false;
   int attempts = 0;
-  Buffer buff;
-  while (!connectionConfirmed && attempts++ < MAX_ATTEMPTS) {
+
+  uint8_t scratch[MAX_PACKET_SIZE];
+  Buffer buff{scratch, 0, sizeof(scratch)};
+  while (!connectionConfirmed && attempts < MAX_ATTEMPTS) {
     client.SendPacket(ConnectionRequest{});
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
     if (client.ReceiveFromServer(buff) > 0) {
       PacketType type = static_cast<PacketType>(ReadChar(buff));
+
       if (type == PacketType::ConnectionAccepted) {
         connectionConfirmed = true;
         ClientID id = ReadInteger(buff);
@@ -38,7 +41,9 @@ void ClientGame::NetworkInit() {
         return;
       }
     }
+    attempts++;
   }
+
   throw std::runtime_error("Couldn't connect to server.");
 }
 

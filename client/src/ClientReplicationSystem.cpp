@@ -31,7 +31,6 @@ bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
 
 bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &p) {
   // game.playerPosition = {p.player1X, p.player1Y};
-
-  std::cout << "received from serv" << '\n';
+  // std::cout << "received from serv" << '\n';
   return true;
 }
