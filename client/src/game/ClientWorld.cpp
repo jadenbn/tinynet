@@ -8,7 +8,7 @@ ClientWorld::ClientWorld() {};
 
 void ClientWorld::Draw() {
   ClearBackground(WHITE);
-  std::cout << players.size() << '\n';
+  // std::cout << players.size() << '\n';
 
   for (Player &player : players) {
     player.DrawPlayer();

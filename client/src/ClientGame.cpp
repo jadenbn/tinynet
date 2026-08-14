@@ -37,7 +37,6 @@ void ClientGame::NetworkInit() {
       if (type == PacketType::ConnectionAccepted) {
         connectionConfirmed = true;
         ClientID id = ReadInteger(buff);
-        std::cout << "yay! id: " << id << '\n';
         return;
       }
     }

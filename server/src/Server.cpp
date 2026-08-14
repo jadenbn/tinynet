@@ -44,7 +44,6 @@ int Server::ReceiveFromClients(ClientID &clientID, Buffer &buff) {
     clients.erase(clientID);
     return 0;
   } else if (packetType == PacketType::ConnectionRequest) {
-    std::cout << "connection accepted" << '\n';
     SendPacket(clientID, ConnectionAccepted{clientID});
   }
 
