@@ -22,12 +22,12 @@ PlayerInputPacket PlayerInputPacket::deserialize(Buffer &buff) {
   return {ReadFloat(buff), ReadFloat(buff)};
 }
 
-void ConnectionRequest::Serialize(Buffer &buff) const {
-  WriteChar(buff, PacketType::ConnectionRequest);
-  WriteChar(buff, status);
-  WriteInteger(buff, clientID);
-}
+// void ConnectionRequest::Serialize(Buffer &buff) const {
+//   WriteChar(buff, PacketType::ConnectionRequest);
+//   WriteChar(buff, status);
+//   WriteInteger(buff, clientID);
+// }
 
-ConnectionRequest ConnectionRequest::deserialize(Buffer &buff) {
-  return {ReadChar(buff), ReadInteger(buff)};
-}
+// ConnectionRequest ConnectionRequest::deserialize(Buffer &buff) {
+//   return {ReadChar(buff), ReadInteger(buff)};
+// }
