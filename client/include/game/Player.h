@@ -1,13 +1,14 @@
 #include "GameTypes.h"
 #include "raylib.h"
+#include "raymath.h"
 class Player {
 
 public:
   const PlayerID playerID;
-  Vector2 pos;
-  Player(Texture sprite, Vector2 initialPosition);
+  Player(PlayerID id, Texture sprite) : playerID(id) {};
   void DrawPlayer();
   ~Player(); // make sure to UnloadTexture(mainPlayerSprite);
 private:
+  Vector2 pos = Vector2Zero();
   Texture sprite;
 };

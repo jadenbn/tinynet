@@ -55,10 +55,7 @@ void ClientWorld::Init(int argc, char *argv[]) {
   client.SendPacket(
       PlayerInputPacket{0.0f, 0.0f}); // our 'handshake' for now lol
 
-  // main player starts in center of screen
-  Texture mainPlayerSprite = LoadTexture("github.png");
-  Player mainPlayer({(float)(WIDTH - 20.0f), (float)(HEIGHT - 20.0f)},
-                    mainPlayerSprite);
+  // Texture playerSprite = LoadTexture("github.png");
 
   SetTargetFPS(144);
 }

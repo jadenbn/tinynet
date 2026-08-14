@@ -1,12 +1,8 @@
 #include "game/Player.h"
+#include "raylib.h"
 
+void Player::DrawPlayer() { DrawTexture(sprite, pos.x, pos.y, WHITE); }
 
-
-public:
-  const PlayerID playerID;
-  Vector2 pos;
-  Player(Texture sprite, Vector2 initialPosition);
-  void DrawPlayer();
-  ~Player(); // make sure to UnloadTexture(mainPlayerSprite);
-private:
-  Texture sprite;
+Player::~Player() {
+  UnloadTexture(sprite);
+} // make sure to UnloadTexture(mainPlayerSprite);
