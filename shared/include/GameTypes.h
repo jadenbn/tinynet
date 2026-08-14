@@ -1,5 +1,4 @@
 #pragma once
-#include "raylib.h"
 #include <cstdint>
 
 typedef uint32_t PlayerID;
@@ -8,10 +7,8 @@ struct NetworkSafeVector2 {
   float y;
 };
 
-class Player {
+struct PlayerState {
+public:
   PlayerID playerID;
-  Vector2 pos;
-  Player(Texture sprite, Vector2 initialPosition);
-  void DrawPlayer();
-  ~Player(); // make sure to UnloadTexture(mainPlayerSprite);
+  NetworkSafeVector2 pos;
 };

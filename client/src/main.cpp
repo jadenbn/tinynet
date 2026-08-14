@@ -1,4 +1,5 @@
 #include "ClientReplicationSystem.h"
+#include "game/ClientWorld.h"
 #include <iostream>
 
 // void MovePlayer(Player *p, int speed, Client &client) {
@@ -29,7 +30,7 @@
 //   // p->position.y += direction.y * speed * deltaTime;
 // }
 
-ClientGame game;
+ClientWorld game;
 ClientReplicationSystem replicationSystem(game);
 
 int main(int argc, char *argv[]) {

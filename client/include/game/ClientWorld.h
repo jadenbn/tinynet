@@ -1,12 +1,13 @@
 // for handling gamestate
 #pragma once
-#include "../shared/include/GameTypes.h"
 #include "Client.h"
 #include "ClientReplicationSystem.h"
+#include "Player.h"
 #include <vector>
 
-class ClientGame {
+class ClientWorld {
 public:
+  ClientWorld();
   void GameLoop();
   void Init(int argc, char *argv[]);
 

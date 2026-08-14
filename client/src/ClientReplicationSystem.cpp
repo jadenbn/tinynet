@@ -1,9 +1,9 @@
 #include "ClientReplicationSystem.h"
-#include "../shared/include/Protocol.h"
 #include "Packets.h"
+#include "Protocol.h"
 #include <iostream>
 
-ClientReplicationSystem::ClientReplicationSystem(ClientGame &c_game)
+ClientReplicationSystem::ClientReplicationSystem(ClientWorld &c_game)
     : game(c_game) {};
 
 bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
@@ -28,6 +28,6 @@ bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
 }
 
 bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &p) {
-  game.playerPosition = {p.player1X, p.player1Y};
+  // game.playerPosition = {p.player1X, p.player1Y};
   return true;
 }

@@ -1,8 +1,8 @@
-#include "ClientGame.h"
+#include "game/ClientWorld.h"
 #include "raylib.h"
 #include "resource_dir.h"
 
-void ClientGame::GameLoop() {
+void ClientWorld::GameLoop() {
   while (!WindowShouldClose()) {
     client.UpdateConnection();
 
@@ -12,20 +12,23 @@ void ClientGame::GameLoop() {
       replicationSystem.HandlePacket(packet);
     }
 
-    mainPlayer.position = game.playerPosition;
+    // mainPlayer.position = game.playerPosition;
 
     BeginDrawing();
     ClearBackground(WHITE);
 
-    MovePlayer(&mainPlayer, 200, client);
+    // MovePlayer(&mainPlayer, 200, client);
 
-    DrawText(std::string(std::to_string(game.playerPosition.x) + '\n' +
-                         std::to_string(game.playerPosition.y))
-                 .c_str(),
-             400, 400, 12, BLACK);
+    // DrawText(std::string(std::to_string(game.playerPosition.x) + '\n' +
+    //                      std::to_string(game.playerPosition.y))
+    //              .c_str(),
+    //          400, 400, 12, BLACK);
 
     // draw main player
-    mainPlayer.DrawPlayer();
+    // mainPlayer.DrawPlayer();
+    for (Player &player : players) {
+      player.DrawPlayer();
+    }
 
     EndDrawing();
   }
@@ -34,7 +37,7 @@ void ClientGame::GameLoop() {
   CloseWindow();
 }
 
-void ClientGame::Init(int argc, char *argv[]) {
+void ClientWorld::Init(int argc, char *argv[]) {
   constexpr int WIDTH = 640;
   constexpr int HEIGHT = 480;
 
