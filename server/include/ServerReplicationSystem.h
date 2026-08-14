@@ -1,6 +1,6 @@
 #pragma once
-#include "../server/include/Server.h"
-#include "../shared/include/Protocol.h"
+#include "Protocol.h"
+#include "Server.h"
 #include "ServerGame.h"
 
 // for turning packets into actions
@@ -14,4 +14,5 @@ private:
   ServerGame &game;
 
   bool ApplyPlayerInputPacket(const PlayerInputPacket &p);
+  bool ApplyConnectionRequest(const ConnectionRequest &p);
 };

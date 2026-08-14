@@ -1,7 +1,7 @@
 #include "../server/include/ServerReplicationSystem.h"
 #include "../server/include/Server.h"
 #include "Packets.h"
-#include <iostream>
+#include "Protocol.h"
 
 ServerReplicationSystem::ServerReplicationSystem(ServerGame &c_game)
     : game(c_game) {};
@@ -16,6 +16,7 @@ bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
     ApplyPlayerInputPacket(PlayerInputPacket::deserialize(buff));
     break;
   case PacketType::ConnectionRequest:
+
   case PacketType::Heartbeat:
     break;
   default:
@@ -27,6 +28,12 @@ bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
 
 bool ServerReplicationSystem::ApplyPlayerInputPacket(
     const PlayerInputPacket &p) {
+  game.playerPosition = {p.x, p.y};
+  return true;
+}
+
+bool ServerReplicationSystem::ApplyConnectionRequest(
+    const ConnectionRequest &p) {
   game.playerPosition = {p.x, p.y};
   return true;
 }

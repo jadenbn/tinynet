@@ -30,3 +30,11 @@ struct PlayerInputPacket {
   void Serialize(Buffer &buff) const;
   static PlayerInputPacket deserialize(Buffer &buff);
 };
+
+struct ConnectionRequest {};
+struct ConnectionAccepted {
+  uint32_t clientID;
+};
+struct ConnectionRejected {
+  uint8_t reason; // kind of temporary icl
+};

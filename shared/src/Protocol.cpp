@@ -1,4 +1,5 @@
 #include "../shared/include/Protocol.h"
+#include "Connection.h"
 #include "Packets.h"
 
 void WorldSnapshot::Serialize(Buffer &buff) const {
@@ -19,4 +20,14 @@ void PlayerInputPacket::Serialize(Buffer &buff) const {
 
 PlayerInputPacket PlayerInputPacket::deserialize(Buffer &buff) {
   return {ReadFloat(buff), ReadFloat(buff)};
+}
+
+void ConnectionRequest::Serialize(Buffer &buff) const {
+  WriteChar(buff, PacketType::ConnectionRequest);
+  WriteChar(buff, status);
+  WriteInteger(buff, clientID);
+}
+
+ConnectionRequest ConnectionRequest::deserialize(Buffer &buff) {
+  return {ReadChar(buff), ReadInteger(buff)};
 }

@@ -1,9 +1,11 @@
 #include "ClientGame.h"
 #include "Client.h"
 #include "ClientReplicationSystem.h"
+#include "Protocol.h"
 #include "game/ClientWorld.h"
 #include "raylib.h"
 #include "resource_dir.h"
+#include <iostream>
 
 ClientGame::ClientGame(Address &clientAddress_c, Address &serverAddress_c)
     : client(clientAddress_c, serverAddress_c), clientWorld(),
@@ -11,8 +13,9 @@ ClientGame::ClientGame(Address &clientAddress_c, Address &serverAddress_c)
 
 void ClientGame::NetworkInit() {
   client.Initialize();
-  client.SendPacket(
-      PlayerInputPacket{0.0f, 0.0f}); // our 'handshake' for now lol
+
+  // handshake
+  client.SendPacket(ConnectionRequest{});
 }
 
 void ClientGame::GameInit() {
@@ -24,14 +27,18 @@ void ClientGame::GameInit() {
 
   SearchAndSetResourceDir("resources");
 
-
   SetTargetFPS(144);
 }
+
+void ClientGame::HandleInput() {};
+void ClientGame::HandleNetwork() {};
 
 void ClientGame::GameLoop() {
   while (!WindowShouldClose()) {
     client.UpdateConnection();
     clientWorld.Draw();
+    HandleInput();
+    HandleNetwork();
 
     uint8_t scratch[MAX_PACKET_SIZE];
     Buffer packet = {scratch, 0, sizeof(scratch)};
