@@ -1,11 +1,19 @@
 #include "ClientGame.h"
 #include "Client.h"
 #include "ClientReplicationSystem.h"
+#include "Packets.h"
 #include "Protocol.h"
+#include "Server.h"
 #include "game/ClientWorld.h"
 #include "raylib.h"
 #include "resource_dir.h"
+#include <chrono>
 #include <iostream>
+#include <pthread.h>
+#include <stdexcept>
+#include <thread>
+
+constexpr static int MAX_ATTEMPTS = 100;
 
 ClientGame::ClientGame(Address &clientAddress_c, Address &serverAddress_c)
     : client(clientAddress_c, serverAddress_c), clientWorld(),
@@ -15,7 +23,23 @@ void ClientGame::NetworkInit() {
   client.Initialize();
 
   // handshake
-  client.SendPacket(ConnectionRequest{});
+  bool connectionConfirmed = false;
+  int attempts = 0;
+  Buffer buff;
+  while (!connectionConfirmed && attempts++ < MAX_ATTEMPTS) {
+    client.SendPacket(ConnectionRequest{});
+    std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    if (client.ReceiveFromServer(buff) > 0) {
+      PacketType type = static_cast<PacketType>(ReadChar(buff));
+      if (type == PacketType::ConnectionAccepted) {
+        connectionConfirmed = true;
+        ClientID id = ReadInteger(buff);
+        std::cout << "yay! id: " << id << '\n';
+        return;
+      }
+    }
+  }
+  throw std::runtime_error("Couldn't connect to server.");
 }
 
 void ClientGame::GameInit() {

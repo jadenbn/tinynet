@@ -1,6 +1,7 @@
 #include "../include/Server.h"
 #include "Address.h"
 #include "Connection.h"
+#include "Protocol.h"
 #include <cstring>
 #include <iostream>
 
@@ -19,15 +20,39 @@ int Server::ReceiveFromClients(ClientID &clientID, Buffer &buff) {
     return 0;
   }
 
-  Connection *conn = FindOrCreateConnection(clientID, incoming);
+  bool createdClient;
+  Connection &conn = FindOrCreateConnection(clientID, incoming, createdClient);
 
   buff.index = 0;
   buff.size = bytesRead;
 
-  return conn->ProcessReceived(buff);
+  int processedBytes = conn.ProcessReceived(buff);
+
+  // erase because we created a tunnel regardless
+  if (processedBytes <= 0) {
+    if (createdClient) {
+      clients.erase(clientID);
+    }
+
+    return 0;
+  }
+
+  PacketType packetType = static_cast<PacketType>(buff.data[buff.index]);
+
+  // must be a connection req
+  if (createdClient && packetType != PacketType::ConnectionRequest) {
+    clients.erase(clientID);
+    return 0;
+  } else if (createdClient && packetType == PacketType::ConnectionRequest) {
+    std::cout << "connection accepted" << '\n';
+    SendPacket(clientID, ConnectionAccepted{clientID});
+  }
+
+  return processedBytes;
 }
 
-Connection *Server::FindOrCreateConnection(ClientID &id, Address address) {
+Connection &Server::FindOrCreateConnection(ClientID &id, Address address,
+                                           bool &flagCreatedClient) {
   // TODO: IMPORTANT TODO
   // i want to turn this into a lookup of address -> clientid. for now this is
   // fine; o(n) lookup for a small # of clients is okay. but whe i get to stress
@@ -35,7 +60,8 @@ Connection *Server::FindOrCreateConnection(ClientID &id, Address address) {
   for (auto &[connId, connection] : clients) {
     if (connection.GetAddress() == address) {
       id = connId;
-      return &connection;
+      flagCreatedClient = false;
+      return connection;
     }
   }
 
@@ -44,7 +70,8 @@ Connection *Server::FindOrCreateConnection(ClientID &id, Address address) {
   // clients[id] = newConnection;  old; invoked connection default constructor
   // which doesn't exist
   auto [it, inserted] = clients.try_emplace(id, address);
-  return &it->second;
+  flagCreatedClient = inserted;
+  return it->second;
 }
 
 Address Server::GetAddress() { return localAddress; }

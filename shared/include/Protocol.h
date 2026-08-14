@@ -5,7 +5,9 @@
 constexpr uint32_t PROTOCOL_HASH = 0x12345678;
 
 enum class PacketType : uint8_t {
-  ConnectionRequest = 1,
+  ConnectionRequest = 0,
+  ConnectionAccepted,
+  ConnectionRejected,
   Heartbeat,
   PlayerInput,
   WorldSnapshot,
@@ -31,10 +33,20 @@ struct PlayerInputPacket {
   static PlayerInputPacket deserialize(Buffer &buff);
 };
 
-struct ConnectionRequest {};
+struct ConnectionRequest {
+
+  void Serialize(Buffer &buff) const;
+  static ConnectionRequest deserialize(Buffer &buff);
+};
 struct ConnectionAccepted {
   uint32_t clientID;
+
+  void Serialize(Buffer &buff) const;
+  static ConnectionAccepted deserialize(Buffer &buff);
 };
 struct ConnectionRejected {
   uint8_t reason; // kind of temporary icl
+
+  void Serialize(Buffer &buff) const;
+  static ConnectionRejected deserialize(Buffer &buff);
 };

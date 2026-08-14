@@ -15,10 +15,6 @@ bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
   case PacketType::PlayerInput:
     ApplyPlayerInputPacket(PlayerInputPacket::deserialize(buff));
     break;
-  case PacketType::ConnectionRequest:
-
-  case PacketType::Heartbeat:
-    break;
   default:
     return false;
   }
@@ -28,12 +24,6 @@ bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
 
 bool ServerReplicationSystem::ApplyPlayerInputPacket(
     const PlayerInputPacket &p) {
-  game.playerPosition = {p.x, p.y};
-  return true;
-}
-
-bool ServerReplicationSystem::ApplyConnectionRequest(
-    const ConnectionRequest &p) {
   game.playerPosition = {p.x, p.y};
   return true;
 }
