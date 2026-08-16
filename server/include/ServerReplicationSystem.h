@@ -14,5 +14,4 @@ private:
   ServerWorld &game;
 
   bool ApplyPlayerInputPacket(const PlayerInputPacket &p);
-  bool ApplyConnectionRequest(const ConnectionRequest &p);
 };

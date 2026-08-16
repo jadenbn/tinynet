@@ -1,8 +1,10 @@
 #include "../server/include/ServerReplicationSystem.h"
 #include "../server/include/Server.h"
+#include "GameTypes.h"
 #include "Packets.h"
 #include "Protocol.h"
 #include "ServerWorld.h"
+#include <iostream>
 
 ServerReplicationSystem::ServerReplicationSystem(ServerWorld &c_game)
     : game(c_game) {};
@@ -16,6 +18,13 @@ bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
   case PacketType::PlayerInput:
     ApplyPlayerInputPacket(PlayerInputPacket::deserialize(buff));
     break;
+
+  case PacketType::ConnectionRequest: {
+    ServerTypes::ServerPlayer newPlayer(id, NetworkSafeVector2{0.0f, 0.0f}, id);
+    game.AddPlayer(newPlayer);
+    break;
+  }
+
   default:
     return false;
   }
