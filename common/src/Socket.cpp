@@ -1,5 +1,6 @@
 #include "Socket.h"
 #include "fcntl.h"
+#include <cstdlib>
 #include <iostream>
 #include <netinet/in.h>
 #include <string>
@@ -15,7 +16,7 @@ bool Socket::Open(unsigned short port) {
   if (handle <= 0) {
     std::cout << "Failed to create socket on port " << std::to_string(port)
               << std::endl;
-    return false;
+    exit(EXIT_FAILURE);
   }
 
   sockaddr_in address;
@@ -26,7 +27,7 @@ bool Socket::Open(unsigned short port) {
   if (bind(handle, (const sockaddr *)&address, sizeof(sockaddr_in)) < 0) {
     std::cout << "Failed to bind socket!" << '\n';
     Close();
-    return false;
+    exit(EXIT_FAILURE);
   }
 
 #pragma region Set_Packets_Non_Blocking
@@ -37,13 +38,14 @@ bool Socket::Open(unsigned short port) {
   if (ioctlsocket(handle, FIONBIO, &nonBlocking) != 0) {
     Close();
     std::cout << "Failed to set non-blocking socket!" << std::endl;
+    exit(EXIT_FAILURE);
     return false;
   }
 #else
   if (fcntl(handle, F_SETFL, O_NONBLOCK) == -1) {
     std::cout << "Failed to set non-blocking socket!" << std::endl;
     Close();
-    return false;
+    exit(EXIT_FAILURE);
   }
 #endif
 
