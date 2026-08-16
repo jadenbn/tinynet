@@ -22,8 +22,7 @@ int Connection::ProcessReceived(Buffer &outBuffer) {
     return 0;
   }
 
-  uint32_t receivedHeader = ReadInteger(outBuffer);
-  if (receivedHeader != PROTOCOL_HASH) {
+  if (!ValidateHeader(outBuffer)) {
     return 0;
   }
 

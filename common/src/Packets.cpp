@@ -1,4 +1,5 @@
 #include "Packets.h"
+#include "Protocol.h"
 #include <cassert>
 #include <chrono>
 #include <cstdint>
@@ -163,3 +164,16 @@ uint8_t ReadChar(Buffer &buff) {
   buff.index += 1;
   return b1;
 }
+
+bool ValidateHeader(Buffer &buff) {
+  if (buff.length < 4) {
+    return false;
+  }
+
+  uint32_t receivedHeader = ReadInteger(buff);
+  if (receivedHeader != PROTOCOL_HASH) {
+    return false;
+  }
+
+  return true;
+};

@@ -63,4 +63,6 @@ uint32_t ReadInteger(Buffer &buff);
 uint16_t ReadShort(Buffer &buff);
 uint8_t ReadChar(Buffer &buff);
 
+bool ValidateHeader(Buffer &buff);
+
 // packet types!
