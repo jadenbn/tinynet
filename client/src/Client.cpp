@@ -13,7 +13,7 @@ void Client::Initialize() {
   socket.Open(localAddress.GetPort());
   std::cout << "Client listening on port " << localAddress.GetPort() << '\n';
 }
-
+// give me a commit :()
 bool Client::GetIsConnected() { return serverConnection.connected; }
 float Client::GetRTT() { return serverConnection.GetRTT(); }
 
