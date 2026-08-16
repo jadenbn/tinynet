@@ -131,7 +131,7 @@ void WriteChar(Buffer &buff, uint8_t data) {
 };
 
 uint32_t ReadInteger(Buffer &buff) {
-  assert(buff.index + 4 <= buff.capacity);
+  assert(buff.index + 4 <= buff.length);
 
   uint8_t b1 = buff.data[buff.index + 3];
   uint8_t b2 = buff.data[buff.index + 2];
@@ -148,7 +148,7 @@ float ReadFloat(Buffer &buff) {
 }
 
 uint16_t ReadShort(Buffer &buff) {
-  assert(buff.index + 2 <= buff.capacity);
+  assert(buff.index + 2 <= buff.length);
 
   uint8_t b1 = buff.data[buff.index + 1];
   uint8_t b2 = buff.data[buff.index + 0]; // msb
@@ -157,7 +157,7 @@ uint16_t ReadShort(Buffer &buff) {
 }
 
 uint8_t ReadChar(Buffer &buff) {
-  assert(buff.index + 1 <= buff.capacity);
+  assert(buff.index + 1 <= buff.length);
 
   uint8_t b1 = buff.data[buff.index + 0];
   buff.index += 1;

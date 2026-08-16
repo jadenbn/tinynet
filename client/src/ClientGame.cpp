@@ -68,7 +68,7 @@ void ClientGame::GameLoop() {
     HandleNetwork();
 
     uint8_t scratch[MAX_PACKET_SIZE];
-    Buffer packet = {scratch, 0, sizeof(scratch)};
+    Buffer packet = {scratch, 0, 0, sizeof(scratch)};
     while (client.ReceiveFromServer(packet) > 0) {
       replicationSystem.HandlePacket(packet);
     }

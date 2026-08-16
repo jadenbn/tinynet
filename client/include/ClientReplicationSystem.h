@@ -11,7 +11,7 @@ public:
   bool HandlePacket(Buffer &buff);
 
 private:
-  ClientWorld &game;
+  ClientWorld &world;
   Client &client;
 
   bool ApplyPlayerInputPacket(const PlayerInputPacket &p);

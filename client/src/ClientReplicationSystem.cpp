@@ -6,7 +6,7 @@
 
 ClientReplicationSystem::ClientReplicationSystem(ClientWorld &c_game,
                                                  Client &client_c)
-    : game(c_game), client(client_c) {};
+    : world(c_game), client(client_c) {};
 
 bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
   if (buff.index >= buff.length)
@@ -30,7 +30,7 @@ bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
 }
 
 bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &p) {
-  // game.playerPosition = {p.player1X, p.player1Y};
+  // world.players = {p.player1X, p.player1Y};
   // std::cout << "received from serv" << '\n';
   return true;
 }
