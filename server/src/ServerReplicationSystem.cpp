@@ -2,8 +2,9 @@
 #include "../server/include/Server.h"
 #include "Packets.h"
 #include "Protocol.h"
+#include "ServerWorld.h"
 
-ServerReplicationSystem::ServerReplicationSystem(ServerGame &c_game)
+ServerReplicationSystem::ServerReplicationSystem(ServerWorld &c_game)
     : game(c_game) {};
 
 bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {

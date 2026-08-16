@@ -1,18 +1,20 @@
-#include "../include/Server.h"
-#include "../include/ServerGame.h"
-#include "../include/ServerReplicationSystem.h"
-#include "../shared/include/Protocol.h"
+#include "Server.h"
+#include "ServerWorld.h"
+#include "ServerReplicationSystem.h"
+#include "Protocol.h"
 #include "Address.h"
 #include "Packets.h"
+#include "ServerWorld.h"
 #include <chrono>
 #include <iostream>
 #include <thread>
 
+// eventually probably turn into ServerGame to mirror client but will see
 int main() {
   Server server(Address(127, 0, 0, 1, 3000));
   server.Initialize();
 
-  ServerGame game;
+  ServerWorld game;
   ServerReplicationSystem replicationSystem(game);
 
   std::cout << "Starting server on 127.0.0.1:3000" << '\n';
