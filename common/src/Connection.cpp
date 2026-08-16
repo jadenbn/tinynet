@@ -22,11 +22,11 @@ int Connection::ProcessReceived(Buffer &outBuffer) {
     return 0;
   }
 
-  if (!ValidateHeader(outBuffer)) {
+  if (!packets::ValidateHeader(outBuffer)) {
     return 0;
   }
 
-  uint32_t incomingSequenceNumber = ReadInteger(outBuffer);
+  uint32_t incomingSequenceNumber = packets::ReadInteger(outBuffer);
 
   if (incomingSequenceNumber > remoteSequenceNumber) {
     remoteSequenceNumber = incomingSequenceNumber;
@@ -34,8 +34,8 @@ int Connection::ProcessReceived(Buffer &outBuffer) {
 
   receivedQueue.insert(incomingSequenceNumber);
 
-  uint32_t incomingAck = ReadInteger(outBuffer);
-  uint32_t incomingAckBitfield = ReadInteger(outBuffer);
+  uint32_t incomingAck = packets::ReadInteger(outBuffer);
+  uint32_t incomingAckBitfield = packets::ReadInteger(outBuffer);
 
   sentQueue.ackPacket(incomingAck, incomingAckBitfield);
 
@@ -50,9 +50,9 @@ int Connection::ProcessReceived(Buffer &outBuffer) {
 bool Connection::Send(Socket &sock, const Buffer &buffer) {
   uint8_t scratch[MAX_PACKET_SIZE];
   Buffer buff = {scratch, 0, 0, sizeof(scratch)};
-  WriteInteger(buff, PROTOCOL_HASH);
-  WriteInteger(buff, sequenceNumber);
-  WriteInteger(buff, remoteSequenceNumber);
+  packets::WriteInteger(buff, PROTOCOL_HASH);
+  packets::WriteInteger(buff, sequenceNumber);
+  packets::WriteInteger(buff, remoteSequenceNumber);
 
   // todo: turn this into helper later
   uint32_t ackBitfield = 0;
@@ -62,7 +62,7 @@ bool Connection::Send(Socket &sock, const Buffer &buffer) {
       ackBitfield |= (1U << (i - 1));
     }
   }
-  WriteInteger(buff, ackBitfield);
+  packets::WriteInteger(buff, ackBitfield);
   sentQueue.insert(sequenceNumber, std::chrono::steady_clock::now());
   sequenceNumber++;
 

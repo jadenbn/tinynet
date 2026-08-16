@@ -31,11 +31,11 @@ void ClientGame::NetworkInit() {
     client.SendPacket(ConnectionRequest{});
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
     if (client.ReceiveFromServer(buff) > 0) {
-      PacketType type = static_cast<PacketType>(ReadChar(buff));
+      PacketType type = static_cast<PacketType>(packets::ReadChar(buff));
 
       if (type == PacketType::ConnectionAccepted) {
         connectionConfirmed = true;
-        ClientID id = ReadInteger(buff);
+        ClientID id = packets::ReadInteger(buff);
         return;
       }
     }

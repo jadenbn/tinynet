@@ -53,6 +53,8 @@ struct Buffer {
   int capacity;
 };
 
+namespace packets {
+
 void WriteInteger(Buffer &buff, uint32_t data);
 void WriteShort(Buffer &buff, uint16_t data);
 void WriteChar(Buffer &buff, uint8_t data);
@@ -65,4 +67,4 @@ uint8_t ReadChar(Buffer &buff);
 
 bool ValidateHeader(Buffer &buff);
 
-// packet types!
+} // namespace packets

@@ -9,7 +9,7 @@ ServerReplicationSystem::ServerReplicationSystem(ServerGame &c_game)
 bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
   if (buff.index >= buff.length)
     return false;
-  PacketType packetType = static_cast<PacketType>(ReadChar(buff));
+  PacketType packetType = static_cast<PacketType>(packets::ReadChar(buff));
 
   switch (packetType) {
   case PacketType::PlayerInput:

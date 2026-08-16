@@ -3,7 +3,6 @@
 #include <cassert>
 #include <chrono>
 #include <cstdint>
-#include <iostream>
 #include <ratio>
 #include <sys/types.h>
 #include <vector>
@@ -92,7 +91,7 @@ std::vector<uint32_t> SentQueue::getLostPackets(uint32_t highestAckReceived) {
   return lost;
 }
 
-void WriteInteger(Buffer &buff, uint32_t data) {
+void packets::WriteInteger(Buffer &buff, uint32_t data) {
   assert(buff.index + 4 <= buff.capacity);
 
   // write as big endian
@@ -105,12 +104,12 @@ void WriteInteger(Buffer &buff, uint32_t data) {
   buff.length += 4;
 };
 
-void WriteFloat(Buffer &buff, float data) {
+void packets::WriteFloat(Buffer &buff, float data) {
   uint32_t int_bits = std::bit_cast<uint32_t>(data);
-  WriteInteger(buff, int_bits);
+  packets::WriteInteger(buff, int_bits);
 }
 
-void WriteShort(Buffer &buff, uint16_t data) {
+void packets::WriteShort(Buffer &buff, uint16_t data) {
   assert(buff.index + 2 <= buff.capacity);
 
   // write as big endian
@@ -121,7 +120,7 @@ void WriteShort(Buffer &buff, uint16_t data) {
   buff.length += 2;
 };
 
-void WriteChar(Buffer &buff, uint8_t data) {
+void packets::WriteChar(Buffer &buff, uint8_t data) {
   assert(buff.index + 1 <= buff.capacity);
 
   // write as big endian
@@ -131,7 +130,7 @@ void WriteChar(Buffer &buff, uint8_t data) {
   buff.length += 1;
 };
 
-uint32_t ReadInteger(Buffer &buff) {
+uint32_t packets::ReadInteger(Buffer &buff) {
   assert(buff.index + 4 <= buff.length);
 
   uint8_t b1 = buff.data[buff.index + 3];
@@ -143,12 +142,12 @@ uint32_t ReadInteger(Buffer &buff) {
          static_cast<uint32_t>(b2) << 8 | static_cast<uint32_t>(b1);
 }
 
-float ReadFloat(Buffer &buff) {
-  uint32_t int_bits = ReadInteger(buff);
+float packets::ReadFloat(Buffer &buff) {
+  uint32_t int_bits = packets::ReadInteger(buff);
   return std::bit_cast<float>(int_bits);
 }
 
-uint16_t ReadShort(Buffer &buff) {
+uint16_t packets::ReadShort(Buffer &buff) {
   assert(buff.index + 2 <= buff.length);
 
   uint8_t b1 = buff.data[buff.index + 1];
@@ -157,7 +156,7 @@ uint16_t ReadShort(Buffer &buff) {
   return static_cast<uint32_t>(b2) << 8 | static_cast<uint32_t>(b1);
 }
 
-uint8_t ReadChar(Buffer &buff) {
+uint8_t packets::ReadChar(Buffer &buff) {
   assert(buff.index + 1 <= buff.length);
 
   uint8_t b1 = buff.data[buff.index + 0];
@@ -165,12 +164,12 @@ uint8_t ReadChar(Buffer &buff) {
   return b1;
 }
 
-bool ValidateHeader(Buffer &buff) {
+bool packets::ValidateHeader(Buffer &buff) {
   if (buff.length < 4) {
     return false;
   }
 
-  uint32_t receivedHeader = ReadInteger(buff);
+  uint32_t receivedHeader = packets::ReadInteger(buff);
   if (receivedHeader != PROTOCOL_HASH) {
     return false;
   }

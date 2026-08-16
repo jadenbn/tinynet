@@ -13,9 +13,13 @@ enum class PacketType : uint8_t {
   WorldSnapshot,
 };
 
+namespace packets {
+
 inline void WriteChar(Buffer &buff, PacketType type) {
-  WriteChar(buff, static_cast<uint8_t>(type));
+  packets::WriteChar(buff, static_cast<uint8_t>(type));
 };
+
+} // namespace packets
 
 struct WorldSnapshot {
   float player1X;
