@@ -1,9 +1,8 @@
-#include "Server.h"
-#include "ServerWorld.h"
-#include "ServerReplicationSystem.h"
-#include "Protocol.h"
 #include "Address.h"
 #include "Packets.h"
+#include "Protocol.h"
+#include "Server.h"
+#include "ServerReplicationSystem.h"
 #include "ServerWorld.h"
 #include <chrono>
 #include <iostream>

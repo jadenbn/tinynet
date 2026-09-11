@@ -16,7 +16,7 @@ bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
 
   switch (packetType) {
   case PacketType::PlayerInput:
-    ApplyPlayerInputPacket(PlayerInputPacket::deserialize(buff));
+    ApplyPlayerInputPacket(PlayerInputPacket::deserialize(buff), id);
     break;
 
   case PacketType::ConnectionRequest: {
@@ -32,8 +32,12 @@ bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
   return true;
 }
 
-bool ServerReplicationSystem::ApplyPlayerInputPacket(
-    const PlayerInputPacket &p) {
-  game.playerPosition = {p.x, p.y};
+bool ServerReplicationSystem::ApplyPlayerInputPacket(const PlayerInputPacket &p,
+                                                     ClientID id) {
+  game.playerPosition = {game.playerPosition.x + p.direction.x,
+                         game.playerPosition.y + p.direction.y};
+
+  std::cout << "received from client id " << id << "with x and y "
+            << p.direction.x << p.direction.y << '\n';
   return true;
 }

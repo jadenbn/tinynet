@@ -13,5 +13,5 @@ public:
 private:
   ServerWorld &game;
 
-  bool ApplyPlayerInputPacket(const PlayerInputPacket &p);
+  bool ApplyPlayerInputPacket(const PlayerInputPacket &p, ClientID id);
 };

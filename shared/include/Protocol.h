@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GameTypes.h"
 #include "Packets.h"
 #include <cstdint>
 constexpr uint32_t PROTOCOL_HASH = 0x12345678;
@@ -30,8 +31,7 @@ struct WorldSnapshot {
 };
 
 struct PlayerInputPacket {
-  float x;
-  float y;
+  NetworkSafeVector2 direction;
 
   void Serialize(Buffer &buff) const;
   static PlayerInputPacket deserialize(Buffer &buff);

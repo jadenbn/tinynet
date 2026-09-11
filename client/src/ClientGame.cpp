@@ -1,13 +1,16 @@
 #include "ClientGame.h"
 #include "Client.h"
 #include "ClientReplicationSystem.h"
+#include "GameTypes.h"
 #include "Packets.h"
 #include "Protocol.h"
 #include "Server.h"
 #include "game/ClientWorld.h"
 #include "raylib.h"
+#include "raymath.h"
 #include "resource_dir.h"
 #include <chrono>
+#include <iostream>
 #include <pthread.h>
 #include <stdexcept>
 #include <thread>
@@ -36,6 +39,7 @@ void ClientGame::NetworkInit() {
       if (type == PacketType::ConnectionAccepted) {
         connectionConfirmed = true;
         ClientID id = packets::ReadInteger(buff);
+        this->id = id;
         return;
       }
     }
@@ -57,7 +61,27 @@ void ClientGame::GameInit() {
   SetTargetFPS(144);
 }
 
-void ClientGame::HandleInput() {};
+void ClientGame::HandleInput() {
+  Vector2 direction = {0.0f, 0.0f};
+
+  if (IsKeyDown(KEY_W))
+    direction.y -= 1.0f;
+  if (IsKeyDown(KEY_A))
+    direction.x -= 1.0f;
+  if (IsKeyDown(KEY_S))
+    direction.y += 1.0f;
+  if (IsKeyDown(KEY_D))
+    direction.x += 1.0f;
+
+  if (direction.x != 0.0f || direction.y != 0.0f) {
+    direction = Vector2Normalize(direction);
+  }
+
+  if (Vector2Length(direction) != 0.0f) {
+    client.SendPacket(
+        PlayerInputPacket{NetworkSafeVector2{direction.x, direction.y}});
+  }
+};
 void ClientGame::HandleNetwork() {};
 
 void ClientGame::GameLoop() {

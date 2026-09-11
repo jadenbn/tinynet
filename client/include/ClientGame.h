@@ -2,6 +2,7 @@
 #pragma once
 #include "Client.h"
 #include "ClientReplicationSystem.h"
+#include "Server.h"
 #include "game/ClientWorld.h"
 
 class ClientGame {
@@ -17,4 +18,5 @@ private:
   Client client;
   ClientWorld clientWorld;
   ClientReplicationSystem replicationSystem;
+  ClientID id;
 };

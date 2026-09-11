@@ -13,8 +13,8 @@ WorldSnapshot WorldSnapshot::deserialize(Buffer &buff) {
 
 void PlayerInputPacket::Serialize(Buffer &buff) const {
   packets::WriteChar(buff, PacketType::PlayerInput);
-  packets::WriteFloat(buff, this->x);
-  packets::WriteFloat(buff, this->y);
+  packets::WriteFloat(buff, this->direction.x);
+  packets::WriteFloat(buff, this->direction.y);
 }
 
 PlayerInputPacket PlayerInputPacket::deserialize(Buffer &buff) {

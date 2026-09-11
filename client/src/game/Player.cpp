@@ -1,5 +1,6 @@
 #include "game/Player.h"
 #include "raylib.h"
+#include <iostream>
 
 void Player::DrawPlayer() { DrawTexture(sprite, pos.x, pos.y, WHITE); }
 Player::Player(PlayerID id_c) : playerID(id_c) {

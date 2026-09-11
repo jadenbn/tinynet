@@ -1,7 +1,6 @@
 #include "game/ClientWorld.h"
 #include "ClientReplicationSystem.h"
 #include "raylib.h"
-#include <iostream>
 
 void ClientWorld::Update(float dt) {}
 ClientWorld::ClientWorld() {};
