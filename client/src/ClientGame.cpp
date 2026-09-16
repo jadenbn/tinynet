@@ -10,7 +10,6 @@
 #include "raymath.h"
 #include "resource_dir.h"
 #include <chrono>
-#include <iostream>
 #include <pthread.h>
 #include <stdexcept>
 #include <thread>

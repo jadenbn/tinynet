@@ -2,7 +2,9 @@
 
 #include "GameTypes.h"
 #include "Packets.h"
+#include "ServerWorld.h"
 #include <cstdint>
+
 constexpr uint32_t PROTOCOL_HASH = 0x12345678;
 
 enum class PacketType : uint8_t {
@@ -23,8 +25,8 @@ inline void WriteChar(Buffer &buff, PacketType type) {
 } // namespace packets
 
 struct WorldSnapshot {
-  float player1X;
-  float player1Y;
+  uint32_t playersLength;
+  std::unordered_map<PlayerID, ServerTypes::ServerPlayer> players;
 
   void Serialize(Buffer &buff) const;
   static WorldSnapshot deserialize(Buffer &buff);

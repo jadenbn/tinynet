@@ -34,8 +34,9 @@ bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
 
 bool ServerReplicationSystem::ApplyPlayerInputPacket(const PlayerInputPacket &p,
                                                      ClientID id) {
-  game.playerPosition = {game.playerPosition.x + p.direction.x,
-                         game.playerPosition.y + p.direction.y};
+  // game.playerPosition = {game.playerPosition.x + p.direction.x,
+  //                        game.playerPosition.y + p.direction.y};
+
 
   std::cout << "received from client id " << id << "with x and y "
             << p.direction.x << p.direction.y << '\n';

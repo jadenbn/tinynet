@@ -1,14 +1,38 @@
 #include "../shared/include/Protocol.h"
 #include "Packets.h"
+#include "ServerWorld.h"
+#include <cstdint>
+#include <utility>
 
 void WorldSnapshot::Serialize(Buffer &buff) const {
+  // writes as:
+  // playerID
+  // position x
+  // position y
   packets::WriteChar(buff, PacketType::WorldSnapshot);
-  packets::WriteFloat(buff, this->player1X);
-  packets::WriteFloat(buff, this->player1Y);
+  packets::WriteInteger(buff, players.size());
+
+  for (const auto &[id, reference] : players) {
+    packets::WriteInteger(buff, reference.playerID);
+    packets::WriteFloat(buff, reference.position.x);
+    packets::WriteFloat(buff, reference.position.y);
+  }
 }
 
 WorldSnapshot WorldSnapshot::deserialize(Buffer &buff) {
-  return {packets::ReadFloat(buff), packets::ReadFloat(buff)};
+  uint32_t playersListSize = packets::ReadInteger(buff);
+  std::unordered_map<PlayerID, ServerTypes::ServerPlayer> reconstruct;
+
+  for (int i = 0; i < playersListSize; i++) {
+    uint32_t id = packets::ReadInteger(buff);
+    float x = packets::ReadFloat(buff);
+    float y = packets::ReadFloat(buff);
+
+    reconstruct.emplace(
+        std::pair<uint32_t, ServerTypes::ServerPlayer>(id, {id, {x, y}, id}));
+  }
+
+  return {playersListSize, reconstruct};
 }
 
 void PlayerInputPacket::Serialize(Buffer &buff) const {

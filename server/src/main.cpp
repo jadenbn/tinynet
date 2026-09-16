@@ -11,7 +11,7 @@
 // eventually probably turn into ServerGame to mirror client but will see
 int main() {
   Server server(Address(127, 0, 0, 1, 3000));
-  server.Initialize();
+    server.Initialize();
 
   ServerWorld game;
   ServerReplicationSystem replicationSystem(game);
@@ -28,9 +28,7 @@ int main() {
     }
 
     for (auto &[clientId, connection] : server.GetClientMap()) {
-      server.SendPacket(clientId,
-                        WorldSnapshot{game.playerPosition.x,
-                                      game.playerPosition.y}); // worldstate
+      server.SendPacket(game.getPlayers().size(), WorldSnapshot{static_cast<uint32_t>(game.getPlayers().size()), game.getPlayers()}); // worldstate
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
   }
