@@ -9,8 +9,8 @@ void ClientWorld::Draw() {
   ClearBackground(WHITE);
   // std::cout << players.size() << '\n';
 
-  for (Player &player : players) {
-    player.DrawPlayer();
+  for (const auto &[id, ref]: players) {
+    ref.DrawPlayer();
 
     DrawText(std::string(std::to_string(player.pos.x) + '\n' +
                          std::to_string(player.pos.y))

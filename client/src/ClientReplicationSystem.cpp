@@ -1,4 +1,5 @@
 #include "ClientReplicationSystem.h"
+#include "Address.h"
 #include "Packets.h"
 #include "Protocol.h"
 #include "game/ClientWorld.h"
@@ -29,9 +30,15 @@ bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
 }
 
 bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &p) {
-  if (world.players.size() <= 0) {
-    world.players.push_back(Player(0)); // tmp
+  // TODO: optimize. we are aligning every player based on the network every
+  // tick. we should either do this by keeping track of dirty changes, or change
+  // the architecture so that we just update based on the authoritative server
+  // when we need it.
+  
+  // world.players = p.players();
+  for (const auto &[id, ref] : p.players) {
+    world.players[id].pos.x = ref.position.x;
+    world.players[id].pos.y = ref.position.y;
   }
-  world.players[0].pos = {p.player1X, p.player1Y};
   return true;
 }

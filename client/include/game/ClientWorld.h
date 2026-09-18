@@ -1,6 +1,7 @@
 // for handling gamestate
 #pragma once
 #include "Player.h"
+#include <unordered_map>
 #include <vector>
 
 class ClientWorld {
@@ -9,5 +10,5 @@ public:
   void Draw();
   void Update(float dt);
 
-  std::vector<Player> players;
+  std::unordered_map<PlayerID, Player> players;
 };
