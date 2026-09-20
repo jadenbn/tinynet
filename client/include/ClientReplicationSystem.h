@@ -12,7 +12,6 @@ public:
 
 private:
   ClientWorld &world;
-  Client &client;
 
   bool ApplyPlayerInputPacket(const PlayerInputPacket &p);
   bool ApplyWorldSnapshot(const WorldSnapshot &p);

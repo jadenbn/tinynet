@@ -6,7 +6,7 @@
 
 ClientReplicationSystem::ClientReplicationSystem(ClientWorld &c_game,
                                                  Client &client_c)
-    : world(c_game), client(client_c) {};
+    : world(c_game) {};
 
 bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
   if (buff.index >= buff.length)
@@ -38,7 +38,7 @@ bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &p) {
   // when we need it.
   for (const auto &[id, ref] : p.players) {
     if (!world.players.contains(id)) {
-        world.AddPlayer(id);
+      world.AddPlayer(id);
     }
 
     world.players.at(id).pos.x = ref.pos.x;
