@@ -1,4 +1,5 @@
 #include "Address.h"
+#include "GameTypes.h"
 #include "Packets.h"
 #include "Protocol.h"
 #include "Server.h"
@@ -11,7 +12,7 @@
 // eventually probably turn into ServerGame to mirror client but will see
 int main() {
   Server server(Address(127, 0, 0, 1, 3000));
-    server.Initialize();
+  server.Initialize();
 
   ServerWorld game;
   ServerReplicationSystem replicationSystem(game);
@@ -27,8 +28,17 @@ int main() {
       replicationSystem.HandlePacket(clientId, buff);
     }
 
+    WorldSnapshot snapshot{static_cast<uint32_t>(game.players.size()), {}};
+    snapshot.players.reserve(game.players.size());
+
+    for (const auto &[id, player] : game.players) {
+      snapshot.players.try_emplace(
+          id,
+          PlayerState{player.playerID, player.position});
+    }
+
     for (auto &[clientId, connection] : server.GetClientMap()) {
-      server.SendPacket(clientId, WorldSnapshot{static_cast<uint32_t>(game.players.size()), game.players}); // worldstate
+      server.SendPacket(clientId, snapshot); // worldstate
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(16));

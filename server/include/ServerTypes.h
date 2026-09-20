@@ -9,4 +9,4 @@ struct ServerPlayer {
   PlayerID playerID;
 };
 
-} // namespace ServerTypes
+} 

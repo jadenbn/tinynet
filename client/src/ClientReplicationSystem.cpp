@@ -36,14 +36,13 @@ bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &p) {
   // tick. we should either do this by keeping track of dirty changes, or change
   // the architecture so that we just update based on the authoritative server
   // when we need it.
-
   for (const auto &[id, ref] : p.players) {
     if (!world.players.contains(id)) {
         world.AddPlayer(id);
     }
 
-    world.players.at(id).pos.x = ref.position.x;
-    world.players.at(id).pos.y = ref.position.y;
+    world.players.at(id).pos.x = ref.pos.x;
+    world.players.at(id).pos.y = ref.pos.y;
   }
 
   return true;

@@ -2,7 +2,6 @@
 
 #include "GameTypes.h"
 #include "Packets.h"
-#include "ServerWorld.h"
 #include <cstdint>
 
 constexpr uint32_t PROTOCOL_HASH = 0x12345678;
@@ -25,8 +24,8 @@ inline void WriteChar(Buffer &buff, PacketType type) {
 } // namespace packets
 
 struct WorldSnapshot {
-  uint32_t playersLength;
-  std::unordered_map<PlayerID, ServerTypes::ServerPlayer> players;
+  uint32_t playersLength; // TODO: do we actually need this?
+  std::unordered_map<PlayerID, PlayerState> players;
 
   void Serialize(Buffer &buff) const;
   static WorldSnapshot deserialize(Buffer &buff);

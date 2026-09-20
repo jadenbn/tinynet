@@ -13,7 +13,6 @@ void ClientWorld::Draw() {
   ClearBackground(WHITE);
   // std::cout << players.size() << '\n';
   for (auto &[id, ref]: players) {
-    std::cout << "player x at " << ref.pos.x << '\n';
     ref.DrawPlayer();
 
     DrawText(std::string(std::to_string(ref.pos.x) + '\n' +

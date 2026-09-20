@@ -1,4 +1,5 @@
 #include "../shared/include/Protocol.h"
+#include "GameTypes.h"
 #include "Packets.h"
 #include "ServerWorld.h"
 #include <cstdint>
@@ -14,22 +15,21 @@ void WorldSnapshot::Serialize(Buffer &buff) const {
 
   for (const auto &[id, reference] : players) {
     packets::WriteInteger(buff, reference.playerID);
-    packets::WriteFloat(buff, reference.position.x);
-    packets::WriteFloat(buff, reference.position.y);
+    packets::WriteFloat(buff, reference.pos.x);
+    packets::WriteFloat(buff, reference.pos.y);
   }
 }
 
 WorldSnapshot WorldSnapshot::deserialize(Buffer &buff) {
   uint32_t playersListSize = packets::ReadInteger(buff);
-  std::unordered_map<PlayerID, ServerTypes::ServerPlayer> reconstruct;
+  std::unordered_map<PlayerID, PlayerState> reconstruct;
 
   for (int i = 0; i < playersListSize; i++) {
     uint32_t id = packets::ReadInteger(buff);
     float x = packets::ReadFloat(buff);
     float y = packets::ReadFloat(buff);
 
-    reconstruct.emplace(
-        std::pair<uint32_t, ServerTypes::ServerPlayer>(id, {id, {x, y}, id}));
+    reconstruct.emplace(id, PlayerState{id, {x, y}});
   }
 
   return {playersListSize, reconstruct};

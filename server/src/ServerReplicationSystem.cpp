@@ -4,7 +4,6 @@
 #include "Packets.h"
 #include "Protocol.h"
 #include "ServerWorld.h"
-#include <iostream>
 
 ServerReplicationSystem::ServerReplicationSystem(ServerWorld &c_game)
     : game(c_game) {};
@@ -37,11 +36,6 @@ bool ServerReplicationSystem::ApplyPlayerInputPacket(const PlayerInputPacket &p,
   //                        game.playerPosition.y + p.direction.y};
     game.players.at(game.clientToPlayer.at(id)).position.x += p.direction.x;
     game.players.at(game.clientToPlayer.at(id)).position.y += p.direction.y;
-
-    for (const auto &[id, ref] : game.players) {
-        std::cout << "Player ID " << ref.playerID << " at pos x " << ref.position.x << '\n';
-    }
-
   // std::cout << "received from client id " << id << "with x and y "
   //           << p.direction.x << p.direction.y << '\n';
   return true;
