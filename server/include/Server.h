@@ -21,10 +21,11 @@ public:
   template <typename Packet>
   bool SendPacket(const ClientID client, const Packet &packet) {
     auto conn = clients.find(client);
-    if (conn == clients.end())
+    if (conn == clients.end()) {
       std::cout
           << "Tried to send packet to client that doesn't exist in map!\n";
-    return false;
+      return false;
+    }
 
     uint8_t scratch[MAX_PACKET_SIZE];
     Buffer buff = Buffer(scratch, 0, 0, sizeof(scratch));

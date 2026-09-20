@@ -86,7 +86,6 @@ void ClientGame::HandleNetwork() {};
 void ClientGame::GameLoop() {
   while (!WindowShouldClose()) {
     client.UpdateConnection();
-    clientWorld.Draw();
     HandleInput();
     HandleNetwork();
 
@@ -101,6 +100,7 @@ void ClientGame::GameLoop() {
     BeginDrawing();
     clientWorld.Draw();
     EndDrawing();
+    std::this_thread::sleep_for(std::chrono::milliseconds(16));
   }
 
   // cleanup

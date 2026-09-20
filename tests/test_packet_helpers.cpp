@@ -11,19 +11,19 @@ void test_all() {
   buff.index = 0;
   buff.data = data;
 
-  WriteInteger(buff, 16161616);
+  packets::WriteInteger(buff, 16161616);
   assert(buff.index == 4);
 
-  WriteShort(buff, 24213);
+  packets::WriteShort(buff, 24213);
   assert(buff.index == 6);
 
-  WriteChar(buff, 4);
+  packets::WriteChar(buff, 4);
   assert(buff.index == 7);
 
   buff.index = 0;
-  assert(ReadInteger(buff) == 16161616);
-  assert(ReadShort(buff) == 24213);
-  assert(ReadChar(buff) == 4);
+  assert(packets::ReadInteger(buff) == 16161616);
+  assert(packets::ReadShort(buff) == 24213);
+  assert(packets::ReadChar(buff) == 4);
   assert(buff.index == 7);
 }
 

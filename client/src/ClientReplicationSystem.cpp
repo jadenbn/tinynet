@@ -18,8 +18,6 @@ bool ClientReplicationSystem::HandlePacket(Buffer &buff) {
     ApplyWorldSnapshot(WorldSnapshot::deserialize(buff));
     break;
   case PacketType::ConnectionAccepted:
-    world.AddPlayer(ConnectionAccepted::deserialize(buff).clientID);
-            std::cout << "connection req received -------------------- " << '\n';
     break;
   case PacketType::ConnectionRequest:
     break;
@@ -39,10 +37,14 @@ bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &p) {
   // the architecture so that we just update based on the authoritative server
   // when we need it.
 
-  // world.players = p.players();
-  // for (const auto &[id, ref] : p.players) {
-  //   world.players.at(id).pos.x = ref.position.x;
-  //   world.players.at(id).pos.y = ref.position.y;
-  // }
+  for (const auto &[id, ref] : p.players) {
+    if (!world.players.contains(id)) {
+        world.AddPlayer(id);
+    }
+
+    world.players.at(id).pos.x = ref.position.x;
+    world.players.at(id).pos.y = ref.position.y;
+  }
+
   return true;
 }

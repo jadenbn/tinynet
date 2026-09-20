@@ -102,6 +102,5 @@ int Socket::Receive(Address &sender, void *data, int size) {
   unsigned int address = ntohl(from.sin_addr.s_addr);
   unsigned short port = ntohs(from.sin_port);
   sender = Address(address, port);
-
   return read_bytes;
 }
