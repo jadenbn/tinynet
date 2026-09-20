@@ -20,8 +20,7 @@ bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
     break;
 
   case PacketType::ConnectionRequest: {
-    ServerTypes::ServerPlayer newPlayer(id, NetworkSafeVector2{0.0f, 0.0f}, id);
-    game.AddPlayer(newPlayer);
+    game.AddPlayer(id);
     break;
   }
 
@@ -36,9 +35,14 @@ bool ServerReplicationSystem::ApplyPlayerInputPacket(const PlayerInputPacket &p,
                                                      ClientID id) {
   // game.playerPosition = {game.playerPosition.x + p.direction.x,
   //                        game.playerPosition.y + p.direction.y};
+    game.players.at(game.clientToPlayer.at(id)).position.x += p.direction.x;
+    game.players.at(game.clientToPlayer.at(id)).position.y += p.direction.y;
 
+    for (const auto &[id, ref] : game.players) {
+        std::cout << "Player ID " << ref.playerID << " at pos x " << ref.position.x << '\n';
+    }
 
-  std::cout << "received from client id " << id << "with x and y "
-            << p.direction.x << p.direction.y << '\n';
+  // std::cout << "received from client id " << id << "with x and y "
+  //           << p.direction.x << p.direction.y << '\n';
   return true;
 }

@@ -28,8 +28,9 @@ int main() {
     }
 
     for (auto &[clientId, connection] : server.GetClientMap()) {
-      server.SendPacket(game.getPlayers().size(), WorldSnapshot{static_cast<uint32_t>(game.getPlayers().size()), game.getPlayers()}); // worldstate
+      server.SendPacket(clientId, WorldSnapshot{static_cast<uint32_t>(game.players.size()), game.players}); // worldstate
     }
+
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
   }
 }

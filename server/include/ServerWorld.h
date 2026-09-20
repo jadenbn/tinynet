@@ -5,10 +5,10 @@
 
 class ServerWorld {
 public:
-  bool AddPlayer(const ServerTypes::ServerPlayer &player);
+  bool AddPlayer(ClientID clientID);
   void UpdatePlayerPosition(PlayerID id, NetworkSafeVector2 position);
-  std::unordered_map<PlayerID, ServerTypes::ServerPlayer> getPlayers();
+  std::unordered_map<PlayerID, ServerTypes::ServerPlayer> players;
+  std::unordered_map<ClientID, PlayerID> clientToPlayer;
 
 private:
-  std::unordered_map<PlayerID, ServerTypes::ServerPlayer> players;
 };

@@ -2,13 +2,13 @@
 #pragma once
 #include "Player.h"
 #include <unordered_map>
-#include <vector>
 
 class ClientWorld {
 public:
   ClientWorld();
   void Draw();
   void Update(float dt);
+  bool AddPlayer(PlayerID playerID);
 
   std::unordered_map<PlayerID, Player> players;
 };

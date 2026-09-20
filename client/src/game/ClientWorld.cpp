@@ -5,16 +5,19 @@
 void ClientWorld::Update(float dt) {}
 ClientWorld::ClientWorld() {};
 
+bool ClientWorld::AddPlayer(PlayerID playerID) {
+    return players.try_emplace(playerID, playerID).second;
+}
+
 void ClientWorld::Draw() {
   ClearBackground(WHITE);
   // std::cout << players.size() << '\n';
-
-  for (const auto &[id, ref]: players) {
+  for (auto &[id, ref]: players) {
     ref.DrawPlayer();
 
-    DrawText(std::string(std::to_string(player.pos.x) + '\n' +
-                         std::to_string(player.pos.y))
+    DrawText(std::string(std::to_string(ref.pos.x) + '\n' +
+                         std::to_string(ref.pos.y))
                  .c_str(),
-             player.pos.x, player.pos.y, 12, BLACK);
+             ref.pos.x, ref.pos.y, 12, BLACK);
   }
 }
