@@ -23,14 +23,13 @@ bool SentQueue::ack(uint32_t sequenceNumber) {
   auto index = sequenceNumber % SENT_QUEUE_SIZE;
   if (exists(sequenceNumber)) {
     queue[index].acked = true;
-    float packetRtt =
-        std::chrono::duration<float, std::milli>(
-            std::chrono::steady_clock::now() - queue[index].timeSent)
-            .count();
+    auto elapsed = std::chrono::steady_clock::now() - queue[index].timeSent;
 
-    if (packetRtt > PACKET_TIMEOUT) {
+    if (elapsed > PACKET_TIMEOUT) {
       return false;
     }
+
+    float packetRtt = std::chrono::duration<float, std::milli>(elapsed).count();
 
     if (globalRtt == 0.0f) {
       globalRtt = packetRtt;
@@ -47,9 +46,8 @@ bool SentQueue::exists(uint32_t sequenceNumber) {
   auto index = sequenceNumber % SENT_QUEUE_SIZE;
   return (!queue[index].acked &&
           queue[index].sequenceNumber == sequenceNumber &&
-          (std::chrono::duration<float, std::milli>(
-               std::chrono::steady_clock::now() - queue[index].timeSent)
-               .count() <= PACKET_TIMEOUT));
+          std::chrono::steady_clock::now() - queue[index].timeSent <=
+              PACKET_TIMEOUT);
 }
 
 void SentQueue::insert(uint32_t sequenceNumber,
@@ -78,9 +76,7 @@ std::vector<uint32_t> SentQueue::getLostPackets(uint32_t highestAckReceived) {
     if (!queue[i].acked && queue[i].sequenceNumber > 0) {
 
       bool outOfWindow = highestAckReceived - 32 > queue[i].sequenceNumber;
-      bool timedOut =
-          std::chrono::duration<float, std::milli>(now - queue[i].timeSent)
-              .count() > PACKET_TIMEOUT;
+      bool timedOut = now - queue[i].timeSent > PACKET_TIMEOUT;
 
       if (outOfWindow || timedOut) {
         lost.push_back(queue[i].sequenceNumber);
