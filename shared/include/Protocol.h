@@ -43,6 +43,14 @@ struct ConnectionRequest {
   void Serialize(Buffer &buff) const;
   static ConnectionRequest deserialize(Buffer &buff);
 };
+
+// sent when there's nothing else to say, so the other side keeps getting acks
+// and doesn't think we've timed out
+struct Heartbeat {
+
+  void Serialize(Buffer &buff) const;
+  static Heartbeat deserialize(Buffer &buff);
+};
 struct ConnectionAccepted {
   uint32_t clientID;
 

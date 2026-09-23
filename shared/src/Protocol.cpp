@@ -51,6 +51,12 @@ void ConnectionRequest::Serialize(Buffer &buff) const {
 
 ConnectionRequest ConnectionRequest::deserialize(Buffer &buff) { return {}; }
 
+void Heartbeat::Serialize(Buffer &buff) const {
+  packets::WriteChar(buff, PacketType::Heartbeat);
+}
+
+Heartbeat Heartbeat::deserialize(Buffer &buff) { return {}; }
+
 void ConnectionAccepted::Serialize(Buffer &buff) const {
   packets::WriteChar(buff, PacketType::ConnectionAccepted);
   packets::WriteInteger(buff, clientID);

@@ -23,6 +23,9 @@ bool ServerReplicationSystem::HandlePacket(const ClientID id, Buffer &buff) {
     break;
   }
 
+  case PacketType::Heartbeat:
+    break;
+
   default:
     return false;
   }

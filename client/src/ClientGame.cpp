@@ -79,6 +79,8 @@ void ClientGame::HandleInput() {
   if (Vector2Length(direction) != 0.0f) {
     client.SendPacket(
         PlayerInputPacket{NetworkSafeVector2{direction.x, direction.y}});
+  } else {
+    client.SendPacket(Heartbeat{});
   }
 };
 void ClientGame::HandleNetwork() {};
