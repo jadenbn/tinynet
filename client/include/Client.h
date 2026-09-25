@@ -9,6 +9,8 @@ public:
   bool GetIsConnected();
   float GetRTT();
   int ReceiveFromServer(Buffer &buff);
+  NetworkConditions GetConditions();
+  void SetConditions(const NetworkConditions &conditions);
 
   template <typename Packet> bool SendPacket(const Packet &packet) {
     uint8_t scratch[MAX_PACKET_SIZE];

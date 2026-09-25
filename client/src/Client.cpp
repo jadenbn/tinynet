@@ -29,5 +29,11 @@ int Client::ReceiveFromServer(Buffer &buff) {
 };
 
 void Client::UpdateConnection() {
+  socket.Update();
   serverConnection.connected = !serverConnection.timedOut();
+}
+
+NetworkConditions Client::GetConditions() { return socket.GetConditions(); }
+void Client::SetConditions(const NetworkConditions &conditions) {
+  socket.SetConditions(conditions);
 }

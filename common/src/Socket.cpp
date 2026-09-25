@@ -1,4 +1,5 @@
 #include "Socket.h"
+#include "Packets.h"
 #include "fcntl.h"
 #include <cstdlib>
 #include <iostream>
@@ -67,6 +68,50 @@ void Socket::Close() {
 }
 
 bool Socket::Send(const Address &destination, const void *data, int size) {
+  if (!outgoing.IsActive()) {
+    return SendNow(destination, data, size);
+  }
+
+  // like real udp, sending "works" even if the packet gets lost on the way
+  outgoing.Push(destination, data, size);
+  Update();
+  return true;
+}
+
+int Socket::Receive(Address &sender, void *data, int size) {
+  if (!incoming.IsActive()) {
+    return ReceiveNow(sender, data, size);
+  }
+
+  // move everything that's really arrived into the simulator, then hand back
+  // whatever it says has "arrived" by now. the caller's buffer is used as
+  // scratch space on the way through
+  Address from;
+  int bytes;
+  while ((bytes = ReceiveNow(from, data, size)) > 0) {
+    incoming.Push(from, data, bytes);
+  }
+
+  return incoming.Pop(sender, data, size);
+}
+
+void Socket::Update() {
+  uint8_t scratch[MAX_PACKET_SIZE];
+  Address destination;
+  int bytes;
+  while ((bytes = outgoing.Pop(destination, scratch, sizeof(scratch))) > 0) {
+    SendNow(destination, scratch, bytes);
+  }
+}
+
+void Socket::SetConditions(const NetworkConditions &conditions) {
+  outgoing.conditions = conditions;
+  incoming.conditions = conditions;
+}
+
+NetworkConditions Socket::GetConditions() const { return outgoing.conditions; }
+
+bool Socket::SendNow(const Address &destination, const void *data, int size) {
   // turns our address from 192, 168, 0, ... to one unsigned integer with each
   // byte corresponding to input vals
   sockaddr_in addr;
@@ -85,7 +130,7 @@ bool Socket::Send(const Address &destination, const void *data, int size) {
   return true;
 }
 
-int Socket::Receive(Address &sender, void *data, int size) {
+int Socket::ReceiveNow(Address &sender, void *data, int size) {
   sockaddr_in from;
   socklen_t fromLength = sizeof(from);
 

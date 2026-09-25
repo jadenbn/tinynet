@@ -81,6 +81,7 @@ std::unordered_map<ClientID, Connection> &Server::GetClientMap() {
 bool Server::GetIsConnected() { return socket.isOpen(); }
 
 void Server::UpdateConnections() {
+  socket.Update();
   for (auto &[id, connection] : clients) {
     connection.connected = !connection.timedOut();
   }
