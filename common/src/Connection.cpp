@@ -28,6 +28,14 @@ int Connection::ProcessReceived(Buffer &outBuffer) {
 
   uint32_t incomingSequenceNumber = packets::ReadInteger(outBuffer);
 
+  stats.packetsReceived++;
+  stats.bytesReceived += outBuffer.length;
+  if (receivedQueue.exists(incomingSequenceNumber)) {
+    stats.duplicatesReceived++;
+  } else if (incomingSequenceNumber < remoteSequenceNumber) {
+    stats.outOfOrderReceived++;
+  }
+
   if (incomingSequenceNumber > remoteSequenceNumber) {
     remoteSequenceNumber = incomingSequenceNumber;
   }
@@ -68,7 +76,29 @@ bool Connection::Send(Socket &sock, const Buffer &buffer) {
 
   std::memcpy(buff.data + buff.length, buffer.data, buffer.index);
 
-  return sock.Send(remoteAddress, buff.data, buffer.index + buff.index);
+  int size = buffer.index + buff.index;
+  stats.packetsSent++;
+  stats.bytesSent += size;
+  return sock.Send(remoteAddress, buff.data, size);
+}
+
+ConnectionStats Connection::GetStats() {
+  ConnectionStats current = stats;
+  current.packetsAcked = sentQueue.totalAcked;
+  current.packetsLost = sentQueue.totalLost;
+  current.rtt = sentQueue.globalRtt;
+  return current;
+}
+
+uint32_t Connection::GetSequenceNumber() { return sequenceNumber; }
+uint32_t Connection::GetRemoteSequenceNumber() { return remoteSequenceNumber; }
+
+PacketStatus Connection::GetSentStatus(uint32_t sequenceNumber) {
+  return sentQueue.status(sequenceNumber);
+}
+
+bool Connection::WasReceived(uint32_t sequenceNumber) {
+  return receivedQueue.exists(sequenceNumber);
 }
 
 bool Connection::timedOut() {

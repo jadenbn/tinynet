@@ -26,9 +26,18 @@ struct SentPacketMetadata {
   std::chrono::steady_clock::time_point timeSent; // to calculate rtt
 };
 
+enum class PacketStatus : uint8_t {
+  Unknown, // never sent, or so old its slot has been reused
+  Pending, // could still be acked
+  Acked,
+  Lost,
+};
+
 struct SentQueue {
-  SentPacketMetadata queue[SENT_QUEUE_SIZE];
+  SentPacketMetadata queue[SENT_QUEUE_SIZE] = {};
   float globalRtt = 0.0f; // ms
+  uint64_t totalAcked = 0;
+  uint64_t totalLost = 0;
 
   bool
   exists(uint32_t sequenceNumber); // in the future we can optimize for bandwith
@@ -37,8 +46,14 @@ struct SentQueue {
               std::chrono::steady_clock::time_point timeSent);
   void ackPacket(uint32_t sequenceNumber, uint32_t bitfield);
   std::vector<uint32_t> getLostPackets(uint32_t highestAckReceived);
+  PacketStatus status(uint32_t sequenceNumber);
 
 private:
+  // newest packet of ours the other side says it got
+  uint32_t highestAcked = 0;
+  // everything below this has already been counted as acked or lost
+  uint32_t lossCheckedUpTo = 0;
+
   bool ack(uint32_t sequenceNumber);
 };
 struct Buffer {

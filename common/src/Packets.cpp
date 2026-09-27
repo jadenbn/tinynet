@@ -23,6 +23,7 @@ bool SentQueue::ack(uint32_t sequenceNumber) {
   auto index = sequenceNumber % SENT_QUEUE_SIZE;
   if (exists(sequenceNumber)) {
     queue[index].acked = true;
+    totalAcked++;
     auto elapsed = std::chrono::steady_clock::now() - queue[index].timeSent;
 
     if (elapsed > PACKET_TIMEOUT) {
@@ -44,10 +45,27 @@ bool SentQueue::ack(uint32_t sequenceNumber) {
 
 bool SentQueue::exists(uint32_t sequenceNumber) {
   auto index = sequenceNumber % SENT_QUEUE_SIZE;
+  // acks only reach 32 packets back, so once the newest ack is further ahead
+  // than that, nothing can ack this packet anymore
+  bool inAckWindow = sequenceNumber + 32 >= highestAcked;
   return (!queue[index].acked &&
-          queue[index].sequenceNumber == sequenceNumber &&
+          queue[index].sequenceNumber == sequenceNumber && inAckWindow &&
           std::chrono::steady_clock::now() - queue[index].timeSent <=
               PACKET_TIMEOUT);
+}
+
+PacketStatus SentQueue::status(uint32_t sequenceNumber) {
+  const auto &packet = queue[sequenceNumber % SENT_QUEUE_SIZE];
+  if (packet.sequenceNumber != sequenceNumber ||
+      packet.timeSent == std::chrono::steady_clock::time_point{}) {
+    return PacketStatus::Unknown;
+  }
+
+  if (packet.acked) {
+    return PacketStatus::Acked;
+  }
+
+  return exists(sequenceNumber) ? PacketStatus::Pending : PacketStatus::Lost;
 }
 
 void SentQueue::insert(uint32_t sequenceNumber,
@@ -57,11 +75,26 @@ void SentQueue::insert(uint32_t sequenceNumber,
 }
 
 void SentQueue::ackPacket(uint32_t sequenceNumber, uint32_t bitfield) {
+  // only trust acks for packets we actually sent
+  if (sequenceNumber > highestAcked &&
+      status(sequenceNumber) != PacketStatus::Unknown) {
+    highestAcked = sequenceNumber;
+  }
+
   ack(sequenceNumber);
   for (int i = 0; i < 32; i++) {
     if (((bitfield >> i) & 1) == 1) {
       ack(sequenceNumber - i - 1);
     }
+  }
+
+  // anything that just fell out of the ack window without being acked is
+  // gone for good. this is the earliest we can honestly call it lost
+  while (lossCheckedUpTo + 32 < highestAcked) {
+    if (status(lossCheckedUpTo) == PacketStatus::Lost) {
+      totalLost++;
+    }
+    lossCheckedUpTo++;
   }
 }
 
