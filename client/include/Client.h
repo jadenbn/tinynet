@@ -9,6 +9,7 @@ public:
   bool GetIsConnected();
   float GetRTT();
   int ReceiveFromServer(Buffer &buff);
+  Connection &GetConnection();
   NetworkConditions GetConditions();
   void SetConditions(const NetworkConditions &conditions);
 

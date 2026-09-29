@@ -49,7 +49,7 @@ void ClientGame::NetworkInit() {
 }
 
 void ClientGame::GameInit() {
-  constexpr int WIDTH = 640;
+  constexpr int WIDTH = 960; // 640 for the game + 320 for the net overlay
   constexpr int HEIGHT = 480;
 
   SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
@@ -96,11 +96,13 @@ void ClientGame::GameLoop() {
     while (client.ReceiveFromServer(packet) > 0) {
       replicationSystem.HandlePacket(packet);
     }
+    overlay.Update(client);
 
     // mainPlayer.position = game.playerPosition;
 
     BeginDrawing();
     clientWorld.Draw();
+    overlay.Draw(client);
     EndDrawing();
     std::this_thread::sleep_for(std::chrono::milliseconds(16));
   }

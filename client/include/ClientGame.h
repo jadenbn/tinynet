@@ -2,6 +2,7 @@
 #pragma once
 #include "Client.h"
 #include "ClientReplicationSystem.h"
+#include "NetDebugOverlay.h"
 #include "Server.h"
 #include "game/ClientWorld.h"
 
@@ -18,5 +19,6 @@ private:
   Client client;
   ClientWorld clientWorld;
   ClientReplicationSystem replicationSystem;
+  NetDebugOverlay overlay;
   ClientID id;
 };

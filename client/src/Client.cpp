@@ -33,6 +33,7 @@ void Client::UpdateConnection() {
   serverConnection.connected = !serverConnection.timedOut();
 }
 
+Connection &Client::GetConnection() { return serverConnection; }
 NetworkConditions Client::GetConditions() { return socket.GetConditions(); }
 void Client::SetConditions(const NetworkConditions &conditions) {
   socket.SetConditions(conditions);
