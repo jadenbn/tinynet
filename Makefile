@@ -7,7 +7,7 @@ CLIENT_FLAGS = -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib -framework O
 
 COMMON_SRC = common/src/*.cpp
 SHARED_SRC = shared/src/*.cpp
-SERVER_SRC = server/src/Server.cpp
+SERVER_SRC = server/src/Server.cpp server/src/ServerWorld.cpp server/src/ServerReplicationSystem.cpp
 CLIENT_SRC = client/src/Client.cpp
 
 TEST_DEPS = $(COMMON_SRC) $(SERVER_SRC) $(CLIENT_SRC) $(SHARED_SRC)

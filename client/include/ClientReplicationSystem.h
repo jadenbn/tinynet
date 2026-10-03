@@ -1,18 +1,18 @@
 #pragma once
-#include "Client.h"
+#include "ClientSimulation.h"
 #include "Protocol.h"
 
 class ClientWorld;
-// for turning packets into actions
 class ClientReplicationSystem {
 public:
-  ClientReplicationSystem(ClientWorld &c_game, Client &client);
-
+  ClientReplicationSystem(ClientWorld &world, ClientSimulation &simulation);
   bool HandlePacket(Buffer &buff);
+  PlayerID localID = 0;
 
 private:
   ClientWorld &world;
-
-  bool ApplyPlayerInputPacket(const PlayerInputPacket &p);
-  bool ApplyWorldSnapshot(const WorldSnapshot &p);
+  ClientSimulation &simulation;
+  bool hasSnapshot = false;
+  uint32_t latestTick = 0;
+  bool ApplyWorldSnapshot(const WorldSnapshot &snapshot);
 };

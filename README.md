@@ -4,7 +4,7 @@ I was writing the netcode for a Unity game I was making with my friends, when I 
 
 So, I decided to build tinynet! This project is just for my enjoyment of recreational programming and to broaden my understanding of the topic, so I've avoided using LLMs. While an extraordinarily useful tool, I find that I learn best when I write the code myself.
 
-Update: I've since started using AI (Claude) to help brainstorm new features and explain networking architecture to me. To be upfront about where the line is, Claude also wrote the code for the packet timeout fix, heartbeats, the network simulator, connection stats and the net debug overlay, plus the design log entries about them further down (marked _(written with Claude)_). Everything else I wrote by hand.
+Update: I've since started using AI (Claude) to help brainstorm new features and explain networking architecture to me. To be upfront about where the line is, Claude also wrote the code for the packet timeout fix, heartbeats, the network simulator, connection stats and the net debug overlay, plus the design log entries about them further down (marked _(written with Claude)_). Codex also wrote the movement simulation and its tests (the entries below say so). Everything else I wrote by hand.
 
 I attribute most of my work to a few different sources, with the most prominent (while this project is still in its infancy) being Glenn Fiedler's [Game Networking series](https://gafferongames.com/categories/game-networking/).
 
@@ -25,11 +25,12 @@ Features so far:
 - Connection Lifecycle (Heartbeat, timeout detection, event loops and such)
 - Network Condition Simulator (latency, jitter, loss, duplication; sits under the socket so nothing above it knows it's fake)
 - Connection Stats (packets/bytes in & out, acked, lost, duplicates, out of order, smoothed RTT)
+- Fixed 60Hz movement simulation (shared Vec3/Quat math, acceleration, friction, server input sequencing)
 - Live Net Debug Overlay in the demo (RTT + bandwidth graphs, per-packet ack strips, simulator sliders & presets)
 
 ![net debug overlay on the "mobile" preset](docs/net-overlay.png)
 
-Running it: `make server client`, then `make run-server` and `make run-client PORT=3001`. In the client, WASD moves, TAB toggles the overlay, 1-4 are network presets (perfect / decent wifi / mobile / awful), and the sliders cover anything in between.
+Running it: `make server client`, then `make run-server` and `make run-client PORT=3001`. In the client, WASD moves relative to your facing direction, Q/E turns, TAB toggles the overlay, 1-4 are network presets (perfect / decent wifi / mobile / awful), and the sliders cover anything in between.
 
 ---
 
@@ -86,6 +87,13 @@ Jaden from a couple hours later here. I think I'm happy with the design I've set
   - Measured loss matches simulated loss within ~1.5 percentage points at 5-25%.
 
   Things the overlay shows that need fixing: turn up duplicate and you move faster, because duplicated input packets get applied twice. Turn up jitter and players rubber-band, because a late snapshot overwrites a newer one. Both come from the same missing check in Connection::ProcessReceived (drop anything we've already received or that's older than the newest), which is the next thing to fix.
+
+- !
+  _Actually simulating movement_ _(written with Codex)_. Before this, moving meant adding a little bit to your position every time an input packet arrived. That means more packets = more movement, which is a slightly unfortunate way to handle duplicates :) The server now steps at 60Hz, and each numbered input describes one of those steps. Missing inputs get resent, duplicates are ignored, and the server says which input it actually processed in the snapshot. The packet ACK still means "received this packet"; the input ACK means "used this movement command".
+
+  There is now a small Vec3/Quat header in shared/, with dot, cross, normalize, lerp, slerp and quaternion-vector rotation. We still draw the demo from above, but its positions and rotations are three-dimensional. A vector is just three numbers describing a direction or position. Normalizing it gives it length 1, so holding W+D doesn't make you faster than just W. The quaternion rotates that input from "forward relative to me" into a direction in the world.
+
+  The actual integration is semi-implicit Euler: first $v_{t+1} = v_t + a\Delta t$, then $x_{t+1} = x_t + v_{t+1}\Delta t$. We use the new velocity to move, then clamp speed and subtract friction. Here $\Delta t = 1/60$ seconds, regardless of how fast the window draws. Releasing the keys still sends a neutral command, so the server knows to coast to a stop. Positions stay inside a world from -100 to 100 on each axis.
 
 ---
 

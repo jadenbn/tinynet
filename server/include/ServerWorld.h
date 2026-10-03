@@ -1,14 +1,17 @@
 #pragma once
-#include "GameTypes.h"
+#include "Protocol.h"
 #include "ServerTypes.h"
 #include <unordered_map>
 
 class ServerWorld {
 public:
   bool AddPlayer(ClientID clientID);
-  void UpdatePlayerPosition(PlayerID id, NetworkSafeVector2 position);
+  bool QueueInputs(ClientID clientID, const PlayerInputPacket &packet);
+  void Tick();
+  WorldSnapshot Snapshot() const;
   std::unordered_map<PlayerID, ServerTypes::ServerPlayer> players;
   std::unordered_map<ClientID, PlayerID> clientToPlayer;
 
 private:
+  uint32_t tick = 0;
 };

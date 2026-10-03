@@ -3,8 +3,10 @@
 #include "GameTypes.h"
 #include "Packets.h"
 #include <cstdint>
+#include <unordered_map>
+#include <vector>
 
-constexpr uint32_t PROTOCOL_HASH = 0x12345678;
+constexpr uint32_t PROTOCOL_HASH = 0x12345679;
 
 enum class PacketType : uint8_t {
   ConnectionRequest = 0,
@@ -24,7 +26,7 @@ inline void WriteChar(Buffer &buff, PacketType type) {
 } // namespace packets
 
 struct WorldSnapshot {
-  uint32_t playersLength; // TODO: do we actually need this?
+  uint32_t tick = 0;
   std::unordered_map<PlayerID, PlayerState> players;
 
   void Serialize(Buffer &buff) const;
@@ -32,7 +34,7 @@ struct WorldSnapshot {
 };
 
 struct PlayerInputPacket {
-  NetworkSafeVector2 direction;
+  std::vector<InputCommand> inputs;
 
   void Serialize(Buffer &buff) const;
   static PlayerInputPacket deserialize(Buffer &buff);

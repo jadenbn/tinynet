@@ -18,7 +18,9 @@ public:
 private:
   Client client;
   ClientWorld clientWorld;
+  ClientSimulation simulation;
   ClientReplicationSystem replicationSystem;
+  float yaw = 0;
   NetDebugOverlay overlay;
-  ClientID id;
+  ClientID id = 0;
 };

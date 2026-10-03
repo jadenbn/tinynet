@@ -43,6 +43,10 @@ int Server::ReceiveFromClients(ClientID &clientID, Buffer &buff) {
   if (createdClient && packetType != PacketType::ConnectionRequest) {
     clients.erase(clientID);
     return 0;
+  } else if (createdClient && clients.size() > MAX_PLAYERS) {
+    SendPacket(clientID, ConnectionRejected{1});
+    clients.erase(clientID);
+    return 0;
   } else if (packetType == PacketType::ConnectionRequest) {
     std::cout << "Accepting connection to client id " << clientID << '\n';
     SendPacket(clientID, ConnectionAccepted{clientID});

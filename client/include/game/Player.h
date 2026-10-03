@@ -1,15 +1,10 @@
+#pragma once
 #include "GameTypes.h"
-#include "raylib.h"
-#include "raymath.h"
-class Player {
 
+class Player {
 public:
   const PlayerID playerID;
-  Player(PlayerID id_c);
+  explicit Player(PlayerID id) : playerID(id) { state.playerID = id; }
   void DrawPlayer();
-  ~Player(); // make sure to UnloadTexture(mainPlayerSprite);
-  Vector2 pos = Vector2Zero();
-
-private:
-  Texture sprite;
+  PlayerState state;
 };
