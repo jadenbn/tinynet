@@ -84,20 +84,22 @@ void ClientGame::HandleNetwork() {
   uint8_t scratch[MAX_PACKET_SIZE];
   Buffer packet{scratch, 0, 0, sizeof(scratch)};
   while (client.ReceiveFromServer(packet) > 0)
-    replicationSystem.HandlePacket(packet);
+    replicationSystem.HandlePacket(packet, client.GetRTT()/2000.0);
 }
 
 void ClientGame::GameLoop() {
   double previous = GetTime(), accumulator = 0;
   while (!WindowShouldClose()) {
     double now = GetTime();
-    accumulator += std::min(now-previous, 0.25);
+    double dt = std::min(now-previous, 0.25);
+    accumulator += dt;
     previous = now;
     HandleNetwork();
     while (accumulator >= TICK_DT) {
       HandleInput();
       accumulator -= TICK_DT;
     }
+    replicationSystem.Update(dt);
     overlay.Update(client);
     BeginDrawing();
     clientWorld.Draw();

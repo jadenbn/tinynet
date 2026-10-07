@@ -4,7 +4,7 @@ I was writing the netcode for a Unity game I was making with my friends, when I 
 
 So, I decided to build tinynet! This project is just for my enjoyment of recreational programming and to broaden my understanding of the topic, so I've avoided using LLMs. While an extraordinarily useful tool, I find that I learn best when I write the code myself.
 
-Update: I've since started using AI (Claude) to help brainstorm new features and explain networking architecture to me. To be upfront about where the line is, Claude also wrote the code for the packet timeout fix, heartbeats, the network simulator, connection stats and the net debug overlay, plus the design log entries about them further down (marked _(written with Claude)_). Codex also wrote the movement simulation and its tests (the entries below say so). Everything else I wrote by hand.
+Update: I've since started using AI (Claude) to help brainstorm new features and explain networking architecture to me. To be upfront about where the line is, Claude also wrote the code for the packet timeout fix, heartbeats, the network simulator, connection stats and the net debug overlay, plus the design log entries about them further down (marked _(written with Claude)_). Codex also wrote the movement simulation, prediction, interpolation and their tests (the entries below say so). Everything else I wrote by hand.
 
 I attribute most of my work to a few different sources, with the most prominent (while this project is still in its infancy) being Glenn Fiedler's [Game Networking series](https://gafferongames.com/categories/game-networking/).
 
@@ -25,6 +25,7 @@ Features so far:
 - Connection Lifecycle (Heartbeat, timeout detection, event loops and such)
 - Network Condition Simulator (latency, jitter, loss, duplication; sits under the socket so nothing above it knows it's fake)
 - Connection Stats (packets/bytes in & out, acked, lost, duplicates, out of order, smoothed RTT)
+- Client-side prediction + reconciliation, remote position/rotation interpolation 100ms behind estimated server time
 - Fixed 60Hz movement simulation (shared Vec3/Quat math, acceleration, friction, server input sequencing)
 - Live Net Debug Overlay in the demo (RTT + bandwidth graphs, per-packet ack strips, simulator sliders & presets)
 
@@ -86,7 +87,7 @@ Jaden from a couple hours later here. I think I'm happy with the design I've set
   - RTT measurement lines up with simulated latency within ~4ms when polled every 1ms.
   - Measured loss matches simulated loss within ~1.5 percentage points at 5-25%.
 
-  Things the overlay shows that need fixing: turn up duplicate and you move faster, because duplicated input packets get applied twice. Turn up jitter and players rubber-band, because a late snapshot overwrites a newer one. Both come from the same missing check in Connection::ProcessReceived (drop anything we've already received or that's older than the newest), which is the next thing to fix.
+  Things the overlay shows that need fixing: turn up duplicate and you move faster, because duplicated input packets get applied twice. Turn up jitter and players rubber-band, because a late snapshot overwrites a newer one. Those were the symptoms at the time. Movement now deduplicates numbered inputs, and snapshot history ignores old ticks, so late packets can still contribute their transport ACKs without moving the world backwards.
 
 - !
   _Actually simulating movement_ _(written with Codex)_. Before this, moving meant adding a little bit to your position every time an input packet arrived. That means more packets = more movement, which is a slightly unfortunate way to handle duplicates :) The server now steps at 60Hz, and each numbered input describes one of those steps. Missing inputs get resent, duplicates are ignored, and the server says which input it actually processed in the snapshot. The packet ACK still means "received this packet"; the input ACK means "used this movement command".
@@ -94,6 +95,13 @@ Jaden from a couple hours later here. I think I'm happy with the design I've set
   There is now a small Vec3/Quat header in shared/, with dot, cross, normalize, lerp, slerp and quaternion-vector rotation. We still draw the demo from above, but its positions and rotations are three-dimensional. A vector is just three numbers describing a direction or position. Normalizing it gives it length 1, so holding W+D doesn't make you faster than just W. The quaternion rotates that input from "forward relative to me" into a direction in the world.
 
   The actual integration is semi-implicit Euler: first $v_{t+1} = v_t + a\Delta t$, then $x_{t+1} = x_t + v_{t+1}\Delta t$. We use the new velocity to move, then clamp speed and subtract friction. Here $\Delta t = 1/60$ seconds, regardless of how fast the window draws. Releasing the keys still sends a neutral command, so the server knows to coast to a stop. Positions stay inside a world from -100 to 100 on each axis.
+
+- !
+  _Waiting a little to look smoother_ _(written with Codex)_. Other players now render about 100ms behind our estimate of server time. It sounds backwards to deliberately add delay, but it means we usually have an update on either side of the moment we're drawing. If those positions are $p_0$ and $p_1$, we draw $(1-\alpha)p_0 + \alpha p_1$, where $\alpha = (t_{render}-t_0)/(t_1-t_0)$. Halfway between the two timestamps? Halfway between the two positions. Rotations use slerp, which follows the shorter arc between unit quaternions instead of cutting straight through them.
+
+  Your own player doesn't wait. The client runs the same movement function immediately and keeps the inputs the server hasn't processed yet. When a snapshot comes back, we reset to that authoritative position AND velocity, discard inputs through its input ACK, then replay the rest. The red ring in the demo is the last position the server sent; the filled circle is where you predict yourself to be now. That gap under latency is expected, not automatically an error.
+
+  This is still a small demo: the remote clock uses half the smoothed RTT as an estimate of transit time, and missing bracketing snapshots hold the nearest available state. There's no extrapolation. The pending input queue caps at two seconds; if the server stops acknowledging, prediction pauses rather than forgetting commands it needs to replay.
 
 ---
 

@@ -48,12 +48,19 @@ int main() {
   world.Tick();
   assert(world.players.at(7).state.lastInput == 0);
 
+  ServerWorld full;
+  for (uint32_t id = 0; id < MAX_PLAYERS; ++id)
+    assert(full.AddPlayer(id));
+  assert(!full.AddPlayer(MAX_PLAYERS));
+  world.QueueInputs(7, {{{MAX_PENDING_INPUTS+1, {}, 0}}});
+  assert(world.players.at(7).pending.empty());
+
   ClientSimulation client;
   client.Reconcile(expected);
   for (uint32_t i = 0; i < MAX_PENDING_INPUTS; ++i)
     assert(client.AddInput({}, 0));
   assert(!client.AddInput({}, 0));
-  client.Reconcile(client.local);
+  client.Reconcile(expected);
   assert(client.pending.size() == MAX_PENDING_INPUTS);
   std::cout << "All movement tests passed!\n";
 }

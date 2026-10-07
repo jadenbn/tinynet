@@ -7,7 +7,9 @@ class ClientWorld {
 public:
   ClientWorld();
   void Draw();
-  void Update(float dt);
+  Vec3 authoritative;
+  Vec3 viewCenter;
+  bool hasLocal = false;
   bool AddPlayer(PlayerID playerID);
 
   std::unordered_map<PlayerID, Player> players;
