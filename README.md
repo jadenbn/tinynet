@@ -4,7 +4,7 @@ I was writing the netcode for a Unity game I was making with my friends, when I 
 
 So, I decided to build tinynet! This project is just for my enjoyment of recreational programming and to broaden my understanding of the topic, so I've avoided using LLMs. While an extraordinarily useful tool, I find that I learn best when I write the code myself.
 
-Update: I've since started using AI (Claude) to help brainstorm new features and explain networking architecture to me. To be upfront about where the line is, Claude also wrote the code for the packet timeout fix, heartbeats, the network simulator, connection stats and the net debug overlay, plus the design log entries about them further down (marked _(written with Claude)_). Codex also wrote the movement simulation, prediction, interpolation, snapshot compression and their tests (the entries below say so). Everything else I wrote by hand.
+Update: I've since started using AI (Claude) to help brainstorm new features and explain networking architecture to me. To be upfront about where the line is, Claude also wrote the code for the packet timeout fix, heartbeats, the network simulator, connection stats and the net debug overlay, plus the design log entries about them further down (marked _(written with Claude)_). Codex also wrote the movement simulation, prediction, interpolation, snapshot compression, the scripted GIF demo and their tests (the entries below say so). Everything else I wrote by hand.
 
 I attribute most of my work to a few different sources, with the most prominent (while this project is still in its infancy) being Glenn Fiedler's [Game Networking series](https://gafferongames.com/categories/game-networking/).
 
@@ -31,6 +31,12 @@ Features so far:
 - Live Net Debug Overlay in the demo (RTT + bandwidth graphs, per-packet ack strips, simulator sliders & presets)
 
 ![net debug overlay on the "mobile" preset](docs/net-overlay.png)
+
+![predicted local movement and interpolated remote movement over UDP](docs/movement-demo.gif)
+
+The GIF records two actual UDP clients with 50ms latency each way, 15ms jitter, 5% loss and 2% duplication. Blue is the local predicted player; orange is the remote interpolated player. The red ring is the last authoritative position for blue, and the faint orange ring is the latest unsmoothed remote update. Inputs are scripted, then released to show friction. A small Python renderer draws the recorded simulation states.
+
+To regenerate it: `make demo` (Python 3 with Pillow; uses local UDP ports 40100-40102 for about 12 seconds). `make snapshot-size` reruns the serialization measurements without opening a window.
 
 Running it: `make server client`, then `make run-server` and `make run-client PORT=3001`. In the client, WASD moves relative to your facing direction, Q/E turns, TAB toggles the overlay, 1-4 are network presets (perfect / decent wifi / mobile / awful), and the sliders cover anything in between.
 

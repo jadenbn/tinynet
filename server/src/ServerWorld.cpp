@@ -33,7 +33,7 @@ void ServerWorld::Tick() {
   ++tick;
   for (auto &[id, player] : players) {
     auto next = player.pending.find(player.state.lastInput + 1);
-    // Hold at a missing command; the client resends it instead of skipping time.
+    // shortcut: missing commands pause this player, add tick-aligned fallback for long outages.
     if (next == player.pending.end())
       continue;
     SimulateMovement(player.state, next->second);

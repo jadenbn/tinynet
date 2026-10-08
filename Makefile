@@ -3,7 +3,7 @@ CXXFLAGS = -std=c++20 -Wall -Icommon/include -Icommon -Iclient/include -Iclient/
 
 CLIENT_FLAGS = -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 
-.PHONY: all server client clean run-server run-client test snapshot-size
+.PHONY: all server client clean run-server run-client test demo snapshot-size
 
 COMMON_SRC = common/src/*.cpp
 SHARED_SRC = shared/src/*.cpp
@@ -45,6 +45,13 @@ endif
 clean:
 	@rm -rf server/bin client/bin tests/bin
 
+
+# Optional README recording; Python Pillow is only needed to encode the GIF.
+demo:
+	@mkdir -p tests/bin
+	$(CXX) $(CXXFLAGS) docs/movement-demo.cpp $(TEST_DEPS) -o tests/bin/movement-demo
+	./tests/bin/movement-demo tests/bin/movement-demo.csv
+	python3 docs/render_demo.py tests/bin/movement-demo.csv docs/movement-demo.gif
 
 snapshot-size:
 	@mkdir -p tests/bin
