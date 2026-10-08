@@ -3,7 +3,7 @@ CXXFLAGS = -std=c++20 -Wall -Icommon/include -Icommon -Iclient/include -Iclient/
 
 CLIENT_FLAGS = -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 
-.PHONY: all server client clean run-server run-client test
+.PHONY: all server client clean run-server run-client test snapshot-size
 
 COMMON_SRC = common/src/*.cpp
 SHARED_SRC = shared/src/*.cpp
@@ -45,3 +45,8 @@ endif
 clean:
 	@rm -rf server/bin client/bin tests/bin
 
+
+snapshot-size:
+	@mkdir -p tests/bin
+	$(CXX) $(CXXFLAGS) tests/test_quantization.cpp $(TEST_DEPS) -o tests/bin/test_quantization
+	./tests/bin/test_quantization

@@ -4,7 +4,7 @@ I was writing the netcode for a Unity game I was making with my friends, when I 
 
 So, I decided to build tinynet! This project is just for my enjoyment of recreational programming and to broaden my understanding of the topic, so I've avoided using LLMs. While an extraordinarily useful tool, I find that I learn best when I write the code myself.
 
-Update: I've since started using AI (Claude) to help brainstorm new features and explain networking architecture to me. To be upfront about where the line is, Claude also wrote the code for the packet timeout fix, heartbeats, the network simulator, connection stats and the net debug overlay, plus the design log entries about them further down (marked _(written with Claude)_). Codex also wrote the movement simulation, prediction, interpolation and their tests (the entries below say so). Everything else I wrote by hand.
+Update: I've since started using AI (Claude) to help brainstorm new features and explain networking architecture to me. To be upfront about where the line is, Claude also wrote the code for the packet timeout fix, heartbeats, the network simulator, connection stats and the net debug overlay, plus the design log entries about them further down (marked _(written with Claude)_). Codex also wrote the movement simulation, prediction, interpolation, snapshot compression and their tests (the entries below say so). Everything else I wrote by hand.
 
 I attribute most of my work to a few different sources, with the most prominent (while this project is still in its infancy) being Glenn Fiedler's [Game Networking series](https://gafferongames.com/categories/game-networking/).
 
@@ -25,6 +25,7 @@ Features so far:
 - Connection Lifecycle (Heartbeat, timeout detection, event loops and such)
 - Network Condition Simulator (latency, jitter, loss, duplication; sits under the socket so nothing above it knows it's fake)
 - Connection Stats (packets/bytes in & out, acked, lost, duplicates, out of order, smoothed RTT)
+- Quantized snapshots (centimetre positions, 32-bit smallest-three quaternions; 35.6% smaller with 10 players)
 - Client-side prediction + reconciliation, remote position/rotation interpolation 100ms behind estimated server time
 - Fixed 60Hz movement simulation (shared Vec3/Quat math, acceleration, friction, server input sequencing)
 - Live Net Debug Overlay in the demo (RTT + bandwidth graphs, per-packet ack strips, simulator sliders & presets)
@@ -81,7 +82,7 @@ Jaden from a couple hours later here. I think I'm happy with the design I've set
 - !
   _Counters, not rates_ _(written with Claude)_. Connection only keeps running totals (packets and bytes sent/received, acked, lost, and so on). Anything per second, like kbps, is worked out by the overlay, which samples the totals every 100ms and diffs them. That keeps common/ cheap (a few increments per packet) and lets whoever's reading choose their own window. The overlay is also the only thing that knows raylib exists; common/ just answers questions like "what happened to packet 512?", so the networking stays reusable outside this demo. The sliders are immediate mode: every frame the slider draws itself and returns the new value, so there are no slider objects to keep in sync.
 
-  Some numbers so far:
+  Some numbers at this stage (before the movement/rotation snapshots below):
   - 16 byte header per packet. A world snapshot with one player is 33 bytes (16 header + 1 type + 4 player count + 12 per player), so ~16 kbps down per client at 60Hz, before UDP/IP's 28 bytes per packet.
   - A snapshot fits in one 1400 byte packet up to 114 players. After that we need splitting, interest management, or deltas.
   - RTT measurement lines up with simulated latency within ~4ms when polled every 1ms.
@@ -90,7 +91,7 @@ Jaden from a couple hours later here. I think I'm happy with the design I've set
   Things the overlay shows that need fixing: turn up duplicate and you move faster, because duplicated input packets get applied twice. Turn up jitter and players rubber-band, because a late snapshot overwrites a newer one. Those were the symptoms at the time. Movement now deduplicates numbered inputs, and snapshot history ignores old ticks, so late packets can still contribute their transport ACKs without moving the world backwards.
 
 - !
-  _Actually simulating movement_ _(written with Codex)_. Before this, moving meant adding a little bit to your position every time an input packet arrived. That means more packets = more movement, which is a slightly unfortunate way to handle duplicates :) The server now steps at 60Hz, and each numbered input describes one of those steps. Missing inputs get resent, duplicates are ignored, and the server says which input it actually processed in the snapshot. The packet ACK still means "received this packet"; the input ACK means "used this movement command".
+  _Actually simulating movement_ _(written with Codex)_. Before this, moving meant adding a little bit to your position every time an input packet arrived. That means more packets = more movement, which is a slightly unfortunate way to handle duplicates :) The server now steps at 60Hz, and each numbered input describes one of those steps. Missing inputs get resent (that player waits at the gap), duplicates are ignored, and the server says which input it actually processed in the snapshot. The packet ACK still means "received this packet"; the input ACK means "used this movement command".
 
   There is now a small Vec3/Quat header in shared/, with dot, cross, normalize, lerp, slerp and quaternion-vector rotation. We still draw the demo from above, but its positions and rotations are three-dimensional. A vector is just three numbers describing a direction or position. Normalizing it gives it length 1, so holding W+D doesn't make you faster than just W. The quaternion rotates that input from "forward relative to me" into a direction in the world.
 
@@ -102,6 +103,23 @@ Jaden from a couple hours later here. I think I'm happy with the design I've set
   Your own player doesn't wait. The client runs the same movement function immediately and keeps the inputs the server hasn't processed yet. When a snapshot comes back, we reset to that authoritative position AND velocity, discard inputs through its input ACK, then replay the rest. The red ring in the demo is the last position the server sent; the filled circle is where you predict yourself to be now. That gap under latency is expected, not automatically an error.
 
   This is still a small demo: the remote clock uses half the smoothed RTT as an estimate of transit time, and missing bracketing snapshots hold the nearest available state. There's no extrapolation. The pending input queue caps at two seconds; if the server stops acknowledging, prediction pauses rather than forgetting commands it needs to replay.
+
+- !
+  _Sending fewer numbers_ _(written with Codex)_. A quaternion has four components, but if it's normalized, their squares add up to 1. So we can drop the component with the largest absolute value and reconstruct it with $q_{dropped} = \sqrt{1-q_a^2-q_b^2-q_c^2}$. We flip the whole quaternion if that component is negative first; $q$ and $-q$ describe the same rotation, so we don't need to send a sign bit.
+
+  The other three components fit in $[-1/\sqrt{2}, 1/\sqrt{2}]$. Each gets 10 bits, and the dropped component's index gets 2, giving us a 32-bit rotation instead of four 32-bit floats. Positions are signed 16-bit centimetres within our -100 to 100 world, so each axis loses at most half a centimetre to rounding. Velocity stays as floats because it's part of the state we replay for prediction.
+
+  I wanted an actual number here rather than "this should be smaller", so `make snapshot-size` serializes the same player states both ways. These include our 16-byte protocol header, but exclude UDP/IP overhead:
+
+  | Players | Float snapshot | Quantized snapshot | Reduction |
+  | --- | ---: | ---: | ---: |
+  | 1 | 73 bytes | 55 bytes | 24.7% |
+  | 10 | 505 bytes | 325 bytes | 35.6% |
+  | 24 | 1177 bytes | 745 bytes | 36.7% |
+
+  This comparison includes the new position, velocity, rotation and input ACK fields in BOTH formats. The old 2D snapshot was smaller because it didn't contain all that state. These are snapshot savings, not a claim that total traffic fell by the same amount; resending unprocessed inputs costs upstream bytes. Tests cover 10,000 seeded rotations (under 0.35 degrees of angular error), world bounds, truncated packets and invalid values. The protocol hash changed, so old clients won't connect to the new server.
+
+  For now the demo caps at 24 players so either snapshot format fits one datagram. Splitting snapshots, delta compression and interest management can wait until there's a reason to add them.
 
 ---
 

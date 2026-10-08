@@ -10,13 +10,14 @@ int main() {
   snapshot.tick = 42;
   snapshot.players.emplace(7, PlayerState{7, {1,2,3}, {0,0,1}, Yaw(0.5f), 19});
   snapshot.Serialize(buff);
-  assert(buff.length == 57);
+  assert(buff.length == 39);
   buff.index = 1;
   auto decoded = WorldSnapshot::deserialize(buff);
   assert(decoded.tick == 42 && decoded.players.at(7).lastInput == 19);
   assert(decoded.players.at(7).pos.x == 1);
   assert(decoded.players.at(7).velocity.z == 1);
-  assert(decoded.players.at(7).orientation.w == snapshot.players.at(7).orientation.w);
+  assert(std::abs(Dot(decoded.players.at(7).orientation,
+                      snapshot.players.at(7).orientation)) > 0.99999f);
   int fullLength = buff.length;
   for (int length = 1; length < fullLength; ++length) {
     buff.index = 1;

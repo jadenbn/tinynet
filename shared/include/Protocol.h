@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-constexpr uint32_t PROTOCOL_HASH = 0x12345679;
+constexpr uint32_t PROTOCOL_HASH = 0x12345680;
 
 enum class PacketType : uint8_t {
   ConnectionRequest = 0,
@@ -30,6 +30,7 @@ struct WorldSnapshot {
   std::unordered_map<PlayerID, PlayerState> players;
 
   void Serialize(Buffer &buff) const;
+  void SerializeRaw(Buffer &buff) const; // same state, floats: benchmark baseline
   static WorldSnapshot deserialize(Buffer &buff);
 };
 

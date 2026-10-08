@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <utility>
 #include "Movement.h"
+#include "Quantization.h"
 #include <stdexcept>
 
 namespace {
@@ -32,26 +33,44 @@ bool ValidState(const PlayerState &state) {
 }
 }
 
-void WorldSnapshot::Serialize(Buffer &buff) const {
-  if (players.size() > MAX_PLAYERS || 9 + players.size()*48 >
+namespace {
+void WriteSnapshot(Buffer &buff, const WorldSnapshot &snapshot, bool compressed) {
+  const auto &players = snapshot.players;
+  size_t stateBytes = compressed ? 30 : 48;
+  if (players.size() > MAX_PLAYERS || 9 + players.size()*stateBytes >
       static_cast<size_t>(buff.capacity - buff.index))
     throw std::length_error("snapshot exceeds datagram");
   packets::WriteChar(buff, PacketType::WorldSnapshot);
-  packets::WriteInteger(buff, tick);
+  packets::WriteInteger(buff, snapshot.tick);
   packets::WriteInteger(buff, players.size());
   for (const auto &[id, state] : players) {
     if (id != state.playerID || !ValidState(state))
       throw std::invalid_argument("invalid player state");
     packets::WriteInteger(buff, id);
-    WriteVec3(buff, state.pos);
+    if (compressed) {
+      packets::WriteShort(buff, PackPosition(state.pos.x));
+      packets::WriteShort(buff, PackPosition(state.pos.y));
+      packets::WriteShort(buff, PackPosition(state.pos.z));
+    } else {
+      WriteVec3(buff, state.pos);
+    }
     WriteVec3(buff, state.velocity);
-    packets::WriteFloat(buff, state.orientation.x);
-    packets::WriteFloat(buff, state.orientation.y);
-    packets::WriteFloat(buff, state.orientation.z);
-    packets::WriteFloat(buff, state.orientation.w);
+    if (compressed) {
+      packets::WriteInteger(buff, PackQuaternion(state.orientation));
+    } else {
+      packets::WriteFloat(buff, state.orientation.x);
+      packets::WriteFloat(buff, state.orientation.y);
+      packets::WriteFloat(buff, state.orientation.z);
+      packets::WriteFloat(buff, state.orientation.w);
+    }
     packets::WriteInteger(buff, state.lastInput);
   }
 }
+
+}
+
+void WorldSnapshot::Serialize(Buffer &buff) const { WriteSnapshot(buff, *this, true); }
+void WorldSnapshot::SerializeRaw(Buffer &buff) const { WriteSnapshot(buff, *this, false); }
 
 WorldSnapshot WorldSnapshot::deserialize(Buffer &buff) {
   Require(buff, 8);
@@ -60,14 +79,15 @@ WorldSnapshot WorldSnapshot::deserialize(Buffer &buff) {
   uint32_t count = packets::ReadInteger(buff);
   if (count > MAX_PLAYERS)
     throw std::invalid_argument("too many players");
-  Require(buff, count*48);
+  Require(buff, count*30);
   for (uint32_t i = 0; i < count; ++i) {
     PlayerState state;
     state.playerID = packets::ReadInteger(buff);
-    state.pos = ReadVec3(buff);
+    state.pos = {UnpackPosition(packets::ReadShort(buff)),
+                 UnpackPosition(packets::ReadShort(buff)),
+                 UnpackPosition(packets::ReadShort(buff))};
     state.velocity = ReadVec3(buff);
-    state.orientation = {packets::ReadFloat(buff), packets::ReadFloat(buff),
-                         packets::ReadFloat(buff), packets::ReadFloat(buff)};
+    state.orientation = UnpackQuaternion(packets::ReadInteger(buff));
     state.lastInput = packets::ReadInteger(buff);
     if (!ValidState(state) || !snapshot.players.emplace(state.playerID, state).second)
       throw std::invalid_argument("invalid player state");
