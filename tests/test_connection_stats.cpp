@@ -62,9 +62,25 @@ void test_duplicate_and_out_of_order_are_counted() {
   assert(!conn.WasReceived(4));
 }
 
+void test_fresh_header_does_not_ack_our_first_packet() {
+  Socket sock;
+  sock.Open(3299);
+  // nobody listens on 3298, udp doesn't care
+  Connection conn(Address(127, 0, 0, 1, 3298));
+  uint8_t data[1] = {static_cast<uint8_t>(PacketType::Heartbeat)};
+  uint32_t first = conn.GetSequenceNumber();
+  assert(conn.Send(sock, {data, 1, 1, 1}));
+
+  // their header says "ack 0, bitfield 0" because they haven't heard from us
+  receive(conn, 1);
+  assert(conn.GetSentStatus(first) == PacketStatus::Pending);
+  assert(conn.GetStats().packetsAcked == 0);
+}
+
 int main() {
   test_loss_is_counted_once_out_of_ack_window();
   test_acks_for_packets_never_sent_are_ignored();
   test_duplicate_and_out_of_order_are_counted();
+  test_fresh_header_does_not_ack_our_first_packet();
   std::cout << "All tests passed!" << std::endl;
 }

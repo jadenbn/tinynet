@@ -45,8 +45,11 @@ private:
   bool initialPacketReceived = false;
   std::chrono::steady_clock::time_point lastReceivedTime;
   Address remoteAddress = Address();
-  uint32_t sequenceNumber = 0;
-  uint32_t remoteSequenceNumber = 0;
+  // starts at 1: a header acks its newest packet with no "nothing yet" flag,
+  // so before the other side has heard from us it says "ack 0". if 0 were a
+  // real packet, that would falsely ack it
+  uint32_t sequenceNumber = 1;
+  uint32_t remoteSequenceNumber = 0; // 0 = nothing received yet
   ReceivedQueue receivedQueue;
   SentQueue sentQueue;
 };
