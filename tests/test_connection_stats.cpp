@@ -42,6 +42,7 @@ void receive(Connection &conn, uint32_t sequenceNumber) {
   packets::WriteInteger(buff, sequenceNumber);
   packets::WriteInteger(buff, 0);
   packets::WriteInteger(buff, 0);
+  packets::WriteChar(buff, 0); // no reliable messages
   packets::WriteChar(buff, PacketType::Heartbeat);
   buff.index = 0;
   conn.ProcessReceived(buff);
@@ -55,7 +56,7 @@ void test_duplicate_and_out_of_order_are_counted() {
 
   ConnectionStats stats = conn.GetStats();
   assert(stats.packetsReceived == 3);
-  assert(stats.bytesReceived == 3 * 17);
+  assert(stats.bytesReceived == 3 * 18);
   assert(stats.outOfOrderReceived == 1);
   assert(stats.duplicatesReceived == 1);
   assert(conn.WasReceived(3));

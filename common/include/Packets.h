@@ -33,6 +33,13 @@ enum class PacketStatus : uint8_t {
   Lost,
 };
 
+// packets one incoming header just acked for the first time: its ack plus
+// up to 32 from the bitfield
+struct AckedPackets {
+  uint32_t sequences[33];
+  int count = 0;
+};
+
 struct SentQueue {
   SentPacketMetadata queue[SENT_QUEUE_SIZE] = {};
   float globalRtt = 0.0f; // ms
@@ -44,7 +51,7 @@ struct SentQueue {
                                    // and turn these fields from 8bit to 4bit
   void insert(uint32_t sequenceNumber,
               std::chrono::steady_clock::time_point timeSent);
-  void ackPacket(uint32_t sequenceNumber, uint32_t bitfield);
+  AckedPackets ackPacket(uint32_t sequenceNumber, uint32_t bitfield);
   std::vector<uint32_t> getLostPackets(uint32_t highestAckReceived);
   PacketStatus status(uint32_t sequenceNumber);
 

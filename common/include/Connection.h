@@ -1,6 +1,7 @@
 #pragma once
 #include "Address.h"
 #include "Packets.h"
+#include "ReliableChannel.h"
 #include "Socket.h"
 #include <chrono>
 
@@ -19,6 +20,12 @@ struct ConnectionStats {
   uint64_t duplicatesReceived = 0;
   uint64_t outOfOrderReceived = 0;
   float rtt = 0.0f; // ms, smoothed
+
+  // reliable messages
+  uint64_t messagesSent = 0;
+  uint64_t messagesResent = 0;
+  uint64_t messagesReceived = 0;
+  int messagesUnacked = 0;
 };
 
 // represents an endpoint; client has one, server has many
@@ -32,6 +39,11 @@ public:
   bool connected = false;
   bool timedOut();
   int ProcessReceived(Buffer &buff);
+
+  // reliable, ordered messages, carried on whatever packets we're sending
+  // anyway. see ReliableChannel.h
+  bool SendReliable(const void *data, int size);
+  int ReceiveReliable(void *out, int capacity);
 
   ConnectionStats GetStats();
   uint32_t GetSequenceNumber();       // the next one we'll send
@@ -52,4 +64,5 @@ private:
   uint32_t remoteSequenceNumber = 0; // 0 = nothing received yet
   ReceivedQueue receivedQueue;
   SentQueue sentQueue;
+  ReliableChannel reliable;
 };

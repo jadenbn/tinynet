@@ -27,6 +27,14 @@ int Connection::ProcessReceived(Buffer &outBuffer) {
   }
 
   uint32_t incomingSequenceNumber = packets::ReadInteger(outBuffer);
+  uint32_t incomingAck = packets::ReadInteger(outBuffer);
+  uint32_t incomingAckBitfield = packets::ReadInteger(outBuffer);
+
+  // a bad message section means a bad packet, so drop it before it touches
+  // any of our state
+  if (!reliable.Read(outBuffer)) {
+    return 0;
+  }
 
   stats.packetsReceived++;
   stats.bytesReceived += outBuffer.length;
@@ -42,10 +50,11 @@ int Connection::ProcessReceived(Buffer &outBuffer) {
 
   receivedQueue.insert(incomingSequenceNumber);
 
-  uint32_t incomingAck = packets::ReadInteger(outBuffer);
-  uint32_t incomingAckBitfield = packets::ReadInteger(outBuffer);
-
-  sentQueue.ackPacket(incomingAck, incomingAckBitfield);
+  // any messages that rode in the packets this just acked made it too
+  AckedPackets acked = sentQueue.ackPacket(incomingAck, incomingAckBitfield);
+  for (int i = 0; i < acked.count; i++) {
+    reliable.OnPacketAcked(acked.sequences[i]);
+  }
 
   initialPacketReceived = true;
   connected = true;
@@ -57,7 +66,12 @@ int Connection::ProcessReceived(Buffer &outBuffer) {
 
 bool Connection::Send(Socket &sock, const Buffer &buffer) {
   uint8_t scratch[MAX_PACKET_SIZE];
-  Buffer buff = {scratch, 0, 0, sizeof(scratch)};
+  if (buffer.index > static_cast<int>(MAX_PACKET_SIZE) - 17) {
+    return false; // no room for the header + message count
+  }
+  // capacity leaves room for the payload, so messages only use what's spare
+  Buffer buff = {scratch, 0, 0,
+                 static_cast<int>(MAX_PACKET_SIZE) - buffer.index};
   packets::WriteInteger(buff, PROTOCOL_HASH);
   packets::WriteInteger(buff, sequenceNumber);
   packets::WriteInteger(buff, remoteSequenceNumber);
@@ -71,7 +85,9 @@ bool Connection::Send(Socket &sock, const Buffer &buffer) {
     }
   }
   packets::WriteInteger(buff, ackBitfield);
-  sentQueue.insert(sequenceNumber, std::chrono::steady_clock::now());
+  auto now = std::chrono::steady_clock::now();
+  reliable.Write(buff, sequenceNumber, now, sentQueue.globalRtt);
+  sentQueue.insert(sequenceNumber, now);
   sequenceNumber++;
 
   std::memcpy(buff.data + buff.length, buffer.data, buffer.index);
@@ -82,11 +98,23 @@ bool Connection::Send(Socket &sock, const Buffer &buffer) {
   return sock.Send(remoteAddress, buff.data, size);
 }
 
+bool Connection::SendReliable(const void *data, int size) {
+  return reliable.Send(data, size);
+}
+
+int Connection::ReceiveReliable(void *out, int capacity) {
+  return reliable.Receive(out, capacity);
+}
+
 ConnectionStats Connection::GetStats() {
   ConnectionStats current = stats;
   current.packetsAcked = sentQueue.totalAcked;
   current.packetsLost = sentQueue.totalLost;
   current.rtt = sentQueue.globalRtt;
+  current.messagesSent = reliable.messagesSent;
+  current.messagesResent = reliable.messagesResent;
+  current.messagesReceived = reliable.messagesReceived;
+  current.messagesUnacked = reliable.Unacked();
   return current;
 }
 
