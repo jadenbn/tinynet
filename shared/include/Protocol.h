@@ -15,6 +15,7 @@ enum class PacketType : uint8_t {
   Heartbeat,
   PlayerInput,
   WorldSnapshot,
+  Disconnect,
 };
 
 namespace packets {
@@ -54,6 +55,15 @@ struct Heartbeat {
   void Serialize(Buffer &buff) const;
   static Heartbeat deserialize(Buffer &buff);
 };
+// "i'm leaving". nobody will be around to resend it, so it goes out a few
+// times; losing all of them just means waiting for the timeout like before
+constexpr int DISCONNECT_PACKETS = 3;
+struct DisconnectPacket {
+
+  void Serialize(Buffer &buff) const;
+  static DisconnectPacket deserialize(Buffer &buff);
+};
+
 struct ConnectionAccepted {
   uint32_t clientID;
 

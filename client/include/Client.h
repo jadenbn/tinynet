@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Connection.h"
+#include "Protocol.h"
+
 class Client {
 public:
   Client(Address clientAddress, Address serverAddress);
@@ -13,6 +15,11 @@ public:
   NetworkConditions GetConditions();
   void SetConditions(const NetworkConditions &conditions);
 
+  // tells the server we're leaving, so it frees our slot right away
+  void Disconnect();
+  // the server told us it's shutting down (or kicked us)
+  bool WasDisconnected();
+
   template <typename Packet> bool SendPacket(const Packet &packet) {
     uint8_t scratch[MAX_PACKET_SIZE];
     Buffer buffer{scratch, 0, 0, sizeof(scratch)};
@@ -24,4 +31,5 @@ private:
   Socket socket;
   Address localAddress;
   Connection serverConnection;
+  bool disconnectedByServer = false;
 };

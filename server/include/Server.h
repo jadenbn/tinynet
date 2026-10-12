@@ -18,6 +18,9 @@ public:
   Connection &FindOrCreateConnection(ClientID &id, Address address,
                                      bool &flagCreatedClient);
 
+  // tells a client we're done with it and forgets the connection
+  void Disconnect(ClientID client);
+
   template <typename Packet>
   bool SendPacket(const ClientID client, const Packet &packet) {
     auto conn = clients.find(client);

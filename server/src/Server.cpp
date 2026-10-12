@@ -50,6 +50,12 @@ int Server::ReceiveFromClients(ClientID &clientID, Buffer &buff) {
   } else if (packetType == PacketType::ConnectionRequest) {
     std::cout << "Accepting connection to client id " << clientID << '\n';
     SendPacket(clientID, ConnectionAccepted{clientID});
+  } else if (packetType == PacketType::Disconnect) {
+    // forget them now rather than in 10 seconds. any of their packets still
+    // on the way just look like a stranger that never asked to connect
+    std::cout << "Client " << clientID << " disconnected\n";
+    clients.erase(clientID);
+    return 0;
   }
 
   return processedBytes;
@@ -76,6 +82,13 @@ Connection &Server::FindOrCreateConnection(ClientID &id, Address address,
   auto [it, inserted] = clients.try_emplace(id, address);
   flagCreatedClient = inserted;
   return it->second;
+}
+
+void Server::Disconnect(ClientID client) {
+  for (int i = 0; i < DISCONNECT_PACKETS; i++) {
+    SendPacket(client, DisconnectPacket{});
+  }
+  clients.erase(client);
 }
 
 Address Server::GetAddress() { return localAddress; }

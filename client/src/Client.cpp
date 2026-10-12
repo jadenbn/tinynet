@@ -25,13 +25,33 @@ int Client::ReceiveFromServer(Buffer &buff) {
   }
   buff.index = 0;
   buff.length = bytesRead;
-  return serverConnection.ProcessReceived(buff);
+  int processedBytes = serverConnection.ProcessReceived(buff);
+
+  if (processedBytes > 0 && static_cast<PacketType>(buff.data[buff.index]) ==
+                                PacketType::Disconnect) {
+    disconnectedByServer = true;
+    serverConnection.connected = false;
+  }
+
+  return processedBytes;
 };
 
 void Client::UpdateConnection() {
   socket.Update();
-  serverConnection.connected = !serverConnection.timedOut();
+  serverConnection.connected =
+      !disconnectedByServer && !serverConnection.timedOut();
 }
+
+void Client::Disconnect() {
+  // we're about to exit, so there's no time to let the simulator hold these
+  socket.SetConditions({});
+  for (int i = 0; i < DISCONNECT_PACKETS; i++) {
+    SendPacket(DisconnectPacket{});
+  }
+  serverConnection.connected = false;
+}
+
+bool Client::WasDisconnected() { return disconnectedByServer; }
 
 Connection &Client::GetConnection() { return serverConnection; }
 NetworkConditions Client::GetConditions() { return socket.GetConditions(); }

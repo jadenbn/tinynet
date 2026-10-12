@@ -106,5 +106,6 @@ void ClientGame::GameLoop() {
     overlay.Draw(client);
     EndDrawing();
   }
+  client.Disconnect();
   CloseWindow();
 }

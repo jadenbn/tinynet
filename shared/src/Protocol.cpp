@@ -139,6 +139,12 @@ void Heartbeat::Serialize(Buffer &buff) const {
 
 Heartbeat Heartbeat::deserialize(Buffer &buff) { return {}; }
 
+void DisconnectPacket::Serialize(Buffer &buff) const {
+  packets::WriteChar(buff, PacketType::Disconnect);
+}
+
+DisconnectPacket DisconnectPacket::deserialize(Buffer &buff) { return {}; }
+
 void ConnectionAccepted::Serialize(Buffer &buff) const {
   packets::WriteChar(buff, PacketType::ConnectionAccepted);
   packets::WriteInteger(buff, clientID);

@@ -61,8 +61,60 @@ void test_server_listens_and_receives_packets_from_client() {
   }
 }
 
+// pumps both sides for a few ms at a time until `done` or a second passes
+template <typename Done>
+bool PumpUntil(Server &server, Client &client, Done done) {
+  for (int i = 0; i < 100 && !done(); i++) {
+    client.UpdateConnection();
+    server.UpdateConnections();
+    uint8_t data[MAX_PACKET_SIZE];
+    Buffer buff = {data, 0, 0, sizeof(data)};
+    while (client.ReceiveFromServer(buff) > 0) {
+    }
+    ClientID id;
+    while (server.ReceiveFromClients(id, buff) > 0) {
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+  return done();
+}
+
+void test_disconnects_are_immediate() {
+  Address serverAddress(127, 0, 0, 1, 3010);
+  Server server(serverAddress);
+  server.Initialize();
+  Client leaver(Address(127, 0, 0, 1, 3011), serverAddress);
+  Client stayer(Address(127, 0, 0, 1, 3012), serverAddress);
+  leaver.Initialize();
+  stayer.Initialize();
+
+  leaver.SendPacket(ConnectionRequest{});
+  stayer.SendPacket(ConnectionRequest{});
+  assert(PumpUntil(server, stayer,
+                   [&] { return server.GetClientMap().size() == 2; }));
+
+  // the client leaving: gone well before the 10s timeout
+  auto start = std::chrono::steady_clock::now();
+  leaver.Disconnect();
+  assert(!leaver.GetIsConnected());
+  assert(PumpUntil(server, stayer,
+                   [&] { return server.GetClientMap().size() == 1; }));
+  assert(std::chrono::steady_clock::now() - start <
+         std::chrono::milliseconds(500));
+
+  // the server kicking the other one
+  ClientID stayerID = server.GetClientMap().begin()->first;
+  assert(PumpUntil(server, stayer, [&] { return stayer.GetIsConnected(); }));
+  server.Disconnect(stayerID);
+  assert(server.GetClientMap().empty());
+  assert(PumpUntil(server, stayer, [&] { return stayer.WasDisconnected(); }));
+  stayer.UpdateConnection();
+  assert(!stayer.GetIsConnected());
+}
+
 int main() {
   test_server_socket();
+  test_disconnects_are_immediate();
   test_server_listens_and_receives_packets_from_client();
   std::cout << "All tests passed!" << std::endl;
 }

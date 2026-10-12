@@ -197,8 +197,10 @@ void NetDebugOverlay::Draw(Client &client) {
   // header
   bool connected = client.GetIsConnected();
   DrawText("tinynet", x, y, 20, TEXT);
-  DrawText(connected ? "connected" : "timed out", x + 90, y + 6, FONT,
-           connected ? GOOD : BAD);
+  const char *status = connected                  ? "connected"
+                       : client.WasDisconnected() ? "server closed"
+                                                  : "timed out";
+  DrawText(status, x + 90, y + 6, FONT, connected ? GOOD : BAD);
   DrawText("[tab] hide", x + width - MeasureText("[tab] hide", FONT), y + 6,
            FONT, DIM);
   y += 30;

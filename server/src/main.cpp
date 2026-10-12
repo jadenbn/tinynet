@@ -2,10 +2,19 @@
 #include "ServerReplicationSystem.h"
 #include "ServerWorld.h"
 #include <chrono>
+#include <csignal>
 #include <iostream>
 #include <thread>
+#include <vector>
+
+namespace {
+volatile std::sig_atomic_t running = 1;
+void Stop(int) { running = 0; }
+} // namespace
 
 int main() {
+  std::signal(SIGINT, Stop);
+  std::signal(SIGTERM, Stop);
   Server server(Address(127, 0, 0, 1, 3000));
   server.Initialize();
   ServerWorld game;
@@ -14,7 +23,7 @@ int main() {
   auto previous = Clock::now();
   double accumulator = 0;
   std::cout << "Starting server on 127.0.0.1:3000\n";
-  while (true) {
+  while (running) {
     auto now = Clock::now();
     accumulator += std::min(std::chrono::duration<double>(now-previous).count(), 0.25);
     previous = now;
@@ -48,4 +57,12 @@ int main() {
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
+
+  // ctrl+c: let everyone know instead of leaving them to time out
+  std::vector<ClientID> ids;
+  for (const auto &[id, connection] : server.GetClientMap())
+    ids.push_back(id);
+  for (ClientID id : ids)
+    server.Disconnect(id);
+  std::cout << "\nServer stopped, disconnected " << ids.size() << " clients\n";
 }
