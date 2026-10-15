@@ -8,7 +8,7 @@ int main() {
   PlayerState player;
   SimulateMovement(player, {1, {0,0,1}, std::numbers::pi_v<float>/2});
   assert(player.pos.x > 0 && std::abs(player.pos.z) < 0.00001f);
-  for (int i = 0; i < 600; ++i)
+  for (int i = 0; i < 60; ++i)
     SimulateMovement(player, {2, {0,0,1}, 0});
   assert(Dot(player.velocity, player.velocity) <= 36);
   float previousSpeed = Dot(player.velocity, player.velocity);
@@ -17,9 +17,19 @@ int main() {
   for (int i = 0; i < 60; ++i)
     SimulateMovement(player, {4, {}, 0});
   assert(Dot(player.velocity, player.velocity) == 0);
-  player.pos.z = WORLD_BOUND;
-  SimulateMovement(player, {5, {0,0,1}, 0});
-  assert(player.pos.z == WORLD_BOUND && player.velocity.z == 0);
+  // the walls stop us
+  for (int i = 0; i < 600; ++i)
+    SimulateMovement(player, {5, {0,0,1}, 0});
+  assert(player.pos.z == PITCH_HALF_WIDTH - PLAYER_RADIUS && player.velocity.z == 0);
+  for (int i = 0; i < 600; ++i)
+    SimulateMovement(player, {5, {0,0,1}, std::numbers::pi_v<float>/2});
+  assert(player.pos.x == PITCH_HALF_LENGTH - PLAYER_RADIUS && player.velocity.x == 0);
+  player.kickCooldown = 2;
+  SimulateMovement(player, {6, {}, 0});
+  SimulateMovement(player, {7, {}, 0});
+  SimulateMovement(player, {8, {}, 0});
+  assert(player.kickCooldown == 0);
+  assert(!ValidInput({1, {}, 0, {static_cast<KickType>(3)}}));
 
   ServerWorld world;
   assert(world.AddPlayer(7));

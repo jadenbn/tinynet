@@ -19,15 +19,28 @@ constexpr float GOAL_HEIGHT = 2.4f;     // crossbar
 constexpr float GOAL_DEPTH = 1.5f;      // back of the net
 constexpr float POST_RADIUS = 0.1f;
 constexpr float BALL_RADIUS = 0.3f;     // big for a football, easier to see
+constexpr float PLAYER_RADIUS = 0.5f;
+constexpr float PLAYER_HEIGHT = 1.8f;   // balls higher than this go over us
 
 inline bool IsNewer(uint32_t a, uint32_t b) {
   return a != b && a - b < 0x80000000u;
 }
 
+enum class KickType : uint8_t { None, Ground, Chip };
+
+// stored the way it goes over the wire, so the client predicts with exactly
+// the numbers the server will see
+struct KickCommand {
+  KickType type = KickType::None;
+  uint8_t power = 0; // 0-255 -> softest to hardest
+  int8_t curve = 0;  // -127 bends left, 127 bends right
+};
+
 struct InputCommand {
   uint32_t sequence = 0;
   Vec3 direction;
   float yaw = 0;
+  KickCommand kick; // kicks on this tick, if the ball's close enough
 };
 
 struct PlayerState {
@@ -36,6 +49,7 @@ struct PlayerState {
   Vec3 velocity;
   Quat orientation;
   uint32_t lastInput = 0;
+  uint8_t kickCooldown = 0; // ticks until we can kick again
 };
 
 struct BallState {

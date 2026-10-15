@@ -95,8 +95,10 @@ WorldSnapshot WorldSnapshot::deserialize(Buffer &buff) {
   return snapshot;
 }
 
+constexpr int INPUT_BYTES = 23;
+
 void PlayerInputPacket::Serialize(Buffer &buff) const {
-  if (inputs.size() > INPUTS_PER_PACKET || 2 + inputs.size()*20 >
+  if (inputs.size() > INPUTS_PER_PACKET || 2 + inputs.size()*INPUT_BYTES >
       static_cast<size_t>(buff.capacity - buff.index))
     throw std::length_error("too many inputs");
   packets::WriteChar(buff, PacketType::PlayerInput);
@@ -107,6 +109,9 @@ void PlayerInputPacket::Serialize(Buffer &buff) const {
     packets::WriteInteger(buff, input.sequence);
     WriteVec3(buff, input.direction);
     packets::WriteFloat(buff, input.yaw);
+    packets::WriteChar(buff, static_cast<uint8_t>(input.kick.type));
+    packets::WriteChar(buff, input.kick.power);
+    packets::WriteChar(buff, static_cast<uint8_t>(input.kick.curve));
   }
 }
 
@@ -115,11 +120,14 @@ PlayerInputPacket PlayerInputPacket::deserialize(Buffer &buff) {
   uint8_t count = packets::ReadChar(buff);
   if (count > INPUTS_PER_PACKET)
     throw std::invalid_argument("too many inputs");
-  Require(buff, count*20);
+  Require(buff, count*INPUT_BYTES);
   PlayerInputPacket packet;
   for (uint8_t i = 0; i < count; ++i) {
     InputCommand input{packets::ReadInteger(buff), ReadVec3(buff),
                        packets::ReadFloat(buff)};
+    input.kick.type = static_cast<KickType>(packets::ReadChar(buff));
+    input.kick.power = packets::ReadChar(buff);
+    input.kick.curve = static_cast<int8_t>(packets::ReadChar(buff));
     if (!ValidInput(input))
       throw std::invalid_argument("invalid input");
     packet.inputs.push_back(input);

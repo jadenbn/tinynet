@@ -34,3 +34,24 @@ int GoalLineCrossed(const BallState &ball);
 // bounces it off. true if they touched
 bool CollideWithBar(BallState &ball, Vec3 a, Vec3 b, float radius,
                     float restitution);
+
+namespace kick {
+constexpr float REACH = 0.45f;     // gap between us and the ball we can kick over
+constexpr float MAX_HEIGHT = 1.0f; // ball centre higher than this is out of reach
+constexpr float CONE = 0.25f;      // cos of the widest angle we can kick at, ~75deg
+constexpr float MIN_SPEED = 5, MAX_SPEED = 24;       // ground shots, m/s
+constexpr float CHIP_MIN_SPEED = 5, CHIP_MAX_SPEED = 15; // chips, along the grass
+constexpr float CHIP_MIN_LIFT = 3, CHIP_MAX_LIFT = 8;    // chips, upwards
+constexpr float MAX_SPIN = 8;      // rad/s at full curve
+constexpr float CARRY = 0.3f;      // how much of our running speed the ball gets
+constexpr uint8_t COOLDOWN = 15;   // ticks between kicks
+constexpr float DRIBBLE_BOUNCE = 0.2f; // running into the ball, not kicking it
+} // namespace kick
+
+// kicks the ball where the player is facing, if it's in reach and in front of
+// them. call after SimulateMovement for the same input
+bool TryKick(PlayerState &player, const KickCommand &command, BallState &ball);
+
+// players are cylinders the ball bounces off; running into it dribbles it.
+// true if they touched
+bool CollidePlayerBall(const PlayerState &player, BallState &ball);

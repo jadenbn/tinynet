@@ -141,6 +141,65 @@ void SimulateBall(BallState &ballState) {
   CollideWithGoal(b, previous, -1);
 }
 
+bool TryKick(PlayerState &player, const KickCommand &command, BallState &b) {
+  if (command.type == KickType::None || player.kickCooldown > 0) {
+    return false;
+  }
+
+  Vec3 toBall = Horizontal(b.pos - player.pos);
+  float distance = std::sqrt(Dot(toBall, toBall));
+  if (distance > PLAYER_RADIUS + BALL_RADIUS + kick::REACH ||
+      b.pos.y > kick::MAX_HEIGHT) {
+    return false;
+  }
+  // the dot product of two unit vectors is the cosine of the angle between
+  // them, so this is "is the ball within ~75 degrees of where we're facing"
+  Vec3 forward = Rotate(player.orientation, {0, 0, 1});
+  if (distance > 0 && Dot(forward, toBall * (1 / distance)) < kick::CONE) {
+    return false;
+  }
+
+  float power = command.power / 255.0f;
+  auto lerp = [power](float a, float b) { return a + (b - a) * power; };
+  if (command.type == KickType::Chip) {
+    b.velocity = forward * lerp(kick::CHIP_MIN_SPEED, kick::CHIP_MAX_SPEED) +
+                 Vec3{0, lerp(kick::CHIP_MIN_LIFT, kick::CHIP_MAX_LIFT), 0};
+  } else {
+    b.velocity = forward * lerp(kick::MIN_SPEED, kick::MAX_SPEED);
+  }
+  b.velocity = b.velocity + Horizontal(player.velocity) * kick::CARRY;
+  b.spin = command.curve / 127.0f * kick::MAX_SPIN;
+  player.kickCooldown = kick::COOLDOWN;
+  return true;
+}
+
+bool CollidePlayerBall(const PlayerState &player, BallState &b) {
+  if (b.pos.y - BALL_RADIUS > PLAYER_HEIGHT) {
+    return false; // over their head
+  }
+  Vec3 offset = Horizontal(b.pos - player.pos);
+  float distance = std::sqrt(Dot(offset, offset));
+  float touching = PLAYER_RADIUS + BALL_RADIUS;
+  if (distance >= touching) {
+    return false;
+  }
+
+  Vec3 normal = distance > 0 ? offset * (1 / distance)
+                             : Rotate(player.orientation, {0, 0, 1});
+  b.pos.x = player.pos.x + normal.x * touching;
+  b.pos.z = player.pos.z + normal.z * touching;
+
+  // a player is way heavier than the ball, so they're a moving wall: the
+  // ball keeps its speed relative to them, flipped and mostly absorbed
+  Vec3 relative = Horizontal(b.velocity - player.velocity);
+  float approach = Dot(relative, normal);
+  if (approach < 0) {
+    b.velocity = b.velocity - normal * ((1 + kick::DRIBBLE_BOUNCE) * approach);
+    b.spin = 0;
+  }
+  return true;
+}
+
 int GoalLineCrossed(const BallState &ball) {
   if (ball.pos.x > PITCH_HALF_LENGTH + BALL_RADIUS) {
     return 1;
