@@ -33,15 +33,14 @@ int main() {
     ClientID clientID;
     while (server.ReceiveFromClients(clientID, buff) > 0)
       replication.HandlePacket(clientID, buff);
-    for (auto it = game.players.begin(); it != game.players.end();) {
-      auto connection = server.GetClientMap().find(it->second.owner);
-      if (connection == server.GetClientMap().end() || !connection->second.connected) {
-        game.clientToPlayer.erase(it->second.owner);
-        it = game.players.erase(it);
-      } else {
-        ++it;
-      }
+    std::vector<ClientID> gone;
+    for (const auto &[id, player] : game.players) {
+      auto connection = server.GetClientMap().find(player.owner);
+      if (connection == server.GetClientMap().end() || !connection->second.connected)
+        gone.push_back(player.owner);
     }
+    for (ClientID owner : gone)
+      game.RemovePlayer(owner);
     for (auto it = server.GetClientMap().begin(); it != server.GetClientMap().end();) {
       if (!it->second.connected)
         it = server.GetClientMap().erase(it);

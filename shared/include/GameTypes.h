@@ -1,5 +1,6 @@
 #pragma once
 #include "VectorMath.h"
+#include <array>
 #include <cstdint>
 
 using PlayerID = uint32_t;
@@ -50,10 +51,37 @@ struct PlayerState {
   Quat orientation;
   uint32_t lastInput = 0;
   uint8_t kickCooldown = 0; // ticks until we can kick again
+  uint8_t team = 0;         // 0 attacks the +x goal, 1 attacks -x
 };
 
 struct BallState {
   Vec3 pos{0, BALL_RADIUS, 0}; // centre, so resting on the grass is y = radius
   Vec3 velocity;
   float spin = 0; // rad/s around the vertical axis, curves the ball
+};
+
+constexpr PlayerID NO_PLAYER = UINT32_MAX;
+constexpr uint16_t MATCH_TICKS = 120 * 60;       // two minute matches
+constexpr uint16_t GOAL_PAUSE_TICKS = 150;       // celebrate, then kick off
+constexpr uint16_t FULL_TIME_PAUSE_TICKS = 360;  // show the result, then go again
+
+enum class MatchPhase : uint8_t { Playing, Goal, FullTime };
+
+struct MatchState {
+  std::array<uint8_t, 2> score{};
+  MatchPhase phase = MatchPhase::Playing;
+  uint16_t clock = MATCH_TICKS; // ticks of play left
+  uint16_t phaseTicks = 0;      // ticks left in a goal / full time pause
+};
+
+// one-off things that happened, as opposed to state. these go over the
+// reliable channel, since they're never sent again like a snapshot is
+enum class EventType : uint8_t { PlayerJoined, PlayerLeft, Goal, FullTime, QuickChat };
+
+struct GameEvent {
+  EventType type = EventType::PlayerJoined;
+  PlayerID player = NO_PLAYER; // who joined / left / scored / chatted
+  uint8_t team = 0;            // their team, or the team that scored
+  uint8_t value = 0;           // goal: 1 if it was an own goal. chat: phrase
+  std::array<uint8_t, 2> score{};
 };
