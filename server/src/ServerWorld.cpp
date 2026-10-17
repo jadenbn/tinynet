@@ -151,6 +151,8 @@ std::vector<GameEvent> ServerWorld::TakeEvents() {
 WorldSnapshot ServerWorld::Snapshot() const {
   WorldSnapshot snapshot;
   snapshot.tick = tick;
+  snapshot.match = match;
+  snapshot.ball = ball;
   for (const auto &[id, player] : players)
     snapshot.players.emplace(id, player.state);
   return snapshot;

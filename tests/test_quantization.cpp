@@ -41,7 +41,9 @@ int main() {
   }
   for (Quat q : {Quat{1,0,0,0}, Quat{0,1,0,0}, Quat{0,0,1,0}, Quat{0,0,0,1}})
     assert(std::abs(Dot(q, UnpackQuaternion(PackQuaternion(q)))) > 0.99999f);
-  std::cout << "players  raw bytes  packed bytes  reduction (includes 16-byte header)\n";
+  // every packet has the 16 byte header plus a byte for its reliable messages
+  constexpr int header = 17;
+  std::cout << "players  raw bytes  packed bytes  reduction (includes 17-byte header)\n";
   for (uint32_t count : {1u,10u,24u}) {
     WorldSnapshot snapshot;
     for (uint32_t id = 0; id < count; ++id)
@@ -50,13 +52,13 @@ int main() {
     Buffer raw{rawData,0,0,sizeof(rawData)}, packed{packedData,0,0,sizeof(packedData)};
     snapshot.SerializeRaw(raw);
     snapshot.Serialize(packed);
-    assert(raw.length == 9+count*48);
-    assert(packed.length == 9+count*30);
+    assert(raw.length == 9+7+28+count*50);
+    assert(packed.length == 9+7+22+count*32);
     packed.index = 1;
     assert(WorldSnapshot::deserialize(packed).players.size() == count);
-    double reduction = 100.0*(raw.length-packed.length)/(raw.length+16);
-    std::cout << count << "        " << raw.length+16 << "         "
-              << packed.length+16 << "          " << std::fixed
+    double reduction = 100.0*(raw.length-packed.length)/(raw.length+header);
+    std::cout << count << "        " << raw.length+header << "         "
+              << packed.length+header << "          " << std::fixed
               << std::setprecision(1) << reduction << "%\n";
   }
   std::cout << "Maximum angular error in 10,000 seeded rotations: "
