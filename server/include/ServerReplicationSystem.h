@@ -9,6 +9,8 @@ public:
   ServerReplicationSystem(ServerWorld &c_game);
 
   bool HandlePacket(const ClientID clientID, Buffer &buff);
+  // a reliable message. clients only get to send quick chat
+  bool HandleMessage(const ClientID clientID, Buffer &buff);
 
 private:
   ServerWorld &game;

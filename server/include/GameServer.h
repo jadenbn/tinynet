@@ -10,11 +10,11 @@ public:
   explicit GameServer(Address address);
   void Initialize();
 
-  // everything that's arrived: inputs and new players. also drops players
-  // whose connection is gone
+  // everything that's arrived: inputs, new players, reliable messages. also
+  // drops players whose connection is gone
   void ReceivePackets();
 
-  // one 60Hz tick: simulate, then send everyone a snapshot
+  // one 60Hz tick: simulate, send events out, then snapshots
   void Step();
 
   // tells every client we're going

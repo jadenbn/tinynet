@@ -44,6 +44,16 @@ struct PlayerInputPacket {
   static PlayerInputPacket deserialize(Buffer &buff);
 };
 
+// one game event per reliable message. there's no packet type byte, since the
+// reliable channel is its own stream inside every packet
+constexpr int QUICK_CHAT_PHRASES = 4;
+struct EventMessage {
+  GameEvent event;
+
+  void Serialize(Buffer &buff) const;
+  static EventMessage deserialize(Buffer &buff);
+};
+
 struct ConnectionRequest {
 
   void Serialize(Buffer &buff) const;

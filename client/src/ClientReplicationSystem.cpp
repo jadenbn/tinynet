@@ -24,6 +24,17 @@ bool ClientReplicationSystem::HandlePacket(Buffer &buff, double transitSeconds) 
   }
 }
 
+bool ClientReplicationSystem::HandleMessage(Buffer &buff) {
+  try {
+    events.push_back(EventMessage::deserialize(buff).event);
+    while (events.size() > 32)
+      events.pop_front();
+    return true;
+  } catch (const std::invalid_argument &) {
+    return false;
+  }
+}
+
 bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &snapshot,
                                                        double transitSeconds) {
   if (!history.Push(snapshot, transitSeconds))

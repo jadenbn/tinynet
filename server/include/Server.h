@@ -36,6 +36,20 @@ public:
     return conn->second.Send(socket, buff);
   }
 
+  // queued on the reliable channel, goes out with the next packet
+  template <typename Message>
+  bool SendReliable(const ClientID client, const Message &message) {
+    auto conn = clients.find(client);
+    if (conn == clients.end()) {
+      return false;
+    }
+
+    uint8_t scratch[ReliableChannel::MAX_MESSAGE_SIZE];
+    Buffer buff = Buffer(scratch, 0, 0, sizeof(scratch));
+    message.Serialize(buff);
+    return conn->second.SendReliable(buff.data, buff.index);
+  }
+
 private:
   Socket socket;
   Address localAddress;

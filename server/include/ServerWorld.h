@@ -10,6 +10,8 @@ public:
   bool AddPlayer(ClientID clientID); // joins the smaller team
   void RemovePlayer(ClientID clientID);
   bool QueueInputs(ClientID clientID, const PlayerInputPacket &packet);
+  // passes a quick chat phrase on to everyone, at most twice a second each
+  bool QuickChat(ClientID clientID, uint8_t phrase);
   void Tick();
   WorldSnapshot Snapshot() const;
   // everything that happened since the last call

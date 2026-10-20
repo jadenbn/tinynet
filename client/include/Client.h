@@ -27,6 +27,14 @@ public:
     return serverConnection.Send(socket, buffer);
   }
 
+  // queued on the reliable channel, goes out with the next packet
+  template <typename Message> bool SendReliable(const Message &message) {
+    uint8_t scratch[ReliableChannel::MAX_MESSAGE_SIZE];
+    Buffer buffer{scratch, 0, 0, sizeof(scratch)};
+    message.Serialize(buffer);
+    return serverConnection.SendReliable(buffer.data, buffer.index);
+  }
+
 private:
   Socket socket;
   Address localAddress;

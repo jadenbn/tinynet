@@ -85,6 +85,12 @@ void ClientGame::HandleNetwork() {
   Buffer packet{scratch, 0, 0, sizeof(scratch)};
   while (client.ReceiveFromServer(packet) > 0)
     replicationSystem.HandlePacket(packet, client.GetRTT()/2000.0);
+  uint8_t message[ReliableChannel::MAX_MESSAGE_SIZE];
+  int size;
+  while ((size = client.GetConnection().ReceiveReliable(message, sizeof(message))) > 0) {
+    Buffer messageBuff{message, 0, size, size};
+    replicationSystem.HandleMessage(messageBuff);
+  }
 }
 
 void ClientGame::GameLoop() {

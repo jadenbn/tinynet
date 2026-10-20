@@ -189,6 +189,29 @@ PlayerInputPacket PlayerInputPacket::deserialize(Buffer &buff) {
   return packet;
 }
 
+void EventMessage::Serialize(Buffer &buff) const {
+  packets::WriteChar(buff, static_cast<uint8_t>(event.type));
+  packets::WriteInteger(buff, event.player);
+  packets::WriteChar(buff, event.team);
+  packets::WriteChar(buff, event.value);
+  packets::WriteChar(buff, event.score[0]);
+  packets::WriteChar(buff, event.score[1]);
+}
+
+EventMessage EventMessage::deserialize(Buffer &buff) {
+  Require(buff, 9);
+  GameEvent event;
+  event.type = static_cast<EventType>(packets::ReadChar(buff));
+  event.player = packets::ReadInteger(buff);
+  event.team = packets::ReadChar(buff);
+  event.value = packets::ReadChar(buff);
+  event.score = {packets::ReadChar(buff), packets::ReadChar(buff)};
+  if (event.type > EventType::QuickChat || event.team > 1 ||
+      (event.type == EventType::QuickChat && event.value >= QUICK_CHAT_PHRASES))
+    throw std::invalid_argument("invalid event");
+  return {event};
+}
+
 void ConnectionRequest::Serialize(Buffer &buff) const {
   packets::WriteChar(buff, PacketType::ConnectionRequest);
 }

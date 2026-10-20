@@ -25,6 +25,15 @@ bool ServerReplicationSystem::HandlePacket(ClientID id, Buffer &buff) {
   }
 }
 
+bool ServerReplicationSystem::HandleMessage(ClientID id, Buffer &buff) {
+  try {
+    GameEvent event = EventMessage::deserialize(buff).event;
+    return event.type == EventType::QuickChat && game.QuickChat(id, event.value);
+  } catch (const std::invalid_argument &) {
+    return false;
+  }
+}
+
 bool ServerReplicationSystem::ApplyPlayerInputPacket(const PlayerInputPacket &packet,
                                                      ClientID id) {
   return game.QueueInputs(id, packet);

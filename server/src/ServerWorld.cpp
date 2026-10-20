@@ -69,6 +69,20 @@ bool ServerWorld::QueueInputs(ClientID clientID, const PlayerInputPacket &packet
   return true;
 }
 
+bool ServerWorld::QuickChat(ClientID clientID, uint8_t phrase) {
+  constexpr uint32_t CHAT_COOLDOWN_TICKS = 30;
+  auto mapping = clientToPlayer.find(clientID);
+  if (mapping == clientToPlayer.end() || phrase >= QUICK_CHAT_PHRASES)
+    return false;
+  auto &player = players.at(mapping->second);
+  if (tick < player.nextChatTick)
+    return false;
+  player.nextChatTick = tick + CHAT_COOLDOWN_TICKS;
+  // who said it comes from the connection, never from the message itself
+  events.push_back({EventType::QuickChat, mapping->second, player.state.team, phrase});
+  return true;
+}
+
 void ServerWorld::Tick() {
   ++tick;
   for (auto &[id, player] : players) {

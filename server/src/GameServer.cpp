@@ -13,6 +13,15 @@ void GameServer::ReceivePackets() {
   while (server.ReceiveFromClients(clientID, buff) > 0)
     replication.HandlePacket(clientID, buff);
 
+  for (auto &[id, connection] : server.GetClientMap()) {
+    uint8_t message[ReliableChannel::MAX_MESSAGE_SIZE];
+    int size;
+    while ((size = connection.ReceiveReliable(message, sizeof(message))) > 0) {
+      Buffer messageBuff{message, 0, size, size};
+      replication.HandleMessage(id, messageBuff);
+    }
+  }
+
   std::vector<ClientID> gone;
   for (const auto &[id, player] : world.players) {
     auto connection = server.GetClientMap().find(player.owner);
@@ -31,6 +40,12 @@ void GameServer::ReceivePackets() {
 
 void GameServer::Step() {
   world.Tick();
+
+  // queue events first so they ride along in this tick's snapshot packets
+  for (const GameEvent &event : world.TakeEvents())
+    for (const auto &[id, player] : world.players)
+      server.SendReliable(player.owner, EventMessage{event});
+
   auto snapshot = world.Snapshot();
   for (const auto &[id, player] : world.players)
     server.SendPacket(player.owner, snapshot);
