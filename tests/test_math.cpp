@@ -25,5 +25,11 @@ int main() {
   assert(Near(std::abs(Dot(Slerp(turn, opposite, 0.5f), turn)), 1));
   assert(Near(Dot(Slerp({}, Yaw(0.0001f), 0.5f),
                        Slerp({}, Yaw(0.0001f), 0.5f)), 1));
+  // facing a direction, then turning a world direction into "relative to me"
+  for (Vec3 d : {Vec3{1,0,0}, Vec3{-3,0,4}, Vec3{0,0,-2}, Vec3{-1,0,-1}})
+    Check(Rotate(Yaw(YawTowards(d)), {0,0,1}), Normalize(d));
+  Quat facing = Yaw(0.8f);
+  Vec3 world{0.3f, 0, -0.7f};
+  Check(Rotate(facing, Rotate(Conjugate(facing), world)), world);
   std::cout << "All math tests passed!\n";
 }

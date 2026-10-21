@@ -59,6 +59,11 @@ inline Quat Slerp(Quat a, Quat b, float t) {
 inline Quat Yaw(float radians) {
   return {0, std::sin(radians/2), 0, std::cos(radians/2)};
 }
+// the yaw that faces along d: Yaw(a) turns +z by a towards +x, so a is the
+// angle of (x, z) measured from +z
+inline float YawTowards(Vec3 d) { return std::atan2(d.x, d.z); }
+// for a unit quaternion, the conjugate is the inverse rotation
+inline Quat Conjugate(Quat q) { return {-q.x, -q.y, -q.z, q.w}; }
 inline Vec3 Rotate(Quat q, Vec3 v) {
   q = Normalize(q);
   Vec3 axis{q.x, q.y, q.z};
