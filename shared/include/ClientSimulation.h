@@ -1,41 +1,49 @@
 #pragma once
 #include "Movement.h"
+#include "Protocol.h"
 #include <deque>
+#include <vector>
 
-// Kept free of rendering so movement and input acknowledgement can be tested.
+// the client's prediction: our own player AND the ball, run ahead of the
+// server by however many inputs it hasn't processed yet. that puts the ball in
+// the same moment as us, so our touches and kicks happen instantly instead of
+// a round trip later. kept free of rendering so it can be tested
 class ClientSimulation {
 public:
+  static constexpr float SNAP_DISTANCE = 2.0f; // corrections bigger than this are teleports
+  static constexpr float PLAYER_SMOOTHING = 0.1f; // s, time constant
+  static constexpr float BALL_SMOOTHING = 0.06f;
+
   PlayerState local;
+  BallState ball;
   bool ready = false;
   std::deque<InputCommand> pending;
 
-  bool AddInput(Vec3 direction, float yaw) {
-    if (!ready || pending.size() >= MAX_PENDING_INPUTS)
-      return false;
-    uint32_t sequence = pending.empty() ? local.lastInput + 1
-                                       : pending.back().sequence + 1;
-    InputCommand input{sequence, direction, yaw};
-    if (!ValidInput(input))
-      return false;
-    pending.push_back(input);
-    SimulateMovement(local, input);
-    return true;
-  }
+  bool AddInput(Vec3 direction, float yaw, KickCommand kick = {});
 
-  bool Reconcile(const PlayerState &state) {
-    if (ready && ((state.lastInput != acknowledged &&
-                   !IsNewer(state.lastInput, acknowledged)) ||
-                  IsNewer(state.lastInput, local.lastInput)))
-      return false;
-    while (!pending.empty() && !IsNewer(pending.front().sequence, state.lastInput))
-      pending.pop_front();
-    local = state;
-    acknowledged = state.lastInput;
-    for (const auto &input : pending)
-      SimulateMovement(local, input);
-    ready = true;
-    return true;
-  }
+  // just our player, no ball
+  bool Reconcile(const PlayerState &state);
+  // our player, the ball, and everyone else (for the ball to bump into)
+  bool Reconcile(const WorldSnapshot &snapshot, PlayerID localID);
+
+  // where to draw things. corrections from the server don't jump: we keep
+  // drawing where we were, and let that offset shrink over a few frames.
+  // alpha blends between the last two ticks, so 144Hz frames look smooth too
+  void DecayErrors(float dt);
+  Vec3 RenderLocal(float alpha) const;
+  Vec3 RenderBall(float alpha) const;
+  Vec3 LocalError() const { return localError; }
+  Vec3 BallError() const { return ballError; }
+  bool PredictingBall() const { return predictBall; }
+
 private:
   uint32_t acknowledged = 0;
+  bool predictBall = false;
+  std::vector<PlayerState> others; // as of the last snapshot
+  int stepsSinceSnapshot = 0;
+  Vec3 localError, ballError;
+  Vec3 previousLocal, previousBall; // last tick's positions, for alpha
+
+  void Step(const InputCommand &input);
+  bool Stale(const PlayerState &state) const;
 };

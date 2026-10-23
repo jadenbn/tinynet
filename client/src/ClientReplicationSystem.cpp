@@ -49,7 +49,7 @@ bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &snapshot,
     world.AddPlayer(id);
     world.players.at(id).state = state;
     if (id == localID) {
-      simulation.Reconcile(state);
+      simulation.Reconcile(snapshot, localID);
       world.authoritative = state.pos;
       world.hasLocal = true;
     }
@@ -59,6 +59,7 @@ bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &snapshot,
 
 void ClientReplicationSystem::Update(double dt) {
   history.Advance(dt);
+  simulation.DecayErrors(static_cast<float>(dt));
   world.viewCenter = simulation.local.pos;
   for (auto &[id, player] : world.players) {
     if (id == localID && simulation.ready)
