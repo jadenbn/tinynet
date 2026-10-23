@@ -43,7 +43,7 @@ int Server::ReceiveFromClients(ClientID &clientID, Buffer &buff) {
   if (createdClient && packetType != PacketType::ConnectionRequest) {
     clients.erase(clientID);
     return 0;
-  } else if (createdClient && clients.size() > MAX_PLAYERS) {
+  } else if (createdClient && clients.size() > MAX_CLIENTS) {
     SendPacket(clientID, ConnectionRejected{1});
     clients.erase(clientID);
     return 0;

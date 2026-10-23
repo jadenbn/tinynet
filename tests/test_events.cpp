@@ -122,7 +122,8 @@ void test_events_reach_everyone_once_over_a_bad_network() {
   assert(a.client.SendReliable(EventMessage{{EventType::QuickChat, 999, 0, 2}}));
   ServerWorld &world = server.World();
   world.lastTouch = a.id;
-  world.ball = {{PITCH_HALF_LENGTH - 1, BALL_RADIUS, 0}, {10, 0, 0}, 0};
+  // off to the side of the keeper, already on its way in
+  world.ball = {{PITCH_HALF_LENGTH - 0.5f, BALL_RADIUS, 2.4f}, {10, 0, 0}, 0};
 
   assert(pump([&] {
     return a.Count(EventType::Goal) && b.Count(EventType::Goal) &&

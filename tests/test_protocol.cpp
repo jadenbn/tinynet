@@ -8,7 +8,7 @@ int main() {
   Buffer buff{data, 0, 0, sizeof(data)};
   WorldSnapshot snapshot;
   snapshot.tick = 42;
-  snapshot.players.emplace(7, PlayerState{7, {1,2,3}, {0,0,1}, Yaw(0.5f), 19, 4, 1});
+  snapshot.players.emplace(7, PlayerState{7, {1,2,3}, {0,0,1}, Yaw(0.5f), 19, 4, 1, true});
   snapshot.match = {{3, 2}, MatchPhase::Goal, 1234, 99};
   snapshot.ball = {{-4.5f, 1.25f, 7}, {12, 3, -1}, -6.5f};
   snapshot.Serialize(buff);
@@ -19,6 +19,7 @@ int main() {
   assert(decoded.players.at(7).pos.x == 1);
   assert(decoded.players.at(7).velocity.z == 1);
   assert(decoded.players.at(7).kickCooldown == 4 && decoded.players.at(7).team == 1);
+  assert(decoded.players.at(7).keeper);
   assert(decoded.match.score[0] == 3 && decoded.match.score[1] == 2);
   assert(decoded.match.phase == MatchPhase::Goal);
   assert(decoded.match.clock == 1234 && decoded.match.phaseTicks == 99);
@@ -35,8 +36,8 @@ int main() {
     catch (const std::invalid_argument &) { rejected = true; }
     assert(rejected);
   }
-  // a phase that doesn't exist, or a nonsense ball
-  for (int field : {9 + 2, 9 + 7 + 6}) {
+  // a phase that doesn't exist, a nonsense ball, or flags we never set
+  for (int field : {9 + 2, 9 + 7 + 6, 9 + 7 + 22 + 30}) {
     buff = {data, 0, 0, sizeof(data)};
     snapshot.Serialize(buff);
     data[field] = 0x7f;

@@ -104,7 +104,7 @@ void WriteSnapshot(Buffer &buff, const WorldSnapshot &snapshot, bool compressed)
       packets::WriteFloat(buff, state.orientation.w);
     }
     packets::WriteInteger(buff, state.lastInput);
-    packets::WriteChar(buff, state.team);
+    packets::WriteChar(buff, state.team | (state.keeper ? 2 : 0));
     packets::WriteChar(buff, state.kickCooldown);
   }
 }
@@ -141,9 +141,11 @@ WorldSnapshot WorldSnapshot::deserialize(Buffer &buff) {
     state.velocity = ReadVec3(buff);
     state.orientation = UnpackQuaternion(packets::ReadInteger(buff));
     state.lastInput = packets::ReadInteger(buff);
-    state.team = packets::ReadChar(buff);
+    uint8_t flags = packets::ReadChar(buff);
+    state.team = flags & 1;
+    state.keeper = flags & 2;
     state.kickCooldown = packets::ReadChar(buff);
-    if (!ValidState(state) || !snapshot.players.emplace(state.playerID, state).second)
+    if (flags > 3 || !ValidState(state) || !snapshot.players.emplace(state.playerID, state).second)
       throw std::invalid_argument("invalid player state");
   }
   return snapshot;

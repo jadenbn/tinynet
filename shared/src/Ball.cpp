@@ -179,7 +179,7 @@ bool CollidePlayerBall(const PlayerState &player, BallState &b) {
   }
   Vec3 offset = Horizontal(b.pos - player.pos);
   float distance = std::sqrt(Dot(offset, offset));
-  float touching = PLAYER_RADIUS + BALL_RADIUS;
+  float touching = (player.keeper ? KEEPER_RADIUS : PLAYER_RADIUS) + BALL_RADIUS;
   if (distance >= touching) {
     return false;
   }

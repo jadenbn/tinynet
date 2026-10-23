@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-constexpr uint32_t PROTOCOL_HASH = 0x12345683;
+constexpr uint32_t PROTOCOL_HASH = 0x12345684;
 
 enum class PacketType : uint8_t {
   ConnectionRequest = 0,

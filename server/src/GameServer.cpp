@@ -1,7 +1,9 @@
 #include "GameServer.h"
 #include <vector>
 
-GameServer::GameServer(Address address) : server(address), replication(world) {}
+GameServer::GameServer(Address address) : server(address), replication(world) {
+  world.AddKeepers();
+}
 
 void GameServer::Initialize() { server.Initialize(); }
 
@@ -24,6 +26,8 @@ void GameServer::ReceivePackets() {
 
   std::vector<ClientID> gone;
   for (const auto &[id, player] : world.players) {
+    if (player.bot)
+      continue;
     auto connection = server.GetClientMap().find(player.owner);
     if (connection == server.GetClientMap().end() || !connection->second.connected)
       gone.push_back(player.owner);
@@ -44,11 +48,13 @@ void GameServer::Step() {
   // queue events first so they ride along in this tick's snapshot packets
   for (const GameEvent &event : world.TakeEvents())
     for (const auto &[id, player] : world.players)
-      server.SendReliable(player.owner, EventMessage{event});
+      if (!player.bot)
+        server.SendReliable(player.owner, EventMessage{event});
 
   auto snapshot = world.Snapshot();
   for (const auto &[id, player] : world.players)
-    server.SendPacket(player.owner, snapshot);
+    if (!player.bot)
+      server.SendPacket(player.owner, snapshot);
 }
 
 int GameServer::Shutdown() {

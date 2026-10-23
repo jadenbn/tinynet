@@ -1,5 +1,6 @@
 #include "ServerWorld.h"
 #include "Ball.h"
+#include "Goalkeeper.h"
 #include "Movement.h"
 #include <algorithm>
 
@@ -27,7 +28,8 @@ bool ServerWorld::AddPlayer(ClientID clientID) {
 
   int teamSize[2] = {};
   for (const auto &[id, player] : players)
-    teamSize[player.state.team]++;
+    if (!player.bot)
+      teamSize[player.state.team]++;
   uint8_t team = teamSize[1] < teamSize[0] ? 1 : 0;
 
   PlayerState state;
@@ -39,6 +41,19 @@ bool ServerWorld::AddPlayer(ClientID clientID) {
   clientToPlayer.emplace(clientID, clientID);
   events.push_back({EventType::PlayerJoined, clientID, team});
   return true;
+}
+
+void ServerWorld::AddKeepers() {
+  for (uint8_t team : {0, 1}) {
+    PlayerState state;
+    state.playerID = KEEPER_IDS[team];
+    state.team = team;
+    state.keeper = true;
+    state.pos = KeeperTarget(team, ball);
+    state.orientation = FacingOpponents(team);
+    players.try_emplace(state.playerID,
+                        ServerTypes::ServerPlayer{UINT32_MAX, state, {}, 0, true});
+  }
 }
 
 void ServerWorld::RemovePlayer(ClientID clientID) {
@@ -85,7 +100,18 @@ bool ServerWorld::QuickChat(ClientID clientID, uint8_t phrase) {
 
 void ServerWorld::Tick() {
   ++tick;
+  recentBalls.push_back(ball);
+  while (recentBalls.size() > keeper::REACTION_TICKS)
+    recentBalls.pop_front();
+
   for (auto &[id, player] : players) {
+    if (player.bot) {
+      InputCommand input = KeeperInput(player.state, recentBalls.front());
+      SimulateMovement(player.state, input);
+      if (TryKick(player.state, input.kick, ball))
+        lastTouch = id;
+      continue;
+    }
     auto next = player.pending.find(player.state.lastInput + 1);
     // shortcut: missing commands pause this player, add tick-aligned fallback for long outages.
     if (next == player.pending.end())
@@ -150,8 +176,15 @@ void ServerWorld::Kickoff() {
     ids.push_back(id);
   std::sort(ids.begin(), ids.end());
   int index[2] = {};
+  recentBalls.clear();
   for (PlayerID id : ids) {
     PlayerState &state = players.at(id).state;
+    if (state.keeper) {
+      state.pos = KeeperTarget(state.team, ball);
+      state.velocity = {};
+      state.orientation = FacingOpponents(state.team);
+      continue;
+    }
     state.pos = SpawnPoint(state.team, index[state.team]++);
     state.velocity = {};
     state.orientation = FacingOpponents(state.team);

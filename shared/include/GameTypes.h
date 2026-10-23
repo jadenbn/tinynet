@@ -10,6 +10,7 @@ constexpr uint32_t MAX_PENDING_INPUTS = 120;
 constexpr uint32_t INPUTS_PER_PACKET = 32;
 // shortcut: one snapshot per datagram, add splitting before exceeding 24 players.
 constexpr uint32_t MAX_PLAYERS = 24;
+constexpr uint32_t MAX_CLIENTS = MAX_PLAYERS - 2; // leave room for the keepers
 
 // the pitch. x runs goal to goal, z touchline to touchline, y is up. walled
 // in like futsal/indoor football, so the ball never goes out of play
@@ -21,6 +22,7 @@ constexpr float GOAL_DEPTH = 1.5f;      // back of the net
 constexpr float POST_RADIUS = 0.1f;
 constexpr float BALL_RADIUS = 0.3f;     // big for a football, easier to see
 constexpr float PLAYER_RADIUS = 0.5f;
+constexpr float KEEPER_RADIUS = 0.75f;  // arms out
 constexpr float PLAYER_HEIGHT = 1.8f;   // balls higher than this go over us
 
 inline bool IsNewer(uint32_t a, uint32_t b) {
@@ -52,6 +54,7 @@ struct PlayerState {
   uint32_t lastInput = 0;
   uint8_t kickCooldown = 0; // ticks until we can kick again
   uint8_t team = 0;         // 0 attacks the +x goal, 1 attacks -x
+  bool keeper = false;      // played by the server
 };
 
 struct BallState {

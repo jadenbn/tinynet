@@ -59,9 +59,10 @@ int main() {
   assert(world.players.at(7).state.lastInput == 0);
 
   ServerWorld full;
-  for (uint32_t id = 0; id < MAX_PLAYERS; ++id)
+  full.AddKeepers();
+  for (uint32_t id = 0; id < MAX_CLIENTS; ++id)
     assert(full.AddPlayer(id));
-  assert(!full.AddPlayer(MAX_PLAYERS));
+  assert(!full.AddPlayer(MAX_CLIENTS));
   world.QueueInputs(7, {{{MAX_PENDING_INPUTS+1, {}, 0}}});
   assert(world.players.at(7).pending.empty());
 
