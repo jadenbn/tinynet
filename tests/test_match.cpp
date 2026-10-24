@@ -85,6 +85,31 @@ void test_own_goals_count_for_the_other_team() {
   assert(goal && goal->team == 1 && goal->value == 1);
 }
 
+// blue (0) shoots at the +x goal, and it goes in off orange (1)
+std::optional<GameEvent> DeflectedIn(uint32_t ticksSinceShot) {
+  ServerWorld world;
+  world.AddPlayer(0);
+  world.AddPlayer(1);
+  for (uint32_t i = 0; i < ticksSinceShot + 1; i++)
+    world.Tick();
+  world.lastShot = 0;
+  world.lastShotTick = world.CurrentTick() - ticksSinceShot;
+  world.lastTouch = 1;
+  world.ball = {{PITCH_HALF_LENGTH - 1, BALL_RADIUS, 2}, {10, 0, 0}, 0};
+  for (int i = 0; i < 30 && world.match.phase == MatchPhase::Playing; i++)
+    world.Tick();
+  return Find(world.TakeEvents(), EventType::Goal);
+}
+
+void test_deflections_count_for_the_shooter() {
+  auto deflected = DeflectedIn(20);
+  assert(deflected && deflected->player == 0 && deflected->team == 0);
+  assert(deflected->value == 0); // not an own goal
+  // ages after the shot, it's on the defender
+  auto later = DeflectedIn(300);
+  assert(later && later->player == 1 && later->value == 1);
+}
+
 void test_kicks_and_touches_are_credited() {
   ServerWorld world;
   world.AddPlayer(0);
@@ -94,7 +119,7 @@ void test_kicks_and_touches_are_credited() {
   // facing +z (yaw 0) at the ball, full power
   assert(world.QueueInputs(0, {{{1, {}, 0, {KickType::Ground, 255, 0}}}}));
   world.Tick();
-  assert(world.lastTouch == 0);
+  assert(world.lastTouch == 0 && world.lastShot == 0);
   assert(world.ball.velocity.z > kick::MAX_SPEED * 0.9f);
 }
 
@@ -123,6 +148,7 @@ int main() {
   test_teams_are_balanced();
   test_goal_then_kickoff();
   test_own_goals_count_for_the_other_team();
+  test_deflections_count_for_the_shooter();
   test_kicks_and_touches_are_credited();
   test_full_time_then_a_new_match();
   std::cout << "All match tests passed!\n";

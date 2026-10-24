@@ -26,7 +26,10 @@ public:
   std::unordered_map<ClientID, PlayerID> clientToPlayer;
   BallState ball;
   MatchState match;
-  PlayerID lastTouch = NO_PLAYER; // gets the credit for a goal
+  PlayerID lastTouch = NO_PLAYER; // usually gets the credit for a goal
+  PlayerID lastShot = NO_PLAYER;  // ...unless it was this shot, deflected in
+  uint32_t lastShotTick = 0;
+  uint32_t CurrentTick() const { return tick; }
 
 private:
   uint32_t tick = 0;
@@ -34,5 +37,7 @@ private:
   std::deque<BallState> recentBalls; // what the keepers see, a bit late
 
   void Kickoff(); // everyone back to their spot, ball to the centre spot
+  void Kicked(PlayerID id);
+  PlayerID Scorer(uint8_t team) const;
   void UpdateMatch();
 };

@@ -64,6 +64,8 @@ void ServerWorld::RemovePlayer(ClientID clientID) {
   events.push_back({EventType::PlayerLeft, mapping->second, player->second.state.team});
   if (lastTouch == mapping->second)
     lastTouch = NO_PLAYER;
+  if (lastShot == mapping->second)
+    lastShot = NO_PLAYER;
   players.erase(player);
   clientToPlayer.erase(mapping);
 }
@@ -109,7 +111,7 @@ void ServerWorld::Tick() {
       InputCommand input = KeeperInput(player.state, recentBalls.front());
       SimulateMovement(player.state, input);
       if (TryKick(player.state, input.kick, ball))
-        lastTouch = id;
+        Kicked(id);
       continue;
     }
     auto next = player.pending.find(player.state.lastInput + 1);
@@ -118,7 +120,7 @@ void ServerWorld::Tick() {
       continue;
     SimulateMovement(player.state, next->second);
     if (TryKick(player.state, next->second.kick, ball))
-      lastTouch = id;
+      Kicked(id);
     player.pending.erase(next);
   }
 
@@ -130,6 +132,25 @@ void ServerWorld::Tick() {
       lastTouch = id;
 
   UpdateMatch();
+}
+
+void ServerWorld::Kicked(PlayerID id) {
+  lastTouch = id;
+  lastShot = id;
+  lastShotTick = tick;
+}
+
+PlayerID ServerWorld::Scorer(uint8_t team) const {
+  // a shot that clips a defender or the keeper on its way in is still the
+  // shooter's goal, not an own goal
+  constexpr uint32_t DEFLECTION_TICKS = 90;
+  auto toucher = players.find(lastTouch);
+  auto shooter = players.find(lastShot);
+  bool deflected = toucher != players.end() && toucher->second.state.team != team;
+  if (deflected && shooter != players.end() && shooter->second.state.team == team &&
+      tick - lastShotTick <= DEFLECTION_TICKS)
+    return lastShot;
+  return lastTouch;
 }
 
 void ServerWorld::UpdateMatch() {
@@ -149,9 +170,10 @@ void ServerWorld::UpdateMatch() {
     match.score[team] = std::min<int>(match.score[team] + 1, 99);
     match.phase = MatchPhase::Goal;
     match.phaseTicks = GOAL_PAUSE_TICKS;
-    auto scorer = players.find(lastTouch);
+    PlayerID scorerID = Scorer(team);
+    auto scorer = players.find(scorerID);
     bool ownGoal = scorer != players.end() && scorer->second.state.team != team;
-    events.push_back({EventType::Goal, lastTouch, team,
+    events.push_back({EventType::Goal, scorerID, team,
                       static_cast<uint8_t>(ownGoal), match.score});
     return;
   }
@@ -170,6 +192,7 @@ void ServerWorld::UpdateMatch() {
 void ServerWorld::Kickoff() {
   ball = BallState{};
   lastTouch = NO_PLAYER;
+  lastShot = NO_PLAYER;
   // same spots every time: lowest id on each team gets the first one
   std::vector<PlayerID> ids;
   for (const auto &[id, player] : players)
