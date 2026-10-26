@@ -35,6 +35,8 @@ public:
   Vec3 LocalError() const { return localError; }
   Vec3 BallError() const { return ballError; }
   bool PredictingBall() const { return predictBall; }
+  // everyone else, as of the last snapshot
+  const std::vector<PlayerState> &Others() const { return others; }
 
 private:
   uint32_t acknowledged = 0;

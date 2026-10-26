@@ -8,6 +8,14 @@ inline bool ValidInput(const InputCommand &input) {
          input.kick.type <= KickType::Chip;
 }
 
+// turns a direction on the pitch into one relative to where we face, which
+// is what InputCommand wants. the conjugate of a unit quaternion undoes it
+inline Vec3 RelativeDirection(Vec3 world, float yaw) {
+  Vec3 local = Rotate(Conjugate(Yaw(yaw)), world);
+  local.y = 0;
+  return local;
+}
+
 inline void SimulateMovement(PlayerState &player, const InputCommand &input) {
   constexpr float acceleration = 24, maxSpeed = 6, friction = 8;
   player.orientation = Yaw(input.yaw);

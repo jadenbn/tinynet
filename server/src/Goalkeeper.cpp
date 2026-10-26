@@ -1,5 +1,6 @@
 #include "Goalkeeper.h"
 #include "Ball.h"
+#include "Movement.h"
 #include <cmath>
 
 using namespace keeper;
@@ -77,9 +78,7 @@ InputCommand KeeperInput(const PlayerState &keeper, const BallState &ball) {
   Vec3 steer = wanted - Horizontal(keeper.velocity);
   Vec3 world = Length(steer) > 0.2f ? Normalize(steer) * SPEED : Vec3{};
 
-  // inputs are relative to where we're facing, so undo our own rotation
-  input.direction = Rotate(Conjugate(Yaw(input.yaw)), world);
-  input.direction.y = 0;
+  input.direction = RelativeDirection(world, input.yaw);
 
   // boot it clear, but never towards our own goal
   Vec3 forward = Rotate(Yaw(input.yaw), {0, 0, 1});
