@@ -177,7 +177,7 @@ int NetDebugOverlay::DrawReceivedStrip(Rectangle bounds, Connection &conn) {
   return missing;
 }
 
-void NetDebugOverlay::Draw(Client &client) {
+void NetDebugOverlay::Draw(Client &client, const PredictionStats &prediction) {
   if (!visible) {
     DrawText("[tab] net debug", PAD, GetScreenHeight() - 20, FONT, DIM);
     return;
@@ -221,6 +221,16 @@ void NetDebugOverlay::Draw(Client &client) {
   DrawText(TextFormat("received %llu  out of order %llu  dupes %llu",
                       stats.packetsReceived, stats.outOfOrderReceived,
                       stats.duplicatesReceived),
+           x, y, FONT, TEXT);
+  y += LINE;
+  DrawText(TextFormat("reliable: sent %llu  resent %llu  waiting %d  got %llu",
+                      stats.messagesSent, stats.messagesResent,
+                      stats.messagesUnacked, stats.messagesReceived),
+           x, y, FONT, TEXT);
+  y += LINE;
+  DrawText(TextFormat("predicting %d ticks ahead, smoothing %.1fcm (ball %.1fcm)",
+                      prediction.pendingInputs, prediction.localCorrection,
+                      prediction.ballCorrection),
            x, y, FONT, TEXT);
   y += LINE + 8;
 
@@ -289,4 +299,6 @@ void NetDebugOverlay::Draw(Client &client) {
   client.SetConditions(conditions);
   y += LINE + 2;
   DrawText("latency + jitter are added in each direction", x, y, FONT, DIM);
+  y += LINE;
+  DrawText("red rings: where the server last had you + the ball", x, y, FONT, DIM);
 }

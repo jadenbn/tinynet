@@ -3,13 +3,22 @@
 #include "raylib.h"
 #include <array>
 
+// how the client's prediction is doing, for the overlay to show
+struct PredictionStats {
+  float ballCorrection = 0;  // cm still being smoothed out
+  float localCorrection = 0; // cm
+  int pendingInputs = 0;     // how far ahead of the server we are
+};
+
 // draws what the networking layer is doing under the hood: rtt, bandwidth,
 // which packets made it, plus sliders for faking a bad network
 class NetDebugOverlay {
 public:
   // samples stats and handles the overlay's keys. call once a frame
   void Update(Client &client);
-  void Draw(Client &client);
+  void Draw(Client &client, const PredictionStats &prediction);
+  bool Visible() const { return visible; }
+  static constexpr float WIDTH = 320.0f;
 
 private:
   struct Sample {

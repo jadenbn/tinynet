@@ -10,7 +10,8 @@ public:
   bool HandlePacket(Buffer &buff, double transitSeconds = 0);
   // a reliable message from the server: always a game event
   bool HandleMessage(Buffer &buff);
-  void Update(double dt);
+  // alpha: how far we are between the last tick and the next, for drawing
+  void Update(double dt, float alpha);
   PlayerID localID = 0;
   std::deque<GameEvent> events; // newest at the back, game pops them
 

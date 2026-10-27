@@ -39,6 +39,9 @@ bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &snapshot,
                                                        double transitSeconds) {
   if (!history.Push(snapshot, transitSeconds))
     return false;
+  world.match = snapshot.match;
+  world.serverBall = snapshot.ball.pos;
+  world.localID = localID;
   for (auto it = world.players.begin(); it != world.players.end();) {
     if (!snapshot.players.contains(it->first))
       it = world.players.erase(it);
@@ -57,14 +60,19 @@ bool ClientReplicationSystem::ApplyWorldSnapshot(const WorldSnapshot &snapshot,
   return true;
 }
 
-void ClientReplicationSystem::Update(double dt) {
+void ClientReplicationSystem::Update(double dt, float alpha) {
   history.Advance(dt);
   simulation.DecayErrors(static_cast<float>(dt));
-  world.viewCenter = simulation.local.pos;
+  // us and the ball: predicted, a little ahead of the server. everyone else:
+  // interpolated, a little behind it
   for (auto &[id, player] : world.players) {
-    if (id == localID && simulation.ready)
+    if (id == localID && simulation.ready) {
       player.state = simulation.local;
-    else if (auto state = history.Sample(id, history.RenderTime()))
+      player.state.pos = simulation.RenderLocal(alpha);
+    } else if (auto state = history.Sample(id, history.RenderTime())) {
       player.state = *state;
+    }
   }
+  if (simulation.PredictingBall())
+    world.ball = simulation.RenderBall(alpha);
 }
