@@ -1,5 +1,6 @@
 #include "ClientGame.h"
 #include "Ball.h"
+#include "Bot.h"
 #include "Client.h"
 #include "ClientReplicationSystem.h"
 #include "GameTypes.h"
@@ -15,9 +16,9 @@
 
 constexpr static int MAX_ATTEMPTS = 100;
 
-ClientGame::ClientGame(Address &clientAddress_c, Address &serverAddress_c)
+ClientGame::ClientGame(Address &clientAddress_c, Address &serverAddress_c, bool bot)
     : client(clientAddress_c, serverAddress_c), clientWorld(),
-      replicationSystem(clientWorld, simulation) {};
+      replicationSystem(clientWorld, simulation), bot(bot) {};
 
 void ClientGame::NetworkInit() {
   client.Initialize();
@@ -77,6 +78,8 @@ KickCommand ClientGame::ChargedKick() const {
 }
 
 void ClientGame::HandleFrameInput() {
+  if (bot)
+    return;
   if (charging == KickType::None) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
       charging = KickType::Ground;
@@ -101,7 +104,15 @@ void ClientGame::HandleInput() {
   // WASD moves you around the screen; the mouse is where you face
   Vec3 world{static_cast<float>(IsKeyDown(KEY_D) - IsKeyDown(KEY_A)), 0,
              static_cast<float>(IsKeyDown(KEY_W) - IsKeyDown(KEY_S))};
-  Vec3 aim = view.ToWorld(GetMousePosition()) - simulation.local.pos;
+  Vec3 aimAt = view.ToWorld(GetMousePosition());
+  if (bot) {
+    BotDecision decision = BotThink(simulation.local, simulation.ball, simulation.Others(), ticks);
+    world = decision.move;
+    aimAt = decision.aim;
+    queuedKick = decision.kick;
+  }
+  ticks++;
+  Vec3 aim = aimAt - simulation.local.pos;
   aim.y = 0;
   if (Dot(aim, aim) > 0.01f)
     yaw = YawTowards(aim);

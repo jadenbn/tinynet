@@ -9,7 +9,7 @@
 
 class ClientGame {
 public:
-  ClientGame(Address &clientAddress, Address &serverAddress);
+  ClientGame(Address &clientAddress, Address &serverAddress, bool bot = false);
   void GameLoop();
   void NetworkInit();
   void GameInit();
@@ -29,6 +29,8 @@ private:
   PitchView view;
   PlayerID id = 0;
   float yaw = 0;
+  bool bot; // the computer plays, through exactly the same inputs
+  uint32_t ticks = 0;
 
   // holding a mouse button winds up a kick; letting go queues it for the
   // next tick's input

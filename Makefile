@@ -3,7 +3,7 @@ CXXFLAGS = -std=c++20 -Wall -Icommon/include -Icommon -Iclient/include -Iclient/
 
 CLIENT_FLAGS = -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo
 
-.PHONY: all server client clean run-server run-client test demo snapshot-size
+.PHONY: all server client clean run-server run-client run-bot test demo snapshot-size
 
 COMMON_SRC = common/src/*.cpp
 SHARED_SRC = shared/src/*.cpp
@@ -41,6 +41,13 @@ ifndef PORT
 	$(error PORT is not set. Usage: make deploy PORT=port. 3001 is a good default)
 endif
 	./client/bin/client $(PORT)
+
+# a client the computer plays, for multiplayer testing on your own
+run-bot:
+ifndef PORT
+	$(error PORT is not set. Usage: make run-bot PORT=port, e.g. 3002)
+endif
+	./client/bin/client $(PORT) --bot
 
 clean:
 	@rm -rf server/bin client/bin tests/bin
