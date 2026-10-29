@@ -183,7 +183,7 @@ void ClientGame::DrawCharge() const {
 void ClientGame::GameLoop() {
   SetExitKey(KEY_ESCAPE);
   double previous = GetTime(), accumulator = 0;
-  while (!WindowShouldClose()) {
+  while (!WindowShouldClose() && !quitRequested) {
     double now = GetTime();
     double dt = std::min(now-previous, 0.25);
     accumulator += dt;

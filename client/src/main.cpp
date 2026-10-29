@@ -14,6 +14,8 @@ int main(int argc, char *argv[]) {
                         3000); // def unsecure but fine for now i thiknks
   Address clientAddress(127, 0, 0, 1, std::stoi(argv[1]));
   ClientGame game(clientAddress, serverAddress, bot);
+  std::signal(SIGINT, [](int) { ClientGame::quitRequested = 1; });
+  std::signal(SIGTERM, [](int) { ClientGame::quitRequested = 1; });
 
   // game loop
   game.NetworkInit();

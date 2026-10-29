@@ -6,6 +6,7 @@
 #include "game/ClientWorld.h"
 #include "game/Hud.h"
 #include "game/PitchView.h"
+#include <csignal>
 
 class ClientGame {
 public:
@@ -16,6 +17,10 @@ public:
   void HandleNetwork();
   void HandleInput();      // once per tick: one input for the server
   void HandleFrameInput(); // once per frame: charging kicks, quick chat
+
+  // set from a signal handler (ctrl+c, kill): leave the loop and say goodbye
+  // to the server like closing the window would
+  inline static volatile std::sig_atomic_t quitRequested = 0;
 
 private:
   static constexpr double CHARGE_SECONDS = 0.8; // to a full power kick
