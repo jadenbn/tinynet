@@ -73,6 +73,15 @@ void ClientReplicationSystem::Update(double dt, float alpha) {
       player.state = *state;
     }
   }
-  if (simulation.PredictingBall())
-    world.ball = simulation.RenderBall(alpha);
+  // the ball: our prediction when it's near us, so our touches are instant;
+  // the interpolated past when it's out with other players, so theirs look
+  // right. predicting a ball someone else is dribbling is mostly guesswork
+  if (simulation.PredictingBall()) {
+    Vec3 predicted = simulation.RenderBall(alpha);
+    Vec3 gap = predicted - simulation.local.pos;
+    gap.y = 0;
+    float weight = ClientSimulation::PredictionWeight(std::sqrt(Dot(gap, gap)));
+    auto past = history.SampleBall(history.RenderTime());
+    world.ball = past ? Lerp(past->pos, predicted, weight) : predicted;
+  }
 }

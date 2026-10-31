@@ -13,6 +13,16 @@ public:
   static constexpr float SNAP_DISTANCE = 2.0f; // corrections bigger than this are teleports
   static constexpr float PLAYER_SMOOTHING = 0.1f; // s, time constant
   static constexpr float BALL_SMOOTHING = 0.06f;
+  // the ball lives in our (predicted) timeframe when it's near us, and in
+  // everyone else's (interpolated) when it isn't. blended in between
+  static constexpr float OUR_BALL = 3.0f, THEIR_BALL = 8.0f; // metres away
+
+  // 1 = draw our prediction, 0 = draw the interpolated past. smoothstep, so
+  // the blend has no kinks as the ball comes and goes
+  static float PredictionWeight(float distance) {
+    float t = std::clamp((THEIR_BALL - distance) / (THEIR_BALL - OUR_BALL), 0.0f, 1.0f);
+    return t * t * (3 - 2 * t);
+  }
 
   PlayerState local;
   BallState ball;

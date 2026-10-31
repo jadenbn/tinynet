@@ -26,13 +26,7 @@ public:
   std::optional<PlayerState> Sample(PlayerID id, double renderTime) const {
     if (history.empty())
       return std::nullopt;
-    const Entry *left = &history.front(), *right = left;
-    for (const auto &entry : history) {
-      right = &entry;
-      if (entry.time >= renderTime)
-        break;
-      left = &entry;
-    }
+    auto [left, right] = Bracket(renderTime);
     auto a = left->snapshot.players.find(id);
     auto b = right->snapshot.players.find(id);
     if (b == right->snapshot.players.end())
@@ -47,8 +41,34 @@ public:
     return state;
   }
 
+  // the ball as everyone else saw it at renderTime: the same moment we draw
+  // other players at, so their touches line up with it
+  std::optional<BallState> SampleBall(double renderTime) const {
+    if (history.empty())
+      return std::nullopt;
+    auto [left, right] = Bracket(renderTime);
+    BallState ball = right->snapshot.ball;
+    if (left->time != right->time) {
+      float alpha = std::clamp(static_cast<float>((renderTime-left->time) /
+                                                (right->time-left->time)), 0.0f, 1.0f);
+      ball.pos = Lerp(left->snapshot.ball.pos, right->snapshot.ball.pos, alpha);
+    }
+    return ball;
+  }
+
 private:
   struct Entry { WorldSnapshot snapshot; double time; };
+  // the snapshots either side of renderTime (the same one twice at the ends)
+  std::pair<const Entry *, const Entry *> Bracket(double renderTime) const {
+    const Entry *left = &history.front(), *right = left;
+    for (const auto &entry : history) {
+      right = &entry;
+      if (entry.time >= renderTime)
+        break;
+      left = &entry;
+    }
+    return {left, right};
+  }
   std::deque<Entry> history;
   double clock = 0;
 };

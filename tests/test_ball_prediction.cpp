@@ -1,6 +1,7 @@
 #include "Ball.h"
 #include "ClientSimulation.h"
 #include "ServerWorld.h"
+#include "SnapshotHistory.h"
 #include <cassert>
 #include <deque>
 #include <functional>
@@ -179,10 +180,37 @@ void test_kickoffs_snap_instead_of_sliding() {
   assert(!client.Reconcile(WorldSnapshot{}, 0));
 }
 
+void test_ball_timeframe_blend() {
+  // ours up close, theirs far away, and smooth with no jumps in between
+  assert(ClientSimulation::PredictionWeight(0) == 1);
+  assert(ClientSimulation::PredictionWeight(ClientSimulation::OUR_BALL) == 1);
+  assert(ClientSimulation::PredictionWeight(ClientSimulation::THEIR_BALL) == 0);
+  assert(ClientSimulation::PredictionWeight(30) == 0);
+  float previous = 1;
+  for (float d = 0; d < 10; d += 0.01f) {
+    float w = ClientSimulation::PredictionWeight(d);
+    assert(w <= previous && previous - w < 0.01f);
+    previous = w;
+  }
+
+  // the interpolated ball sits between snapshots like players do
+  SnapshotHistory history;
+  WorldSnapshot a{10, {}}, b{16, {}};
+  a.ball.pos = {0, BALL_RADIUS, 0};
+  b.ball.pos = {4, BALL_RADIUS, -2};
+  assert(!history.SampleBall(0));
+  history.Push(a);
+  history.Push(b);
+  auto middle = history.SampleBall(history.LatestTime() / 2);
+  assert(middle && std::abs(middle->pos.x - 2) < 0.0001f && std::abs(middle->pos.z + 1) < 0.0001f);
+  assert(history.SampleBall(-1)->pos.x == 0 && history.SampleBall(10)->pos.x == 4);
+}
+
 int main() {
   test_prediction_matches_the_server_exactly();
   test_quantized_snapshots_are_close_enough();
   test_someone_else_getting_there_first_is_smoothed();
   test_kickoffs_snap_instead_of_sliding();
+  test_ball_timeframe_blend();
   std::cout << "All ball prediction tests passed!\n";
 }
