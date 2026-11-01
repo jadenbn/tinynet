@@ -20,6 +20,10 @@ ClientGame::ClientGame(Address &clientAddress_c, Address &serverAddress_c, bool 
     : client(clientAddress_c, serverAddress_c), clientWorld(),
       replicationSystem(clientWorld, simulation), bot(bot) {};
 
+void ClientGame::SetConditions(const NetworkConditions &conditions) {
+  client.SetConditions(conditions);
+}
+
 void ClientGame::NetworkInit() {
   client.Initialize();
 

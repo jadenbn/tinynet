@@ -64,14 +64,9 @@ void NetDebugOverlay::Update(Client &client) {
   }
 
   // presets, so a demo can jump straight to an interesting network
-  if (IsKeyPressed(KEY_ONE))
-    client.SetConditions({});
-  if (IsKeyPressed(KEY_TWO))
-    client.SetConditions({20.0f, 5.0f, 0.01f, 0.0f});
-  if (IsKeyPressed(KEY_THREE))
-    client.SetConditions({60.0f, 20.0f, 0.05f, 0.01f});
-  if (IsKeyPressed(KEY_FOUR))
-    client.SetConditions({150.0f, 50.0f, 0.2f, 0.05f});
+  for (int i = 0; i < 4; i++)
+    if (IsKeyPressed(KEY_ONE + i))
+      client.SetConditions(PRESETS[i]);
 
   double now = GetTime();
   if (now - lastSampleTime < SAMPLE_INTERVAL) {

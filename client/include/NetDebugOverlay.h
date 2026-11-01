@@ -18,6 +18,12 @@ public:
   void Update(Client &client);
   void Draw(Client &client, const PredictionStats &prediction);
   bool Visible() const { return visible; }
+
+  // perfect, decent wifi, mobile, awful. keys 1-4, or --preset on the
+  // command line
+  static constexpr NetworkConditions PRESETS[4] = {
+      {}, {20.0f, 5.0f, 0.01f, 0.0f}, {60.0f, 20.0f, 0.05f, 0.01f},
+      {150.0f, 50.0f, 0.2f, 0.05f}};
   static constexpr float WIDTH = 320.0f;
 
 private:

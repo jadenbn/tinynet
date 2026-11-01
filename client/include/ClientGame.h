@@ -11,6 +11,7 @@
 class ClientGame {
 public:
   ClientGame(Address &clientAddress, Address &serverAddress, bool bot = false);
+  void SetConditions(const NetworkConditions &conditions);
   void GameLoop();
   void NetworkInit();
   void GameInit();
