@@ -21,6 +21,19 @@ BotDecision BotThink(const PlayerState &me, const BallState &ball,
   BotDecision decision;
   decision.aim = b;
 
+  // up against the boards, "behind the ball" can be the other side of the
+  // wall, so we'd just pin it there. face it and boot it off the boards
+  // instead; it comes back out at 70% of the speed
+  constexpr float BOARDS = 1.2f;
+  bool againstWall = std::abs(b.x) > PITCH_HALF_LENGTH - BOARDS ||
+                     std::abs(b.z) > PITCH_HALF_WIDTH - BOARDS;
+  if (againstWall && std::abs(b.z) > GOAL_HALF_WIDTH + 1 && distance < 1.6f) {
+    decision.move = distance > 0.01f ? toBall * (1 / distance) : Vec3{};
+    if (me.kickCooldown == 0)
+      decision.kick = {KickType::Ground, 170, 0};
+    return decision;
+  }
+
   // a teammate's closer: hang back and wide for a rebound instead of both
   // chasing it
   for (const PlayerState &other : others) {
